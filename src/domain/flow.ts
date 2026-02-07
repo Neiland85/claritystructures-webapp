@@ -1,21 +1,18 @@
 import type { WizardResult } from '@/types/wizard';
 
-export type IntakeFlow = 'A' | 'B' | 'C';
+export function resolveIntakeRoute(result: WizardResult): string {
+  if (result.urgency === 'critical') return '/contact/critical';
 
-export function resolveFlow(result: WizardResult): IntakeFlow {
-  if (
-    result.clientProfile === 'legal_professional' ||
-    result.clientProfile === 'court_related'
-  ) {
-    return 'B';
+  if (result.clientProfile === 'family_inheritance_conflict') {
+    return '/contact/family';
   }
 
   if (
-    result.urgency === 'critical' ||
-    result.clientProfile === 'family_inheritance_conflict'
+    result.clientProfile === 'court_related' ||
+    result.clientProfile === 'legal_professional'
   ) {
-    return 'A';
+    return '/contact/legal';
   }
 
-  return 'C';
+  return '/contact/basic';
 }
