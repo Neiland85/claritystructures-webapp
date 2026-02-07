@@ -1,24 +1,34 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import Wizard from './Wizard';
-import EvidencePreview from './EvidencePreview';
+import type { WizardResult } from '@/types/wizard';
+import { resolveIntakeRoute } from '@/domain/flow';
 
 export default function Hero() {
-  const [data, setData] = useState<any>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
-  if (data) {
-    return <EvidencePreview data={data} />;
+  // Extrae el idioma desde /[lang]
+  const lang = pathname.split('/')[1] || 'es';
+
+  function handleComplete(result: WizardResult) {
+    const route = resolveIntakeRoute(result);
+
+    const params = new URLSearchParams({
+      context: JSON.stringify({
+        clientProfile: result.clientProfile,
+        urgency: result.urgency,
+        hasEmotionalDistress: result.hasEmotionalDistress,
+      }),
+    });
+
+    router.push(`/${lang}/contact/${route}?${params.toString()}`);
   }
 
   return (
-    <section className="min-h-screen flex flex-col items-center justify-center gap-6">
-      <Wizard onComplete={setData} />
-
-      <p className="text-xs text-gray-500 max-w-xl text-center">
-        Evaluación técnica preliminar.  
-        No constituye asesoramiento legal ni pericial.
-      </p>
+    <section className="min-h-screen flex items-center justify-center">
+      <Wizard onComplete={handleComplete} />
     </section>
   );
 }
