@@ -1,56 +1,73 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
-export const runtime = 'nodejs';
-
-export async function POST(req: Request) {
-  const body = await req.json();
-  const { email, message, context, acceptedLegal } = body;
-
-  if (!acceptedLegal) {
-    return NextResponse.json(
-      { error: 'Legal acceptance required' },
-      { status: 400 }
-    );
-  }
-
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-
-  await transporter.sendMail({
-    from: process.env.CONTACT_EMAIL,
-    to: process.env.CONTACT_EMAIL,
-    subject: 'Nuevo contacto — Evidence Pack',
-    text: `
-Email: ${email}
-
-Mensaje:
-${message}
-
-Contexto:
-${context}
-    `,
-  });
-
-  return NextResponse.json({ ok: true });
-}
-
-// Consent fields are expected:
-// - consent: boolean
-// - consentVersion: 'v1'
-// - tone: 'basic' | 'family' | 'legal' | 'critical'
-
+import type { WizardResult } from '@/types/wizard';
 import { assessIntake } from '@/domain/priority';
 
-// After parsing request body as WizardResult-compatible payload:
-const assessment = assessIntake(body);
+export const runtime = 'nodejs';
 
-// assessment.priority
-// assessment.flags
-// assessment.recommendedAction
+type ContactPayload = WizardResult & {
+  email: string;
+  message: string;
+  tone: 'basic' | 'family' | 'legal' | 'critical';
+  consent: boolean;
+  consentVersion: 'v1';
+};
+
+export async function POST(req: Request) {
+  try {
+    // 1️⃣ Parse body ONCE
+    const body = (await req.json()) as ContactPayload;
+
+    // 2️⃣ Internal assessment (NOT exposed)
+    const assessment = assessIntake(body);
+
+    // 3️⃣ Prepare email transport
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    // 4️⃣ Build internal email
+    const subject = `[${assessment.priority.toUpperCase()}] New intake received`;
+
+    const text = `
+--- Intake ---
+Tone: ${body.tone}
+Email: ${body.email}
+
+--- Context ---
+Client profile: ${body.clientProfile}
+Urgency: ${body.urgency}
+Emotional distress: ${body.hasEmotionalDistress ? 'YES' : 'NO'}
+
+--- Assessment ---
+Priority: ${assessment.priority}
+Flags: ${assessment.flags.join(', ') || 'none'}
+Recommended action: ${assessment.recommendedAction}
+
+--- Message ---
+${body.message}
+    `.trim();
+
+    await transporter.sendMail({
+      from: 'Clarity Structures <no-reply@claritystructures.com>',
+      to: process.env.CONTACT_EMAIL,
+      subject,
+      text,
+    });
+
+    // 5️⃣ Response to client (no internal data leaked)
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error('[CONTACT_API_ERROR]', error);
+    return NextResponse.json(
+      { ok: false },
+      { status: 500 }
+    );
+  }
+}
