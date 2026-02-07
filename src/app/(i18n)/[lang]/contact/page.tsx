@@ -1,13 +1,16 @@
 import ContactForm from '@/components/ContactForm';
 
-export default function ContactPage({
+export default function ContactFallbackPage({
   searchParams,
 }: {
   searchParams?: { context?: string };
 }) {
   return (
     <main className="min-h-screen flex items-center justify-center">
-      <ContactForm context={searchParams?.context} />
+      <ContactForm
+        tone="basic"
+        context={searchParams?.context}
+      />
     </main>
   );
 }
