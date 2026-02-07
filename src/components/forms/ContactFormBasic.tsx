@@ -86,3 +86,6 @@ export default function ContactFormBasic({ context }: Props) {
     </form>
   );
 }
+
+import ContactConfirmation from '@/components/ContactConfirmation';
+
