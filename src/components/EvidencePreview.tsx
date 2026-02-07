@@ -29,6 +29,20 @@ Objective: ${data.objective}`
 
       <footer className="pt-6 flex justify-end">
 
+  return (
+    <section className="max-w-2xl mx-auto p-6 space-y-6 border rounded">
+      <header className="space-y-2">
+        <h2 className="text-xl font-semibold">Evidence Pack Preview (v0.1)</h2>
+        <p className="text-sm text-gray-600">
+          Vista técnica preliminar generada a partir de la información declarada.
+          No es un informe final ni asesoramiento legal.
+        </p>
+      </header>
+
+      {/* bloques existentes */}
+
+      <footer className="pt-6 flex justify-end">
+
 type EvidencePreviewProps = {
   data: WizardResult;
 };
