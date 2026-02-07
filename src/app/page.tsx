@@ -1,9 +1,5 @@
-import Hero from '@/components/Hero';
+import { redirect } from 'next/navigation';
 
-export default function Home() {
-  return (
-    <main className="min-h-screen">
-      <Hero lang="es" />
-    </main>
-  );
+export default function Root() {
+  redirect('/es');
 }
