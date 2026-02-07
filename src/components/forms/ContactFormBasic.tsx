@@ -9,21 +9,47 @@ type Props = {
 
 export default function ContactFormBasic({ context }: Props) {
   const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  async function submit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    await fetch('/api/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...context, email }),
-    });
+    setError(null);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...context,
+          email,
+          message,
+          tone: 'basic',
+          consent: true,
+          consentVersion: 'v1',
+        }),
+      });
+
+      if (!res.ok) throw new Error();
+      setSent(true);
+    } catch {
+      setError('No se pudo enviar. Inténtalo de nuevo.');
+    }
+  }
+
+  if (sent) {
+    return (
+      <div className="text-sm text-green-400">
+        Hemos recibido tu solicitud.
+      </div>
+    );
   }
 
   return (
-    <form onSubmit={submit} className="space-y-4 max-w-xl">
-      <p className="text-sm text-gray-400">
-        Evaluación informativa. Podrás solicitar custodia técnica si el caso
-        evoluciona.
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
+      <p className="text-sm text-neutral-400">
+        Consulta informativa / preventiva.
       </p>
 
       <input
@@ -32,11 +58,22 @@ export default function ContactFormBasic({ context }: Props) {
         placeholder="Correo electrónico"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        className="w-full border p-3"
+        className="w-full border p-3 bg-black"
       />
 
-      <button className="bg-white text-black px-4 py-2 rounded">
-        Enviar
+      <textarea
+        required
+        rows={4}
+        placeholder="Cuéntanos brevemente lo que está ocurriendo"
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        className="w-full border p-3 bg-black"
+      />
+
+      {error && <p className="text-sm text-red-400">{error}</p>}
+
+      <button className="px-6 py-3 bg-white text-black">
+        Enviar consulta
       </button>
     </form>
   );

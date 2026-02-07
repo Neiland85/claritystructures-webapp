@@ -1,24 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import Wizard from './Wizard';
-import EvidencePreview from './EvidencePreview';
+import { resolveIntakeRoute } from '@/domain/flow';
+import type { WizardResult } from '@/types/wizard';
 
 export default function Hero() {
-  const [data, setData] = useState<any>(null);
+  const router = useRouter();
+  const params = useParams();
+  const lang = params.lang as string;
 
-  if (data) {
-    return <EvidencePreview data={data} />;
+  function handleComplete(result: WizardResult) {
+    const route = resolveIntakeRoute(result);
+    router.push('/' + lang + route);
   }
 
-  return (
-    <section className="min-h-screen flex flex-col items-center justify-center gap-6">
-      <Wizard onComplete={setData} />
-
-      <p className="text-xs text-gray-500 max-w-xl text-center">
-        Evaluación técnica preliminar.  
-        No constituye asesoramiento legal ni pericial.
-      </p>
-    </section>
-  );
+  return <Wizard onComplete={handleComplete} />;
 }
