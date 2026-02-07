@@ -10,12 +10,13 @@ type Props = {
 export default function Wizard({ onComplete }: Props) {
   const [step, setStep] = useState(0);
 
-  // 🔧 TEMPORAL: resultado mínimo válido
-  // (tu lógica real ya estaba bien, esto solo garantiza return)
   const complete = () => {
     onComplete({
+      clientProfile: 'family_inheritance_conflict',
+      urgency: 'critical',
+      hasEmotionalDistress: true,
+
       incident: 'whatsapp',
-      urgency: 'high',
       devices: 1,
       actionsTaken: [],
       evidenceSources: [],
