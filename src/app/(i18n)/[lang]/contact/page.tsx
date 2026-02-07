@@ -1,19 +1,19 @@
 import ContactForm from '@/components/ContactForm';
+import type { Lang } from '@/types/lang';
 
-export default function ContactPage({
+export default async function ContactPage({
   params,
   searchParams,
 }: {
-  params: { lang: 'es' | 'en' };
-  searchParams: { context?: string };
+  params: { lang: Lang };
+  searchParams: Promise<{ context?: string }>;
 }) {
-  const context = searchParams?.context
-    ? decodeURIComponent(searchParams.context)
-    : undefined;
+  const sp = await searchParams;
+  const context = sp?.context ? decodeURIComponent(sp.context) : undefined;
 
   return (
     <main className="min-h-screen flex items-center justify-center">
-      <ContactForm context={context} />
+      <ContactForm lang={params.lang} context={context} />
     </main>
   );
 }
