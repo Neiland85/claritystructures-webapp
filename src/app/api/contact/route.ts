@@ -40,3 +40,17 @@ ${context}
 
   return NextResponse.json({ ok: true });
 }
+
+// Consent fields are expected:
+// - consent: boolean
+// - consentVersion: 'v1'
+// - tone: 'basic' | 'family' | 'legal' | 'critical'
+
+import { assessIntake } from '@/domain/priority';
+
+// After parsing request body as WizardResult-compatible payload:
+const assessment = assessIntake(body);
+
+// assessment.priority
+// assessment.flags
+// assessment.recommendedAction
