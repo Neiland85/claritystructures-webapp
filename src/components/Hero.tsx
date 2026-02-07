@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Wizard, { WizardResult } from '@/components/Wizard';
 import EvidencePreview from '@/components/EvidencePreview';
 
@@ -11,29 +12,36 @@ const COPY: Record<Lang, {
   title: string;
   subtitle: string;
   cta: string;
+  note: string;
 }> = {
   es: {
-    eyebrow: 'Trazabilidad técnica para incidentes digitales',
+    eyebrow: 'TRAZABILIDAD TÉCNICA PARA INCIDENTES DIGITALES',
     title: 'Convierte un incidente en un Evidence Pack defendible',
     subtitle:
       'En menos de un minuto, estructura la información mínima necesaria para documentar, preservar y explicar un incidente digital.',
     cta: 'Iniciar diagnóstico (60s)',
+    note: 'Vista técnica preliminar. No constituye asesoramiento legal ni pericial.',
   },
   en: {
-    eyebrow: 'Technical traceability for digital incidents',
+    eyebrow: 'TECHNICAL TRACEABILITY FOR DIGITAL INCIDENTS',
     title: 'Turn an incident into a defensible Evidence Pack',
     subtitle:
-      'In under one minute, structure the minimal information required to document, preserve and explain a digital incident.',
+      'In under one minute, structure the minimal information required to document, preserve, and explain a digital incident.',
     cta: 'Start diagnosis (60s)',
+    note: 'Preliminary technical view. Not legal or forensic advice.',
   },
 };
 
-export default function Hero({ lang = 'es' }: { lang?: Lang }) {
-  const [data, setData] = useState<WizardResult | null>(null);
+export default function Hero() {
+  const pathname = usePathname();
+  const lang: Lang = pathname.startsWith('/en') ? 'en' : 'es';
+  const t = COPY[lang];
+
   const [started, setStarted] = useState(false);
+  const [data, setData] = useState<WizardResult | null>(null);
 
   if (data) {
-    return <EvidencePreview data={data} />;
+    return <EvidencePreview data={data} lang={lang} />;
   }
 
   return (
@@ -42,13 +50,13 @@ export default function Hero({ lang = 'es' }: { lang?: Lang }) {
         <>
           <div className="space-y-2">
             <p className="text-sm uppercase tracking-wide text-gray-500">
-              {COPY[lang].eyebrow}
+              {t.eyebrow}
             </p>
             <h1 className="text-3xl font-semibold">
-              {COPY[lang].title}
+              {t.title}
             </h1>
             <p className="text-lg text-gray-700">
-              {COPY[lang].subtitle}
+              {t.subtitle}
             </p>
           </div>
 
@@ -56,11 +64,11 @@ export default function Hero({ lang = 'es' }: { lang?: Lang }) {
             className="px-6 py-3 bg-black text-white rounded"
             onClick={() => setStarted(true)}
           >
-            {COPY[lang].cta}
+            {t.cta}
           </button>
 
           <p className="text-xs text-gray-500 max-w-xl">
-            Vista técnica preliminar. No constituye asesoramiento legal ni pericial.
+            {t.note}
           </p>
         </>
       ) : (
