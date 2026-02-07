@@ -1,50 +1,86 @@
 'use client';
 
 import { useState } from 'react';
-import type { WizardResult } from '@/types/wizard';
+import type { WizardResult, ClientProfile, UrgencyLevel } from '@/types/wizard';
+import { clientProfiles, urgencyLevels } from '@/constants/wizardOptions';
 
 type Props = {
   onComplete: (data: WizardResult) => void;
 };
 
 export default function Wizard({ onComplete }: Props) {
-  const [step, setStep] = useState(0);
+  const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
+  const [urgency, setUrgency] = useState<UrgencyLevel | null>(null);
+  const [hasEmotionalDistress, setHasEmotionalDistress] = useState<boolean | null>(null);
 
-  const complete = () => {
+  function submit() {
+    if (!clientProfile || !urgency) return;
+
     onComplete({
-      clientProfile: 'family_inheritance_conflict',
-      urgency: 'critical',
-      hasEmotionalDistress: true,
-
-      incident: 'whatsapp',
-      devices: 1,
+      clientProfile,
+      urgency,
+      hasEmotionalDistress: hasEmotionalDistress ?? false,
+      incident: 'unspecified',
+      devices: 0,
       actionsTaken: [],
       evidenceSources: [],
-      objective: 'document',
+      objective: 'document'
     });
-  };
+  }
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="text-sm text-gray-400">
-        Wizard step {step + 1}
-      </p>
+    <div className="space-y-6 max-w-xl">
+      {/* Client profile */}
+      <div>
+        <h2 className="font-semibold">Tu situación actual</h2>
+        {clientProfiles.map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => setClientProfile(opt.value)}
+            className={`block w-full text-left p-3 border ${
+              clientProfile === opt.value ? 'border-white' : 'border-neutral-700'
+            }`}
+          >
+            <div>{opt.label}</div>
+            {opt.description && (
+              <div className="text-sm text-neutral-400">{opt.description}</div>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Urgency */}
+      <div>
+        <h2 className="font-semibold">Nivel de urgencia</h2>
+        {urgencyLevels.map(opt => (
+          <button
+            key={opt.value}
+            onClick={() => setUrgency(opt.value)}
+            className={`block w-full text-left p-3 border ${
+              urgency === opt.value ? 'border-white' : 'border-neutral-700'
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Emotional distress */}
+      <div>
+        <h2 className="font-semibold">¿Te está afectando emocionalmente?</h2>
+        <div className="flex gap-4">
+          <button onClick={() => setHasEmotionalDistress(true)}>Sí</button>
+          <button onClick={() => setHasEmotionalDistress(false)}>No</button>
+          <button onClick={() => setHasEmotionalDistress(null)}>Prefiero no responder</button>
+        </div>
+      </div>
 
       <button
-        onClick={() => setStep((s) => s + 1)}
-        className="px-4 py-2 border rounded"
+        onClick={submit}
+        className="mt-6 px-4 py-2 bg-white text-black"
       >
-        Next
+        Continuar
       </button>
-
-      {step >= 2 && (
-        <button
-          onClick={complete}
-          className="px-4 py-2 bg-white text-black rounded"
-        >
-          Finish
-        </button>
-      )}
     </div>
   );
 }
