@@ -12,6 +12,8 @@ export default function ContactForm({
   const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>(
     'idle'
   );
+export default function ContactForm({ lang = 'es', context }: any) {
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle');
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,6 +26,7 @@ export default function ContactForm({
       setStatus('error');
       return;
     }
+    const data = Object.fromEntries(new FormData(e.currentTarget).entries());
 
     const res = await fetch('/api/contact', {
       method: 'POST',
@@ -55,6 +58,12 @@ export default function ContactForm({
 
         <button
           type="submit"
+      {/* título y texto igual */}
+
+      <form onSubmit={onSubmit} className="space-y-4">
+        {/* inputs iguales */}
+
+        <button
           disabled={status === 'loading'}
           className="px-4 py-2 bg-black text-white rounded disabled:opacity-50"
         >
@@ -65,6 +74,7 @@ export default function ContactForm({
       {status === 'ok' && (
         <p className="text-sm text-green-600">
           Mensaje enviado correctamente.
+          Mensaje enviado. Nos pondremos en contacto.
         </p>
       )}
 
