@@ -1,12 +1,24 @@
 'use client';
 
 import type { WizardResult } from './Wizard';
+import { useRouter } from 'next/navigation';
 
 type EvidencePreviewProps = {
   data: WizardResult;
 };
 
 export default function EvidencePreview({ data }: EvidencePreviewProps) {
+  const router = useRouter();
+
+  const context = encodeURIComponent(
+    `Incident: ${data.incidentType}
+Urgency: ${data.urgency}
+Devices: ${data.devices}
+Actions: ${data.actionsTaken.join(', ')}
+Sources: ${data.evidenceSources.join(', ')}
+Objective: ${data.objective}`
+  );
+
   return (
     <section className="max-w-2xl mx-auto p-6 space-y-6 border rounded">
       <h2 className="text-xl font-semibold">
@@ -49,11 +61,19 @@ export default function EvidencePreview({ data }: EvidencePreviewProps) {
 
         <Block title="5. Notas de alcance y límites">
           <p>
-            Este documento es una vista previa técnica generada automáticamente.
-            La preservación, custodia y uso legal de la evidencia requiere
-            intervención profesional especializada.
+            Vista previa técnica generada automáticamente. La preservación,
+            custodia y uso legal de la evidencia requiere intervención profesional.
           </p>
         </Block>
+      </div>
+
+      <div className="pt-6 flex justify-end">
+        <button
+          className="px-4 py-2 bg-black text-white rounded"
+          onClick={() => router.push(`/contact?context=${context}`)}
+        >
+          Continuar → Contacto técnico
+        </button>
       </div>
     </section>
   );
