@@ -1,16 +1,5 @@
-import ContactForm from '@/components/ContactForm';
+import { redirect } from 'next/navigation';
 
-export default function ContactFallbackPage({
-  searchParams,
-}: {
-  searchParams?: { context?: string };
-}) {
-  return (
-    <main className="min-h-screen flex items-center justify-center">
-      <ContactForm
-        tone="basic"
-        context={searchParams?.context}
-      />
-    </main>
-  );
+export default function ContactIndex() {
+  redirect('./contact/basic');
 }
