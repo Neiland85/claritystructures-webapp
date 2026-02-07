@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import type { Lang } from '@/types/lang';
 
 export type WizardResult = {
   incidentType: 'whatsapp' | 'email' | 'sms' | 'other';
@@ -27,25 +27,46 @@ const SOURCES = [
   'bank',
 ];
 
-export default function Wizard({
-  onComplete,
-}: {
+type WizardProps = {
+  lang: Lang;
   onComplete: (data: WizardResult) => void;
-}) {
-  const pathname = usePathname();
-  const lang = pathname.startsWith('/en') ? 'en' : 'es';
+};
 
+export default function Wizard({ lang, onComplete }: WizardProps) {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<Partial<WizardResult>>({});
   const [devicesInput, setDevicesInput] = useState('');
 
   const next = () => setStep((s) => s + 1);
 
+  const t = {
+    es: {
+      incident: 'Tipo de incidente',
+      urgency: 'Urgencia',
+      devices: 'Dispositivos afectados',
+      actions: 'Acciones realizadas',
+      sources: 'Fuentes de evidencia',
+      objective: 'Objetivo',
+      next: 'Siguiente',
+      finish: 'Finalizar',
+    },
+    en: {
+      incident: 'Incident type',
+      urgency: 'Urgency',
+      devices: 'Affected devices',
+      actions: 'Actions taken',
+      sources: 'Evidence sources',
+      objective: 'Objective',
+      next: 'Next',
+      finish: 'Finish',
+    },
+  }[lang];
+
   return (
     <section className="max-w-xl mx-auto p-6 space-y-6">
       {step === 0 && (
         <Select
-          label={lang === 'en' ? 'Incident type' : 'Tipo de incidente'}
+          label={t.incident}
           options={['whatsapp', 'email', 'sms', 'other']}
           onSelect={(v) => {
             setData({ ...data, incidentType: v as any });
@@ -56,7 +77,7 @@ export default function Wizard({
 
       {step === 1 && (
         <Select
-          label={lang === 'en' ? 'Urgency' : 'Urgencia'}
+          label={t.urgency}
           options={['low', 'medium', 'high']}
           onSelect={(v) => {
             setData({ ...data, urgency: v as any });
@@ -67,9 +88,7 @@ export default function Wizard({
 
       {step === 2 && (
         <div className="space-y-4">
-          <label className="font-medium">
-            {lang === 'en' ? 'Affected devices' : 'Dispositivos afectados'}
-          </label>
+          <label className="font-medium">{t.devices}</label>
           <input
             type="number"
             value={devicesInput}
@@ -84,14 +103,14 @@ export default function Wizard({
               next();
             }}
           >
-            {lang === 'en' ? 'Next' : 'Siguiente'}
+            {t.next}
           </button>
         </div>
       )}
 
       {step === 3 && (
         <AutoMultiSelect
-          label={lang === 'en' ? 'Actions taken' : 'Acciones realizadas'}
+          label={t.actions}
           options={ACTIONS}
           onSelect={(v) => {
             setData({ ...data, actionsTaken: v });
@@ -102,7 +121,7 @@ export default function Wizard({
 
       {step === 4 && (
         <AutoMultiSelect
-          label={lang === 'en' ? 'Evidence sources' : 'Fuentes de evidencia'}
+          label={t.sources}
           options={SOURCES}
           onSelect={(v) => {
             setData({ ...data, evidenceSources: v });
@@ -113,7 +132,7 @@ export default function Wizard({
 
       {step === 5 && (
         <Select
-          label={lang === 'en' ? 'Objective' : 'Objetivo'}
+          label={t.objective}
           options={['preserve', 'document', 'deliver']}
           onSelect={(v) =>
             onComplete({ ...(data as WizardResult), objective: v as any })
