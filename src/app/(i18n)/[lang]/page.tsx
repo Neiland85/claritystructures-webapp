@@ -1,13 +1,9 @@
 import Hero from '@/components/Hero';
 
-export default function Home({
-  params,
-}: {
-  params: { lang: 'es' | 'en' };
-}) {
+export default function Home() {
   return (
     <main className="min-h-screen">
-      <Hero lang={params.lang} />
+      <Hero />
     </main>
   );
 }
