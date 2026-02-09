@@ -2,22 +2,16 @@
   "name": "claritystructures-webapp",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "typecheck": "tsc --noEmit",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate deploy",
-    "db:migrate:dev": "prisma migrate dev"
-    "@prisma/client": "^6.8.2",
-    "prisma": "^6.8.2",
-    "typecheck": "tsc --noEmit",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate deploy",
-    "db:migrate:dev": "prisma migrate dev"
-  },
+ "scripts": {
+   "dev": "next dev",
+   "build": "next build",
+   "start": "next start",
+   "lint": "eslint",
+   "typecheck": "tsc --noEmit",
+   "db:generate": "prisma generate",
+   "db:migrate": "prisma migrate deploy",
+   "db:migrate:dev": "prisma migrate dev"
+ },
   "dependencies": {
     "@prisma/client": "^6.8.2",
     "next": "16.1.6",
