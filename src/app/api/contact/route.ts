@@ -16,7 +16,6 @@ type ContactPayload = Partial<WizardResult> & {
   tone?: IntakeTone;
   consent?: boolean;
   consentVersion?: string;
-  consentContent?: string;
   name?: string;
   phone?: string;
   context?: string;
@@ -78,14 +77,29 @@ export async function POST(req: Request) {
       );
     }
 
-    const wizardContext = isWizardResult(body)
+    const hasConsentPayload = Boolean(body.consent);
+    const hasConsentVersion = Boolean(body.consentVersion);
+
+    if (hasConsentPayload !== hasConsentVersion) {
+      return NextResponse.json(
+        { ok: false, error: 'Consent version mismatch.' },
+        { status: 400 }
+      );
+    }
+
+    const hasWizardContext = isWizardResult(body);
+    const wizardContext = hasWizardContext
       ? body
       : buildFallbackWizardResult();
     const assessment = assessIntake(wizardContext);
-    const route = resolveIntakeRoute(wizardContext);
+
     const tone = isTone(body.tone)
       ? body.tone
-      : deriveToneFromRoute(route);
+      : deriveToneFromRoute(resolveIntakeRoute(wizardContext));
+
+    const route = hasWizardContext
+      ? resolveIntakeRoute(wizardContext)
+      : `/contact/${tone}`;
     const now = new Date();
 
     const intake = await intakeRepository.createIntake({
@@ -101,7 +115,7 @@ export async function POST(req: Request) {
       meta: {
         context: body.context ?? null,
         role: body.role ?? null,
-        hasWizardContext: isWizardResult(body),
+        hasWizardContext,
         wizardSummary: {
           clientProfile: wizardContext.clientProfile,
           urgency: wizardContext.urgency,
@@ -119,13 +133,13 @@ export async function POST(req: Request) {
         tone,
         route,
         priority: assessment.priority,
-        hasConsent: Boolean(body.consent),
+        hasConsent: hasConsentPayload && hasConsentVersion,
         consentVersion: body.consentVersion ?? null,
         email: body.email,
       },
     });
 
-    if (body.consent && body.consentVersion) {
+    if (hasConsentPayload && body.consentVersion) {
       const ipAddress =
         req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
         req.headers.get('x-real-ip')?.trim();
@@ -135,7 +149,6 @@ export async function POST(req: Request) {
 
       const consentAcceptance = await intakeRepository.createConsentAcceptance({
         consentVersion: body.consentVersion,
-        consentContent: body.consentContent ?? null,
         intakeId: intake.id,
         acceptedAt: now,
         ipHash,

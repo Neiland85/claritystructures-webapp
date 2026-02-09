@@ -1,8 +1,8 @@
+import type { IntakePriority } from '@/domain/priority';
+
 export type IntakeTone = 'basic' | 'family' | 'legal' | 'critical';
 
 export type IntakeStatus = 'RECEIVED' | 'ALERT_QUEUED' | 'DONE';
-
-export type IntakePriority = 'low' | 'medium' | 'high' | 'critical';
 
 export type InternalAlertType = 'CRITICAL_EMAIL';
 
@@ -30,7 +30,6 @@ export type ContactIntakeInput = {
 
 export type ConsentAcceptanceInput = {
   consentVersion: string;
-  consentContent?: string | null;
   intakeId: string;
   acceptedAt: Date;
   ipHash?: string | null;

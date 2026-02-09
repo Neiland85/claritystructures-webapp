@@ -10,13 +10,6 @@ import type { IntakeRepository } from '@/domain/repositories/intake-repository';
 import { prisma } from '@/infra/db/client';
 import { hashSha256, stableStringify } from '@/infra/db/hash';
 
-function buildPlaceholderConsentContent(version: string) {
-  return JSON.stringify({
-    version,
-    note: 'placeholder_consent_content',
-  });
-}
-
 export const intakeRepository: IntakeRepository = {
   async createIntake(input: ContactIntakeInput) {
     return prisma.contactIntake.create({
@@ -49,30 +42,13 @@ export const intakeRepository: IntakeRepository = {
       select: { id: true },
     });
 
-    let consentVersionId = consentVersion?.id;
-
-    if (!consentVersionId) {
-      const content = input.consentContent?.trim()
-        ? input.consentContent
-        : buildPlaceholderConsentContent(input.consentVersion);
-      const checksum = hashSha256(content);
-
-      const createdVersion = await prisma.consentVersion.create({
-        data: {
-          version: input.consentVersion,
-          content,
-          checksumSha256: checksum,
-          isActive: false,
-        },
-        select: { id: true },
-      });
-
-      consentVersionId = createdVersion.id;
+    if (!consentVersion) {
+      throw new Error(`Unknown consent version: ${input.consentVersion}`);
     }
 
     return prisma.consentAcceptance.create({
       data: {
-        consentVersionId,
+        consentVersionId: consentVersion.id,
         intakeId: input.intakeId,
         acceptedAt: input.acceptedAt,
         ipHash: input.ipHash ?? null,
