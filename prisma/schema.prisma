@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum IntakeTone {
+  basic
+  family
+  legal
+  critical
+}
+
+enum IntakePriority {
+  low
+  medium
+  high
+  critical
+}
+
+enum IntakeStatus {
+  RECEIVED
+  ALERT_QUEUED
+  DONE
+}
+
+model ContactIntake {
+  id        String         @id @default(uuid()) @db.Uuid
+  createdAt DateTime       @default(now())
+  tone      IntakeTone
+  route     String
+  priority  IntakePriority
+  name      String?
+  email     String
+  message   String
+  phone     String?
+  status    IntakeStatus
+  spamScore Float?
+  meta      Json?
+}
