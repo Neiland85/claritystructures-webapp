@@ -40,4 +40,33 @@ model ContactIntake {
   status    IntakeStatus
   spamScore Float?
   meta      Json?
+
+  consents  ConsentAcceptance[]
+}
+
+model ConsentVersion {
+  id             String   @id @default(uuid()) @db.Uuid
+  version        String   @unique
+  content        String
+  checksumSha256 String
+  createdAt      DateTime @default(now())
+  isActive       Boolean  @default(false)
+
+  acceptances    ConsentAcceptance[]
+}
+
+model ConsentAcceptance {
+  id               String   @id @default(uuid()) @db.Uuid
+  consentVersionId String   @db.Uuid
+  intakeId         String   @db.Uuid
+  acceptedAt       DateTime @default(now())
+  ipHash           String?
+  userAgent        String?
+  locale           String?
+
+  consentVersion ConsentVersion @relation(fields: [consentVersionId], references: [id])
+  intake         ContactIntake  @relation(fields: [intakeId], references: [id])
+
+  @@index([consentVersionId])
+  @@index([intakeId])
 }
