@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum IntakeTone {
+  basic
+  family
+  legal
+  critical
+}
+
+enum IntakeStatus {
+  RECEIVED
+  ALERT_QUEUED
+  DONE
+}
+
+enum IntakePriority {
+  low
+  medium
+  high
+  critical
+}
+
+enum InternalAlertType {
+  CRITICAL_EMAIL
+}
+
+enum InternalAlertStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model ConsentVersion {
+  id             String              @id @default(uuid()) @db.Uuid
+  version        String              @unique
+  content        String
+  checksumSha256 String              @map("checksum_sha256")
+  createdAt      DateTime            @default(now()) @map("created_at")
+  isActive       Boolean             @default(false) @map("is_active")
+  acceptances    ConsentAcceptance[]
+
+  @@map("consent_versions")
+}
+
+model ContactIntake {
+  id        String              @id @default(uuid()) @db.Uuid
+  createdAt DateTime            @default(now()) @map("created_at")
+  tone      IntakeTone
+  route     String
+  priority  IntakePriority
+  name      String?
+  email     String
+  message   String
+  phone     String?
+  status    IntakeStatus
+  spamScore Float?              @map("spam_score")
+  meta      Json?
+  consent   ConsentAcceptance[]
+  alerts    InternalAlert[]
+
+  @@map("contact_intakes")
+}
+
+model ConsentAcceptance {
+  id               String         @id @default(uuid()) @db.Uuid
+  consentVersionId String         @map("consent_version_id") @db.Uuid
+  intakeId         String         @map("intake_id") @db.Uuid
+  acceptedAt       DateTime       @default(now()) @map("accepted_at")
+  ipHash           String?        @map("ip_hash")
+  userAgent        String?        @map("user_agent")
+  locale           String?
+
+  consentVersion ConsentVersion @relation(fields: [consentVersionId], references: [id])
+  intake         ContactIntake  @relation(fields: [intakeId], references: [id])
+
+  @@index([consentVersionId])
+  @@index([intakeId])
+  @@map("consent_acceptances")
+}
+
+model InternalAlert {
+  id        String              @id @default(uuid()) @db.Uuid
+  intakeId  String              @map("intake_id") @db.Uuid
+  type      InternalAlertType
+  status    InternalAlertStatus
+  createdAt DateTime            @default(now()) @map("created_at")
+  sentAt    DateTime?           @map("sent_at")
+  error     String?
+
+  intake    ContactIntake @relation(fields: [intakeId], references: [id])
+
+  @@index([intakeId])
+  @@map("internal_alerts")
+}
+
+model AuditEvent {
+  id         String   @id @default(uuid()) @db.Uuid
+  entityType String   @map("entity_type")
+  entityId   String   @map("entity_id") @db.Uuid
+  eventType  String   @map("event_type")
+  createdAt  DateTime @default(now()) @map("created_at")
+  payload    Json
+  hashSha256 String   @map("hash_sha256")
+
+  @@index([entityType, entityId])
+  @@map("audit_events")
+}
