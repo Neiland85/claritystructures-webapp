@@ -6,11 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@prisma/client": "^6.8.2",
     "next": "16.1.6",
     "nodemailer": "^8.0.0",
+    "prisma": "^6.8.2",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },
