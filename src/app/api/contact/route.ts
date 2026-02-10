@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
 import type { WizardResult } from '@/types/wizard';
+import type { IntakeTone } from '@/domain/intake-records';
 import { assessIntake } from '@/domain/priority';
 
 export const runtime = 'nodejs';
@@ -9,7 +10,7 @@ export const runtime = 'nodejs';
 type ContactPayload = WizardResult & {
   email: string;
   message: string;
-  tone: 'basic' | 'family' | 'legal' | 'critical';
+  tone: IntakeTone;
   consent: boolean;
   consentVersion: 'v1';
 };
