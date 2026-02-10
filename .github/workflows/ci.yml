@@ -37,8 +37,11 @@ jobs:
       - name: Typecheck (strict TypeError gate)
         run: pnpm run typecheck
 
-      - name: Run tests with coverage
-        run: pnpm run --if-present test -- --coverage
+      - name: Ensure Vitest is available in CI
+        run: pnpm add --no-save -D vitest @vitest/coverage-v8
+
+      - name: Run tests + coverage
+        run: pnpm run --if-present test
 
       - name: Build Next.js
         run: pnpm run build
