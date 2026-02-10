@@ -14,6 +14,9 @@ import type {
   UrgencyLevel,
   WizardResult,
 } from '@/types/wizard';
+import type { WizardResult } from '@/types/wizard';
+import type { IntakeTone } from '@/domain/intake-records';
+import { assessIntake } from '@/domain/priority';
 
 export const runtime = 'nodejs';
 
@@ -23,6 +26,9 @@ type ContactPayload = Partial<WizardResult> & {
   tone: 'basic' | 'family' | 'legal' | 'critical';
   consent?: boolean;
   consentVersion?: string;
+  tone: IntakeTone;
+  consent: boolean;
+  consentVersion: 'v1';
 };
 
 function hasConsentVersion(value: unknown): value is string {

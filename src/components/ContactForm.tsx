@@ -1,15 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import type { IntakeTone } from '@/domain/intake-records';
 
 /* =========================
    Types
 ========================= */
 
-type Tone = 'basic' | 'family' | 'legal' | 'critical';
-
 type Props = {
-  tone: Tone;
+  tone: IntakeTone;
   context?: string;
 };
 
@@ -29,7 +28,7 @@ type Copy = CopyBase | CopyWithWarning;
    Copy by tone
 ========================= */
 
-const COPY_BY_TONE: Record<Tone, Copy> = {
+const COPY_BY_TONE: Record<IntakeTone, Copy> = {
   basic: {
     title: 'Consulta inicial',
     hint:
