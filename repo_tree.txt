@@ -1,0 +1,69 @@
+.
+├── .editorconfig
+├── .github
+│   └── workflows
+│       └── ci-typecheck.yml
+├── .gitignore
+├── .vscode
+│   ├── extensions.json
+│   └── settings.json
+├── AI_RULES.md
+├── CHANGELOG.md
+├── README.md
+├── eslint.config.mjs
+├── next-env.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+├── prisma
+│   ├── migrations
+│   │   ├── 20260209080045_add_consent_versions_and_acceptances
+│   │   │   └── migration.sql
+│   │   └── migration_lock.toml
+│   └── schema.prisma
+├── public
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── src
+│   ├── app
+│   │   ├── (i18n)
+│   │   │   └── [lang]
+│   │   ├── api
+│   │   │   └── contact
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components
+│   │   ├── ConsentBlock.tsx
+│   │   ├── ContactConfirmation.tsx
+│   │   ├── ContactForm.tsx
+│   │   ├── EvidencePreview.tsx
+│   │   ├── Hero.tsx
+│   │   ├── LanguageProvider.tsx
+│   │   ├── Wizard.tsx
+│   │   └── forms
+│   │       ├── ContactFormBasic.tsx
+│   │       ├── ContactFormLegal.tsx
+│   │       └── ContactFormSensitive.tsx
+│   ├── constants
+│   │   └── wizardOptions.ts
+│   ├── domain
+│   │   ├── flow.ts
+│   │   ├── intake-prisma-consistency.ts
+│   │   ├── intake-records.ts
+│   │   ├── intake.ts
+│   │   ├── json.ts
+│   │   └── priority.ts
+│   ├── infra
+│   │   └── alerts.ts
+│   └── types
+│       ├── consent.ts
+│       ├── lang.ts
+│       └── wizard.ts
+├── tsconfig.json
+└── tsconfig.typecheck.json

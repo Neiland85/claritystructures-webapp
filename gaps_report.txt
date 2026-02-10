@@ -1,0 +1,20 @@
+Architectural Gap Analysis
+==========================
+
+Existing workflows:
+- .github/workflows/ci-typecheck.yml
+
+ADRs: MISSING
+  - Expected ADR directory (docs/adr, docs/adrs, adr, or adrs).
+Use cases artifacts: MISSING
+  - Expected explicit use-case documentation or application/use-case layer.
+Automated tests: MISSING
+  - Expected unit/integration test files (*.(test|spec).ts(x)).
+CI/CD workflows: FOUND
+  - Expected at least one workflow file in .github/workflows.
+
+Detected test files:
+- None
+
+Detected use-case artifacts:
+- None
