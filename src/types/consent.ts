@@ -1,5 +1,7 @@
+import type { IntakeTone } from '@/domain/intake-records';
+
 export type ConsentPayload = {
   consent: boolean;
   consentVersion: 'v1';
-  consentTone: 'basic' | 'family' | 'legal' | 'critical';
+  consentTone: IntakeTone;
 };

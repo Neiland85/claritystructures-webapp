@@ -1,13 +1,13 @@
 'use client';
 
-type Tone = 'basic' | 'family' | 'legal' | 'critical';
+import type { IntakeTone } from '@/domain/intake-records';
 
 type Props = {
-  tone: Tone;
+  tone: IntakeTone;
 };
 
 const CONFIRMATION_COPY: Record<
-  Tone,
+  IntakeTone,
   {
     title: string;
     message: string;
