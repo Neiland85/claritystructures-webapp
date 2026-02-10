@@ -26,3 +26,7 @@ pnpm-debug.log*
 
 # Package manager locks (workspace noise)
 pnpm-lock.yaml
+
+# TypeScript incremental cache
+tsconfig.tsbuildinfo
+.cache/

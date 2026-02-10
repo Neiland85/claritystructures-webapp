@@ -1,6 +1,6 @@
 import type { WizardResult } from '@/types/wizard';
 
-export type IntakePriority = 'low' | 'medium' | 'high' | 'critical';
+import type { IntakePriority } from './intake-records';
 
 export type IntakeAssessment = {
   priority: IntakePriority;

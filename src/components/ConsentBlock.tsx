@@ -1,15 +1,15 @@
 'use client';
 
-type Tone = 'basic' | 'family' | 'legal' | 'critical';
+import type { IntakeTone } from '@/domain/intake-records';
 
 type Props = {
-  tone: Tone;
+  tone: IntakeTone;
   checked: boolean;
   onChange: (value: boolean) => void;
 };
 
 const CONSENT_COPY: Record<
-  Tone,
+  IntakeTone,
   { text: string; warning?: string }
 > = {
   basic: {
