@@ -16,7 +16,7 @@ import type {
 } from '@/types/wizard';
 import type { WizardResult } from '@/types/wizard';
 import type { IntakeTone } from '@/domain/intake-records';
-import { assessIntake as assessPriorityIntake } from '@/domain/priority';
+import { assessIntake as assessIntakeDomain } from '@/domain/priority';
 
 export const runtime = 'nodejs';
 
@@ -186,6 +186,7 @@ export async function POST(req: Request) {
     // 2️⃣ Internal assessment (NOT exposed)
     const assessment = assessPriorityIntake(body);
        main
+    const assessment = assessIntakeDomain(body);
 
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
