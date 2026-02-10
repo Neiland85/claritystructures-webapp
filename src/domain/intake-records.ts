@@ -30,6 +30,24 @@ export const INTAKE_PRIORITIES = [
 
 export type IntakePriority = (typeof INTAKE_PRIORITIES)[number];
 
+export const INTAKE_FLAGS = [
+  'family_conflict',
+  'active_procedure',
+  'legal_professional',
+  'emotional_distress',
+] as const;
+
+export type IntakeFlag = (typeof INTAKE_FLAGS)[number];
+
+export const INTAKE_ACTION_CODES = [
+  'IMMEDIATE_HUMAN_CONTACT',
+  'PRIORITY_REVIEW_24_48H',
+  'STANDARD_REVIEW',
+  'DEFERRED_INFORMATIONAL_RESPONSE',
+] as const;
+
+export type IntakeActionCode = (typeof INTAKE_ACTION_CODES)[number];
+
 /**
  * Core intake input
  */

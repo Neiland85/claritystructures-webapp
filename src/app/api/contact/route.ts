@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 
 import type { WizardResult } from '@/types/wizard';
 import type { IntakeTone } from '@/domain/intake-records';
-import { assessIntake as assessIntakeDomain } from '@/domain/priority';
+import { decideIntake } from '@/domain/decision';
 
 export const runtime = 'nodejs';
 
@@ -15,13 +15,20 @@ type ContactPayload = WizardResult & {
   consentVersion: 'v1';
 };
 
+const ACTION_MESSAGE_BY_CODE = {
+  IMMEDIATE_HUMAN_CONTACT: 'Immediate human contact and evidence preservation guidance',
+  PRIORITY_REVIEW_24_48H: 'Priority review within 24–48h',
+  STANDARD_REVIEW: 'Standard review',
+  DEFERRED_INFORMATIONAL_RESPONSE: 'Deferred or informational response',
+} as const;
+
 export async function POST(req: Request) {
   try {
     // 1️⃣ Parse body ONCE
     const body = (await req.json()) as ContactPayload;
 
     // 2️⃣ Internal assessment (NOT exposed)
-    const assessment = assessIntakeDomain(body);
+    const decision = decideIntake(body);
 
     // 3️⃣ Prepare email transport
     const transporter = nodemailer.createTransport({
@@ -34,7 +41,7 @@ export async function POST(req: Request) {
     });
 
     // 4️⃣ Build internal email
-    const subject = `[${assessment.priority.toUpperCase()}] New intake received`;
+    const subject = `[${decision.priority.toUpperCase()}] New intake received`;
 
     const text = `
 --- Intake ---
@@ -47,9 +54,12 @@ Urgency: ${body.urgency}
 Emotional distress: ${body.hasEmotionalDistress ? 'YES' : 'NO'}
 
 --- Assessment ---
-Priority: ${assessment.priority}
-Flags: ${assessment.flags.join(', ') || 'none'}
-Recommended action: ${assessment.recommendedAction}
+Priority: ${decision.priority}
+Flags: ${decision.flags.join(', ') || 'none'}
+Action code: ${decision.actionCode}
+Recommended action: ${ACTION_MESSAGE_BY_CODE[decision.actionCode]}
+Decision model version: ${decision.decisionModelVersion}
+Route: ${decision.route}
 
 --- Message ---
 ${body.message}
