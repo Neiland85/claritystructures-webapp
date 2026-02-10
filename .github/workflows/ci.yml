@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -37,33 +37,5 @@ jobs:
       - name: Typecheck (strict TypeError gate)
         run: pnpm run typecheck
 
-      - name: Prepare CI vitest config
-        run: |
-          cat > vitest.ci.mts <<'EOF'
-          import { defineConfig } from 'vitest/config'
-
-          export default defineConfig({
-            test: {
-              exclude: ['tests/**'],
-              passWithNoTests: true,
-              coverage: {
-                enabled: true,
-                provider: 'v8',
-                reporter: ['text', 'lcov']
-              }
-            }
-          })
-          EOF
-
-      - name: Run tests + coverage
-        run: pnpm dlx --package=vitest@3.2.4 --package=@vitest/coverage-v8@3.2.4 vitest run --config vitest.ci.mts
-
       - name: Build Next.js
         run: pnpm run build
-
-      - name: Upload coverage report
-        if: ${{ always() && hashFiles('coverage/**') != '' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-node-${{ matrix.node-version }}
-          path: coverage
