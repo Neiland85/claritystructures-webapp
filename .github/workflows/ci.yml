@@ -38,7 +38,7 @@ jobs:
         run: pnpm run typecheck
 
       - name: Ensure Vitest is available in CI
-        run: pnpm add --no-save -D vitest @vitest/coverage-v8
+        run: pnpm add -D vitest @vitest/coverage-v8
 
       - name: Run tests + coverage
         run: pnpm run --if-present test
