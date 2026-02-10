@@ -18,24 +18,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
 
       - name: Lint (app code)
-        run: pnpm exec eslint . --ignore-pattern 'tests/**'
+        run: npx eslint . --ignore-pattern 'tests/**'
 
       - name: Typecheck (strict TypeError gate)
-        run: pnpm run typecheck
+        run: npm run typecheck
 
       - name: Prepare CI vitest config
         run: |
@@ -56,10 +54,10 @@ jobs:
           EOF
 
       - name: Run tests + coverage
-        run: pnpm dlx --package=vitest@3.2.4 --package=@vitest/coverage-v8@3.2.4 vitest run --config vitest.ci.mts
+        run: npx --package=vitest@3.2.4 --package=@vitest/coverage-v8@3.2.4 vitest run --config vitest.ci.mts
 
       - name: Build Next.js
-        run: pnpm run build
+        run: npm run build
 
       - name: Upload coverage report
         if: ${{ always() && hashFiles('coverage/**') != '' }}
