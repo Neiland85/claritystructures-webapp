@@ -2,7 +2,7 @@
 
 import { useRouter, useParams } from 'next/navigation';
 import Wizard from './Wizard';
-import { resolveIntakeRoute } from '@/domain/flow';
+import { decideIntake } from '@/domain/decision';
 import type { WizardResult } from '@/types/wizard';
 
 export default function Hero() {
@@ -11,8 +11,8 @@ export default function Hero() {
   const lang = params.lang as string;
 
   function handleComplete(result: WizardResult) {
-    const route = resolveIntakeRoute(result);
-    router.push('/' + lang + route);
+    const decision = decideIntake(result);
+    router.push('/' + lang + decision.route);
   }
 
   return <Wizard onComplete={handleComplete} />;
