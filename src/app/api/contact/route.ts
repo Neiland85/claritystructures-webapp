@@ -16,7 +16,7 @@ import type {
 } from '@/types/wizard';
 import type { WizardResult } from '@/types/wizard';
 import type { IntakeTone } from '@/domain/intake-records';
-import { assessIntake } from '@/domain/priority';
+import { assessIntake as assessPriorityIntake } from '@/domain/priority';
 
 export const runtime = 'nodejs';
 
@@ -130,6 +130,7 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as ContactPayload;
 
+        codex/update-contact-api-for-submissions-and-consent
     if (!body?.email || !body?.message || !body?.tone) {
       return errorResponse(400, 'INVALID_PAYLOAD', 'Missing required contact fields.');
     }
@@ -182,6 +183,9 @@ export async function POST(req: Request) {
         'Unable to persist contact intake.',
       );
     }
+    // 2️⃣ Internal assessment (NOT exposed)
+    const assessment = assessPriorityIntake(body);
+       main
 
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
