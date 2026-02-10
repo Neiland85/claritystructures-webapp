@@ -1,0 +1,9 @@
+Detected TypeScript domain logic files
+====================================
+
+- src/domain/flow.ts (in src/domain)
+- src/domain/intake-prisma-consistency.ts (in src/domain)
+- src/domain/intake-records.ts (in src/domain)
+- src/domain/intake.ts (in src/domain)
+- src/domain/json.ts (in src/domain)
+- src/domain/priority.ts (in src/domain)

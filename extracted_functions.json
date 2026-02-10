@@ -1,0 +1,71 @@
+{
+  "domain_files": [
+    {
+      "file": "src/domain/flow.ts",
+      "functions": [
+        {
+          "name": "resolveIntakeRoute",
+          "kind": "function_declaration",
+          "params": "result: WizardResult",
+          "return_type": "string",
+          "line": 16
+        }
+      ]
+    },
+    {
+      "file": "src/domain/intake-prisma-consistency.ts",
+      "functions": []
+    },
+    {
+      "file": "src/domain/intake-records.ts",
+      "functions": []
+    },
+    {
+      "file": "src/domain/intake.ts",
+      "functions": [
+        {
+          "name": "resolveIntakeRoute",
+          "kind": "re_export",
+          "from": "./flow",
+          "line": 1
+        }
+      ]
+    },
+    {
+      "file": "src/domain/json.ts",
+      "functions": []
+    },
+    {
+      "file": "src/domain/priority.ts",
+      "functions": [
+        {
+          "name": "assessIntake",
+          "kind": "function_declaration",
+          "params": "result: WizardResult",
+          "return_type": "IntakeAssessment",
+          "line": 11
+        }
+      ]
+    }
+  ],
+  "focus": {
+    "src/domain/flow.ts": [
+      {
+        "name": "resolveIntakeRoute",
+        "kind": "function_declaration",
+        "params": "result: WizardResult",
+        "return_type": "string",
+        "line": 16
+      }
+    ],
+    "src/domain/priority.ts": [
+      {
+        "name": "assessIntake",
+        "kind": "function_declaration",
+        "params": "result: WizardResult",
+        "return_type": "IntakeAssessment",
+        "line": 11
+      }
+    ]
+  }
+}
