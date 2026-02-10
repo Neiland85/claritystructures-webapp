@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // CI should always run a clean, deterministic typecheck and never reuse stale local build info.
+    "incremental": false,
+    "tsBuildInfoFile": "./.cache/tsconfig.typecheck.tsbuildinfo"
+  },
+  // Keep typecheck inputs stable across local/CI and avoid generated build artifacts.
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next",
+    "dist",
+    "out",
+    "coverage"
+  ]
+}
