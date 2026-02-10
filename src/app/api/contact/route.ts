@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 
 import type { WizardResult } from '@/types/wizard';
 import type { IntakeTone } from '@/domain/intake-records';
-import { assessIntake } from '@/domain/priority';
+import { assessIntake as assessPriorityIntake } from '@/domain/priority';
 
 export const runtime = 'nodejs';
 
@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     const body = (await req.json()) as ContactPayload;
 
     // 2️⃣ Internal assessment (NOT exposed)
-    const assessment = assessIntake(body);
+    const assessment = assessPriorityIntake(body);
 
     // 3️⃣ Prepare email transport
     const transporter = nodemailer.createTransport({
