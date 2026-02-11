@@ -38,20 +38,22 @@ function deriveRiskLevel(result: WizardResult): RiskLevel {
 }
 
 function containsAnyKeyword(values: string[], keywords: string[]): boolean {
-  return values.some((value) => {
-    const normalized = value.toLowerCase();
-    return keywords.some((keyword) => normalized.includes(keyword));
+  return values.some((value: string): boolean => {
+    const normalized: string = value.toLowerCase();
+    return keywords.some((keyword: string): boolean => normalized.includes(keyword));
   });
 }
 
 function deriveEvidenceLevel(result: WizardResult): EvidenceLevel {
-  const normalizedSources = result.evidenceSources.map((source) => source.toLowerCase());
+  const normalizedSources: string[] = result.evidenceSources.map(
+    (source: string): string => source.toLowerCase()
+  );
 
   if (normalizedSources.length === 0) {
     return result.devices > 0 ? 'full_device' : 'none';
   }
 
-  const hasDeviceEvidence = containsAnyKeyword(normalizedSources, [
+  const hasDeviceEvidence: boolean = containsAnyKeyword(normalizedSources, [
     'device',
     'phone',
     'computer',
@@ -59,12 +61,12 @@ function deriveEvidenceLevel(result: WizardResult): EvidenceLevel {
     'tablet',
     'forensic',
   ]);
-  const hasScreenshotEvidence = containsAnyKeyword(normalizedSources, [
+  const hasScreenshotEvidence: boolean = containsAnyKeyword(normalizedSources, [
     'screenshot',
     'screen capture',
     'screen recording',
   ]);
-  const hasMessageEvidence = containsAnyKeyword(normalizedSources, [
+  const hasMessageEvidence: boolean = containsAnyKeyword(normalizedSources, [
     'message',
     'chat',
     'sms',
@@ -89,8 +91,8 @@ function deriveEvidenceLevel(result: WizardResult): EvidenceLevel {
 }
 
 function deriveExposureState(result: WizardResult): ExposureState {
-  const actions = result.actionsTaken.map((action) => action.toLowerCase());
-  const objective = result.objective.toLowerCase();
+  const actions: string[] = result.actionsTaken.map((action: string): string => action.toLowerCase());
+  const objective: string = result.objective.toLowerCase();
 
   if (
     containsAnyKeyword(actions, ['secured', 'contained', 'blocked', 'reset']) ||
@@ -150,9 +152,9 @@ function refineExposureState(exposureState: ExposureState, result: WizardResult)
 }
 
 export function mapWizardToSignals(result: WizardResult): IntakeSignals {
-  const riskLevel = refineRiskLevel(deriveRiskLevel(result), result);
-  const evidenceLevel = refineEvidenceLevel(deriveEvidenceLevel(result), result);
-  const exposureState = refineExposureState(deriveExposureState(result), result);
+  const riskLevel: RiskLevel = refineRiskLevel(deriveRiskLevel(result), result);
+  const evidenceLevel: EvidenceLevel = refineEvidenceLevel(deriveEvidenceLevel(result), result);
+  const exposureState: ExposureState = refineExposureState(deriveExposureState(result), result);
 
   return {
     incidentType: deriveIncidentType(result),
