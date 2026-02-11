@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 
 import type { WizardResult } from '@/types/wizard';
 import type { IntakeTone } from '@/domain/intake-records';
-import { decideIntake } from '@/domain/decision';
+import { decideIntake } from '@/domain';
 
 export const runtime = 'nodejs';
 
