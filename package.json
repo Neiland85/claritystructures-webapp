@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
-    "test": "vitest run --coverage",
-    "test:watch": "vitest"
+    "test": "node --test --experimental-strip-types tests/decision.spec.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",
@@ -25,12 +24,10 @@
     "@types/nodemailer": "^7.0.9",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitest/coverage-v8": "^1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "vitest": "^1.0.0"
+    "typescript": "^5"
   },
   "engines": {
     "node": ">=20.9.0"
