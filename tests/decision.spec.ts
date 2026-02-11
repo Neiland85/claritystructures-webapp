@@ -2,6 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import { DECISION_MODEL_VERSION, decideIntake } from '../src/domain/decision.js';
+import { mapWizardToSignals } from '../src/domain/map-wizard-to-signals.js';
+import { assessIntake, assessIntakeWithSignals } from '../src/domain/priority.js';
 import type { WizardResult } from '../src/types/wizard.js';
 
 function buildResult(overrides: Partial<WizardResult> = {}): WizardResult {
@@ -83,4 +85,63 @@ test('legal professional only yields low priority and legal route', () => {
   assert.equal(result.priority, 'low');
   assert.deepEqual(result.flags, ['legal_professional']);
   assert.equal(result.actionCode, 'DEFERRED_INFORMATIONAL_RESPONSE');
+});
+
+test('mapWizardToSignals is deterministic for same input', () => {
+  const input = buildResult({
+    urgency: 'legal_risk',
+    evidenceSources: ['email thread', 'screenshots from app'],
+    actionsTaken: ['monitor'],
+    devices: 0,
+  });
+
+  const first = mapWizardToSignals(input);
+  const second = mapWizardToSignals(input);
+
+  assert.deepEqual(first, second);
+  assert.equal(first.riskLevel, 'high');
+  assert.equal(first.evidenceLevel, 'mixed');
+  assert.equal(first.exposureState, 'potential');
+});
+
+test('mapWizardToSignals handles missing optional fields safely', () => {
+  const result = mapWizardToSignals(
+    buildResult({
+      hasEmotionalDistress: undefined,
+      evidenceSources: [],
+      actionsTaken: [],
+      devices: 0,
+    })
+  );
+
+  assert.equal(result.sensitivityFlags.length, 0);
+  assert.equal(result.evidenceLevel, 'none');
+  assert.equal(result.exposureState, 'unknown');
+});
+
+test('assessIntake default behavior remains unchanged when using signal-enabled helper', () => {
+  const input = buildResult({
+    clientProfile: 'family_inheritance_conflict',
+    urgency: 'time_sensitive',
+  });
+
+  const baseline = assessIntake(input);
+  const withSignals = assessIntakeWithSignals(input);
+
+  assert.deepEqual(
+    baseline,
+    {
+      priority: 'high',
+      flags: ['family_conflict'],
+      actionCode: 'PRIORITY_REVIEW_24_48H',
+    }
+  );
+  assert.deepEqual(
+    {
+      priority: withSignals.priority,
+      flags: withSignals.flags,
+      actionCode: withSignals.actionCode,
+    },
+    baseline
+  );
 });
