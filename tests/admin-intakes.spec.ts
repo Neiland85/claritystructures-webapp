@@ -53,7 +53,7 @@ class InMemoryIntakeStore {
   }
 }
 
-function isReviewerAuthorized(authHeader: string | null, expectedUser: string, expectedPass: string): boolean {
+function validateBasicAuthCredentials(authHeader: string | null, expectedUser: string, expectedPass: string): boolean {
   if (!authHeader) {
     return false;
   }
@@ -65,13 +65,13 @@ function isReviewerAuthorized(authHeader: string | null, expectedUser: string, e
 
   try {
     const decoded = Buffer.from(encoded, 'base64').toString('utf8');
-    const separator = decoded.indexOf(':');
-    if (separator < 0) {
+    const colonIndex = decoded.indexOf(':');
+    if (colonIndex < 0) {
       return false;
     }
 
-    const username = decoded.slice(0, separator);
-    const password = decoded.slice(separator + 1);
+    const username = decoded.slice(0, colonIndex);
+    const password = decoded.slice(colonIndex + 1);
 
     return username === expectedUser && password === expectedPass;
   } catch {
@@ -87,7 +87,7 @@ async function simulateMarkForReview(
   expectedPass: string
 ): Promise<{ success: boolean; error?: string }> {
   // Simulate authorization check (server actions must enforce their own auth)
-  if (!isReviewerAuthorized(authHeader, expectedUser, expectedPass)) {
+  if (!validateBasicAuthCredentials(authHeader, expectedUser, expectedPass)) {
     return { success: false, error: 'Unauthorized' };
   }
 
