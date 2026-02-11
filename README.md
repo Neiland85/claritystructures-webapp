@@ -22,6 +22,36 @@ npm ci
 npm run test
 ```
 
+## Intake funnel MVP
+- Public landing + intake form is available at `/intake` with required disclosures and minimal structured fields.
+- Form submissions go to `POST /api/intake/submit`, which validates payload, deterministically maps to `WizardResult`, runs `decideIntakeWithExplanation(..., true)`, stores the intake in `intakes`, and returns a generic acknowledgement only.
+- Internal reviewers access `/admin/intakes` (HTTP Basic auth via env vars) to review submissions and mark records for human follow-up.
+- Each successful intake can trigger an internal notification email with intake summary + admin URL.
+
+### Required environment variables
+```bash
+DATABASE_URL=postgresql://...
+APP_BASE_URL=https://your-domain.example
+
+# Admin review auth
+INTAKE_REVIEWER_USER=reviewer
+INTAKE_REVIEWER_PASS=strong-password
+
+# Notification email
+INTAKE_NOTIFICATION_EMAIL=ops@example.com
+INTAKE_FROM_EMAIL=no-reply@example.com
+SMTP_HOST=smtp.example.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=smtp-user
+SMTP_PASS=smtp-password
+```
+
+### Deploy notes
+1. Run Prisma migration to create the `intakes` table.
+2. Set the environment variables above in your deployment platform.
+3. Ensure `/admin/intakes` is reachable only by authorized reviewers and served over HTTPS.
+
 ## Decision Engine
 See [`docs/decision-engine.md`](./docs/decision-engine.md).
 

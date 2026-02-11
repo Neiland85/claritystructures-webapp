@@ -3,7 +3,7 @@ import {
   decideIntakeV2,
   decideIntakeWithExplanation,
   type WizardResult,
-} from '../src/domain/decision-engine.js';
+} from '../src/domain/decision-engine';
 
 type DemoCase = {
   name: string;
