@@ -67,7 +67,7 @@ function sanitizeInteger(value: unknown, fallback: number = 0): number {
     }
     return fallback;
   }
-  
+
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     return fallback;
   }
