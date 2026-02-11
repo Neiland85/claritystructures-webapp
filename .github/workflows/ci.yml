@@ -18,11 +18,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -44,7 +39,10 @@ jobs:
       - name: Run tests + coverage
         run: npm run --if-present test -- --coverage
 
-      - name: Build Next.js
+      - name: Build Next.js (Node >= 20 only)
+        if: ${{ matrix.node-version >= 20 }}
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
         run: npm run build
 
       - name: Upload coverage report
