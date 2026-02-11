@@ -32,6 +32,16 @@ export function assessIntake(result: WizardResult): IntakeAssessment {
   };
 }
 
+
+export function assessIntakeV2(result: WizardResult): IntakeAssessment {
+  const decision = decideIntakeV2(result);
+  return {
+    priority: decision.priority,
+    flags: decision.flags,
+    actionCode: decision.actionCode,
+  };
+}
+
 export function assessIntakeWithSignals(
   result: WizardResult,
   options: AssessIntakeWithSignalsOptions = {}
