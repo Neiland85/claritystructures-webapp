@@ -70,3 +70,16 @@ model ConsentAcceptance {
   @@index([consentVersionId])
   @@index([intakeId])
 }
+
+model Intake {
+  id           String   @id @default(uuid()) @db.Uuid
+  wizardResult Json
+  decision     Json
+  explanation  Json
+  contactEmail String
+  contactPhone String
+  needsReview  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@map("intakes")
+}
