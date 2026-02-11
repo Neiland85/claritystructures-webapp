@@ -1,7 +1,7 @@
 import { headers } from 'next/headers';
-import { notFound } from 'next/navigation';
+import { NextResponse } from 'next/server';
 
-import { isReviewerAuthorized } from '@/lib/admin-auth';
+import { isReviewerAuthorized, unauthorizedHeaders } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
 import { toAdminIntakeRows } from '@/application/intake/admin-intakes-view';
 
@@ -10,27 +10,45 @@ export const runtime = 'nodejs';
 async function markForReview(formData: FormData) {
   'use server';
 
+  const authHeader = (await headers()).get('authorization');
+
+  if (!isReviewerAuthorized(authHeader)) {
+    return NextResponse.json(
+      { message: 'Unauthorized' },
+      { status: 401, headers: unauthorizedHeaders() },
+    );
+  }
+
   const intakeId = String(formData.get('intakeId') ?? '');
 
   if (!intakeId) {
     return;
   }
 
-  await prisma.intake.update({
-    where: { id: intakeId },
-    data: { needsReview: true },
-  });
+  try {
+    await prisma.intake.update({
+      where: { id: intakeId },
+      data: { needsReview: true },
+    });
+  } catch (error) {
+    console.error('[MARK_FOR_REVIEW_ERROR]', { intakeId, error });
+    throw new Error('Failed to mark intake for review');
+  }
 }
 
 export default async function AdminIntakesPage() {
   const authHeader = (await headers()).get('authorization');
 
   if (!isReviewerAuthorized(authHeader)) {
-    notFound();
+    return new NextResponse('Unauthorized', {
+      status: 401,
+      headers: unauthorizedHeaders(),
+    });
   }
 
   const intakes = await prisma.intake.findMany({
     orderBy: { createdAt: 'desc' },
+    take: 50,
   });
   const rows = toAdminIntakeRows(intakes);
 

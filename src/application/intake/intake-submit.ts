@@ -36,8 +36,15 @@ const URGENCY_VALUES: ReadonlySet<string> = new Set([
 
 const START_VALUES: ReadonlySet<string> = new Set(['unknown', 'recent', 'weeks', 'months']);
 
+// RFC 5322 compliant email regex
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+
 function nonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isValidEmail(value: string): boolean {
+  return EMAIL_REGEX.test(value);
 }
 
 export function isIntakePayload(value: unknown): value is IntakePayload {
@@ -56,6 +63,7 @@ export function isIntakePayload(value: unknown): value is IntakePayload {
     typeof candidate.estimatedIncidentStart === 'string' &&
     START_VALUES.has(candidate.estimatedIncidentStart) &&
     nonEmptyString(candidate.contactEmail) &&
+    isValidEmail(candidate.contactEmail) &&
     nonEmptyString(candidate.contactPhone)
   );
 }
@@ -93,12 +101,19 @@ export function buildIntakeSubmitHandler(deps: IntakeSubmitDeps) {
         contactPhone: body.contactPhone,
       });
 
-      await deps.notify({
-        intakeId: saved.id,
-        contactEmail: body.contactEmail,
-        urgency: body.urgency,
-        adminUrl: `${process.env.APP_BASE_URL ?? 'http://localhost:3000'}/admin/intakes`,
-      });
+      try {
+        await deps.notify({
+          intakeId: saved.id,
+          contactEmail: body.contactEmail,
+          urgency: body.urgency,
+          adminUrl: `${process.env.APP_BASE_URL ?? 'http://localhost:3000'}/admin/intakes`,
+        });
+      } catch (notifyError) {
+        deps.logger.error('[INTAKE_NOTIFY_ERROR]', {
+          intakeId: saved.id,
+          error: notifyError,
+        });
+      }
 
       deps.logger.info('[INTAKE_SUBMITTED]', {
         intakeId: saved.id,

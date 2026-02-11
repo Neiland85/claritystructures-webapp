@@ -81,5 +81,6 @@ model Intake {
   needsReview  Boolean  @default(false)
   createdAt    DateTime @default(now())
 
+  @@index([createdAt])
   @@map("intakes")
 }
