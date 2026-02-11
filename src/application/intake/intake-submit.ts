@@ -44,8 +44,9 @@ function isValidEmail(value: unknown): value is string {
   if (typeof value !== 'string' || value.trim().length === 0) {
     return false;
   }
-  // RFC 5322 simplified email regex
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // RFC 5322 simplified email regex - requires at least one char before @,
+  // at least one char for domain name, and at least 2 chars for TLD
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
   return emailRegex.test(value.trim());
 }
 

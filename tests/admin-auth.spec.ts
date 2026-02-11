@@ -114,10 +114,9 @@ test('isReviewerAuthorized returns true for correct credentials', () => {
   }
 });
 
-test('isReviewerAuthorized uses timing-safe comparison', () => {
-  // This test verifies that the function doesn't throw errors
-  // when comparing strings of different lengths (which would happen
-  // if we used timingSafeEqual directly without hashing first)
+test('isReviewerAuthorized handles different length credentials without throwing', () => {
+  // This test verifies that the function handles different-length credentials
+  // gracefully without throwing errors (SHA-256 hashing ensures fixed-length buffers)
   const originalUser = process.env.INTAKE_REVIEWER_USER;
   const originalPass = process.env.INTAKE_REVIEWER_PASS;
 

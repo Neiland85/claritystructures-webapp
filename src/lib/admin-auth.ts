@@ -41,6 +41,8 @@ export function isReviewerAuthorized(authHeader: string | null): boolean {
   }
 
   // Use timing-safe comparison with SHA-256 hashing to prevent timing attacks
+  // SHA-256 ensures fixed-length 32-byte buffers for timingSafeEqual,
+  // which would throw if buffer lengths differ
   const expectedUserHash = createHash('sha256').update(reviewerUser).digest();
   const actualUserHash = createHash('sha256').update(parsed.username).digest();
   

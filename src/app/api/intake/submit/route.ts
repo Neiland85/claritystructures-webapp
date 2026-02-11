@@ -20,16 +20,13 @@ const submitHandler = buildIntakeSubmitHandler({
     return { id: saved.id };
   },
   notify: async (input) => {
-    // Best-effort notification - logs failure instead of throwing
-    try {
-      console.info('[INTAKE_NOTIFY]', {
-        intakeId: input.intakeId,
-        urgency: input.urgency,
-        adminUrl: input.adminUrl,
-      });
-    } catch (notifyError) {
-      console.error('[INTAKE_NOTIFY_ERROR]', notifyError);
-    }
+    // Placeholder notification implementation
+    // TODO: Implement actual email/SMS notification
+    console.info('[INTAKE_NOTIFY]', {
+      intakeId: input.intakeId,
+      urgency: input.urgency,
+      adminUrl: input.adminUrl,
+    });
   },
   logger: console,
 });
