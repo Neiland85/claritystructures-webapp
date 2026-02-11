@@ -59,6 +59,15 @@ function sanitizeBoolean(value: unknown): boolean | undefined {
 }
 
 function sanitizeInteger(value: unknown, fallback: number = 0): number {
+  // Handle numeric strings from form fields
+  if (typeof value === 'string') {
+    const parsed = parseInt(value, 10);
+    if (!Number.isNaN(parsed) && Number.isFinite(parsed)) {
+      return Math.max(0, parsed);
+    }
+    return fallback;
+  }
+
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     return fallback;
   }
@@ -74,15 +83,28 @@ function toWizardResult(payload: RawIntakePayload): WizardResult | null {
     return null;
   }
 
+  const incident = sanitizeString(payload.incident, 5000);
+  const objective = sanitizeString(payload.objective, 2000);
+  const devices = sanitizeInteger(payload.devices);
+
+  // Validate required fields: non-empty strings and at least one device.
+  if (!incident || !incident.trim() || !objective || !objective.trim()) {
+    return null;
+  }
+
+  if (!Number.isInteger(devices) || devices < 1) {
+    return null;
+  }
+
   const result: WizardResult = {
     clientProfile,
     urgency,
     hasEmotionalDistress: sanitizeBoolean(payload.hasEmotionalDistress),
-    incident: sanitizeString(payload.incident, 5000),
-    devices: sanitizeInteger(payload.devices),
+    incident,
+    devices,
     actionsTaken: sanitizeStringArray(payload.actionsTaken),
     evidenceSources: sanitizeStringArray(payload.evidenceSources),
-    objective: sanitizeString(payload.objective, 2000),
+    objective,
   };
 
   const isOngoing = sanitizeBoolean(payload.isOngoing);
@@ -115,42 +137,6 @@ function toWizardResult(payload: RawIntakePayload): WizardResult | null {
   }
 
   return result;
-export const runtime = 'nodejs';
-
-type IntakeSubmitPayload = {
-  description: string;
-  urgency: string;
-  incidentOngoing: 'yes' | 'no';
-  hasDeviceAccess: 'yes' | 'no';
-  incidentStart: string;
-  email: string;
-  phone: string;
-};
-
-function isNonEmptyString(value: unknown): value is string {
-  return typeof value === 'string' && value.trim().length > 0;
-}
-
-function isBooleanRadioValue(value: unknown): value is 'yes' | 'no' {
-  return value === 'yes' || value === 'no';
-}
-
-function isValidPayload(value: unknown): value is IntakeSubmitPayload {
-  if (typeof value !== 'object' || value === null) {
-    return false;
-  }
-
-  const candidate = value as Record<string, unknown>;
-
-  return (
-    isNonEmptyString(candidate.description) &&
-    isNonEmptyString(candidate.urgency) &&
-    isBooleanRadioValue(candidate.incidentOngoing) &&
-    isBooleanRadioValue(candidate.hasDeviceAccess) &&
-    isNonEmptyString(candidate.incidentStart) &&
-    isNonEmptyString(candidate.email) &&
-    isNonEmptyString(candidate.phone)
-  );
 }
 
 export async function POST(request: Request) {
@@ -181,23 +167,5 @@ export async function POST(request: Request) {
       { message: 'Unable to submit intake at this time.' },
       { status: 500 }
     );
-    const payload = await request.json();
-
-    if (!isValidPayload(payload)) {
-      return NextResponse.json({ message: 'Invalid intake submission' }, { status: 400 });
-    }
-
-    console.info('[INTAKE_SUBMIT]', payload);
-
-    return NextResponse.json(
-      {
-        message: 'Intake submitted successfully',
-      },
-      { status: 201 },
-    );
-  } catch (error) {
-    console.error('[INTAKE_SUBMIT_ERROR]', error);
-
-    return NextResponse.json({ message: 'Unable to submit intake' }, { status: 500 });
   }
 }
