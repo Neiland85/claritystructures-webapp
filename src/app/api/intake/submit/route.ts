@@ -4,7 +4,6 @@ import nodemailer from 'nodemailer';
 import { buildIntakeSubmitHandler } from '@/application/intake/intake-submit';
 import { prisma } from '@/lib/prisma';
 
-export const runtime = 'nodejs';
 
 function makeNotifierTransport() {
   return nodemailer.createTransport({
