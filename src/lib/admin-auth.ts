@@ -40,9 +40,8 @@ export function isReviewerAuthorized(authHeader: string | null): boolean {
     return false;
   }
 
-  // Use timing-safe comparison with SHA-256 hashing to prevent timing attacks
-  // SHA-256 ensures fixed-length 32-byte buffers for timingSafeEqual,
-  // which would throw if buffer lengths differ
+  // Use timing-safe comparison with SHA-256 hashing to prevent timing attacks.
+  // SHA-256 ensures fixed-length 32-byte buffers, preventing length-based timing leaks.
   const expectedUserHash = createHash('sha256').update(reviewerUser).digest();
   const actualUserHash = createHash('sha256').update(parsed.username).digest();
   
@@ -55,7 +54,7 @@ export function isReviewerAuthorized(authHeader: string | null): boolean {
       timingSafeEqual(expectedPassHash, actualPassHash)
     );
   } catch {
-    // timingSafeEqual throws if buffer lengths differ
+    // Defensive catch for unexpected errors (buffers are always 32 bytes with SHA-256)
     return false;
   }
 }

@@ -36,6 +36,10 @@ const URGENCY_VALUES: ReadonlySet<string> = new Set([
 
 const START_VALUES: ReadonlySet<string> = new Set(['unknown', 'recent', 'weeks', 'months']);
 
+// RFC 5322 simplified email regex - requires at least one char before @,
+// at least one char for domain name, and at least 2 chars for TLD
+const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+
 function nonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
@@ -44,10 +48,7 @@ function isValidEmail(value: unknown): value is string {
   if (typeof value !== 'string' || value.trim().length === 0) {
     return false;
   }
-  // RFC 5322 simplified email regex - requires at least one char before @,
-  // at least one char for domain name, and at least 2 chars for TLD
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-  return emailRegex.test(value.trim());
+  return EMAIL_REGEX.test(value.trim());
 }
 
 export function isIntakePayload(value: unknown): value is IntakePayload {
