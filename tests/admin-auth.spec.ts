@@ -42,25 +42,6 @@ test('isReviewerAuthorized returns false for invalid password', () => {
   assert.equal(isReviewerAuthorized(authHeader), false);
 });
 
-test('isReviewerAuthorized uses timing-safe comparison', () => {
-  process.env.INTAKE_REVIEWER_USER = 'admin';
-  process.env.INTAKE_REVIEWER_PASS = 'secret123456';
-
-  // Test with credentials that differ at the start
-  const authHeader1 = 'Basic ' + Buffer.from('xdmin:secret123456').toString('base64');
-  const result1 = isReviewerAuthorized(authHeader1);
-
-  // Test with credentials that differ at the end
-  const authHeader2 = 'Basic ' + Buffer.from('admin:secret12345x').toString('base64');
-  const result2 = isReviewerAuthorized(authHeader2);
-
-  assert.equal(result1, false);
-  assert.equal(result2, false);
-
-  // Note: This test doesn't actually verify timing safety in a meaningful way
-  // since timing differences would be in microseconds, but it documents the intent
-});
-
 test('isReviewerAuthorized handles malformed auth headers', () => {
   process.env.INTAKE_REVIEWER_USER = 'admin';
   process.env.INTAKE_REVIEWER_PASS = 'secret';

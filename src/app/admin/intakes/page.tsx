@@ -1,7 +1,6 @@
 import { headers } from 'next/headers';
-import { NextResponse } from 'next/server';
 
-import { isReviewerAuthorized, unauthorizedHeaders } from '@/lib/admin-auth';
+import { isReviewerAuthorized } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
 import { toAdminIntakeRows } from '@/application/intake/admin-intakes-view';
 
@@ -37,10 +36,16 @@ export default async function AdminIntakesPage() {
   const authHeader = (await headers()).get('authorization');
 
   if (!isReviewerAuthorized(authHeader)) {
-    return new NextResponse('Unauthorized', {
-      status: 401,
-      headers: unauthorizedHeaders(),
-    });
+    return (
+      <div className="flex min-h-screen items-center justify-center p-6">
+        <div className="max-w-md rounded-lg border border-red-300 bg-red-50 p-6 text-center">
+          <h1 className="text-xl font-bold text-red-900">Unauthorized</h1>
+          <p className="mt-2 text-sm text-red-700">
+            You must be authenticated to access this page.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const intakes = await prisma.intake.findMany({
