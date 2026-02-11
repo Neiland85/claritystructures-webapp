@@ -29,9 +29,25 @@ export default async function AdminIntakesPage() {
     notFound();
   }
 
-  const intakes = await prisma.intake.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
+  let intakes;
+  try {
+    intakes = await prisma.intake.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  } catch (error) {
+    console.error('[ADMIN_INTAKES_DB_ERROR]', error);
+    return (
+      <main className="mx-auto max-w-5xl p-6 md:p-10">
+        <h1 className="text-3xl font-bold">Intake Review Dashboard</h1>
+        <div className="mt-6 rounded border border-red-300 bg-red-50 p-4">
+          <p className="text-red-800">
+            Unable to load intakes. Please check the database connection and try again.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
   const rows = toAdminIntakeRows(intakes);
 
   return (
