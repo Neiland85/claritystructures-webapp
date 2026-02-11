@@ -1,5 +1,9 @@
 import type { WizardResult } from './wizard-result';
 
+import type {
+  DecisionExplanation,
+  DecisionReason,
+} from './decision-explanation';
 import { mapWizardToSignals } from './map-wizard-to-signals';
 import type {
   IntakeActionCode,
@@ -131,6 +135,94 @@ function maxPriority(left: IntakePriority, right: IntakePriority): IntakePriorit
   return PRIORITY_RANK[left] >= PRIORITY_RANK[right] ? left : right;
 }
 
+function buildDecisionExplanation(
+  baseline: IntakeDecision,
+  refined: IntakeDecision,
+  result: WizardResult
+): DecisionExplanation {
+  const reasons: DecisionReason[] = [];
+  const isV2 = refined.decisionModelVersion === DECISION_MODEL_VERSION_V2;
+
+  if (result.urgency === 'critical' && refined.route === INTAKE_ROUTE_BY_TONE.critical) {
+    reasons.push('urgency_based_routing');
+  } else if (
+    (result.clientProfile === 'family_inheritance_conflict' &&
+      refined.route === INTAKE_ROUTE_BY_TONE.family) ||
+    ((result.clientProfile === 'legal_professional' ||
+      result.clientProfile === 'court_related') &&
+      refined.route === INTAKE_ROUTE_BY_TONE.legal)
+  ) {
+    reasons.push('client_profile_routing');
+  }
+
+  if (baseline.flags.includes('family_conflict')) {
+    reasons.push('family_conflict_flag');
+  }
+
+  if (baseline.flags.includes('legal_professional')) {
+    reasons.push('legal_professional_flag');
+  }
+
+  if (baseline.flags.includes('active_procedure')) {
+    reasons.push('active_procedure_flag');
+  }
+
+  if (baseline.flags.includes('emotional_distress')) {
+    reasons.push('emotional_distress_flag');
+  }
+
+  if (isV2) {
+    const signals = mapWizardToSignals(result);
+    let refinedPriority = baseline.priority;
+
+    const pushEscalationReason = (
+      nextPriority: IntakePriority,
+      reason: Extract<
+        DecisionReason,
+        'ongoing_incident_escalation' | 'data_sensitivity_escalation' | 'device_access_constraint'
+      >
+    ) => {
+      if (nextPriority !== refinedPriority) {
+        reasons.push(reason);
+        refinedPriority = nextPriority;
+      }
+    };
+
+    if (signals.exposureState === 'active' && baseline.priority !== 'critical') {
+      pushEscalationReason(maxPriority(refinedPriority, 'high'), 'ongoing_incident_escalation');
+    }
+
+    if (
+      result.dataSensitivityLevel === 'high' &&
+      (signals.riskLevel === 'high' || signals.riskLevel === 'imminent')
+    ) {
+      pushEscalationReason(maxPriority(refinedPriority, 'critical'), 'data_sensitivity_escalation');
+    }
+
+    if (
+      result.hasAccessToDevices === false &&
+      signals.evidenceLevel === 'messages_only' &&
+      refinedPriority === 'low'
+    ) {
+      pushEscalationReason(maxPriority(refinedPriority, 'medium'), 'device_access_constraint');
+    }
+
+    if (
+      result.estimatedIncidentStart === 'weeks' ||
+      result.estimatedIncidentStart === 'months'
+    ) {
+      reasons.push('long_duration_exposure_hint');
+    }
+  }
+
+  return {
+    reasons,
+    baselinePriority: baseline.priority,
+    finalPriority: refined.priority,
+    modelVersion: refined.decisionModelVersion,
+  };
+}
+
 /**
  * Decision model V2 keeps V1 as baseline and applies signal-based refinements
  * only when contextual signal fields provide additional, meaningful context.
@@ -184,5 +276,18 @@ export function decideIntakeV2(result: WizardResult): IntakeDecision {
   return {
     ...refinedDecision,
     decisionModelVersion: DECISION_MODEL_VERSION_V2,
+  };
+}
+
+export function decideIntakeWithExplanation(result: WizardResult, useV2 = false): {
+  decision: IntakeDecision;
+  explanation: DecisionExplanation;
+} {
+  const baseline = decideIntake(result);
+  const decision = useV2 ? decideIntakeV2(result) : baseline;
+
+  return {
+    decision,
+    explanation: buildDecisionExplanation(baseline, decision, result),
   };
 }

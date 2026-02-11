@@ -9,6 +9,7 @@
 export {
   decideIntake,
   decideIntakeV2,
+  decideIntakeWithExplanation,
   DECISION_MODEL_VERSION,
   DECISION_MODEL_VERSION_V1,
   DECISION_MODEL_VERSION_V2,
@@ -22,3 +23,5 @@ export type {
 } from './priority';
 export type { ClientProfile, UrgencyLevel, WizardResult } from './wizard-result';
 
+
+export type { DecisionExplanation, DecisionReason } from './decision-explanation';

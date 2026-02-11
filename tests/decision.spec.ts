@@ -6,6 +6,7 @@ import {
   DECISION_MODEL_VERSION_V2,
   decideIntake,
   decideIntakeV2,
+  decideIntakeWithExplanation,
 } from '../src/domain/decision.js';
 import { mapWizardToSignals } from '../src/domain/map-wizard-to-signals.js';
 import { assessIntake, assessIntakeWithSignals } from '../src/domain/priority.js';
@@ -240,4 +241,63 @@ test('assessIntakeWithSignals can expose decisionModelVersion and opt into V2', 
   assert.equal(v2.decisionModelVersion, DECISION_MODEL_VERSION_V2);
   assert.equal(v1Default.priority, 'low');
   assert.equal(v2.priority, 'critical');
+});
+
+
+test('decideIntakeWithExplanation includes expected V1 reasons and no V2-only reasons', () => {
+  const input = buildResult({
+    clientProfile: 'family_inheritance_conflict',
+    urgency: 'time_sensitive',
+    hasEmotionalDistress: true,
+  });
+
+  const { decision, explanation } = decideIntakeWithExplanation(input);
+
+  assert.deepEqual(decision, decideIntake(input));
+  assert.equal(explanation.modelVersion, DECISION_MODEL_VERSION);
+  assert.equal(explanation.baselinePriority, 'high');
+  assert.equal(explanation.finalPriority, 'high');
+  assert.deepEqual(explanation.reasons, [
+    'client_profile_routing',
+    'family_conflict_flag',
+    'emotional_distress_flag',
+  ]);
+  assert.equal(
+    explanation.reasons.some((reason) =>
+      [
+        'data_sensitivity_escalation',
+        'ongoing_incident_escalation',
+        'device_access_constraint',
+        'long_duration_exposure_hint',
+      ].includes(reason)
+    ),
+    false
+  );
+});
+
+test('decideIntakeWithExplanation includes V2 escalation reasons when applicable', () => {
+  const input = buildResult({
+    urgency: 'informational',
+    dataSensitivityLevel: 'high',
+  });
+
+  const { decision, explanation } = decideIntakeWithExplanation(input, true);
+
+  assert.deepEqual(decision, decideIntakeV2(input));
+  assert.equal(explanation.modelVersion, DECISION_MODEL_VERSION_V2);
+  assert.equal(explanation.baselinePriority, 'low');
+  assert.equal(explanation.finalPriority, 'critical');
+  assert.deepEqual(explanation.reasons, ['data_sensitivity_escalation']);
+});
+
+test('decideIntakeWithExplanation is deterministic for identical input', () => {
+  const input = buildResult({
+    isOngoing: true,
+    estimatedIncidentStart: 'months',
+  });
+
+  const first = decideIntakeWithExplanation(input, true);
+  const second = decideIntakeWithExplanation(input, true);
+
+  assert.deepEqual(first, second);
 });
