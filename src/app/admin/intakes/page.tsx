@@ -29,7 +29,7 @@ export default async function AdminIntakesPage() {
     notFound();
   }
 
-  let intakes;
+  let intakes: Awaited<ReturnType<typeof prisma.intake.findMany>>;
   try {
     intakes = await prisma.intake.findMany({
       orderBy: { createdAt: 'desc' },
