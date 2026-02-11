@@ -11,7 +11,7 @@ import {
   type IntakePriority,
   type IntakeStatus,
   type IntakeTone,
-} from './intake-records';
+} from '../../domain/intake-records';
 
 const toneDomainToPrisma: Record<IntakeTone, PrismaIntakeTone> = {
   basic: 'basic',
@@ -36,7 +36,7 @@ const statusDomainToPrisma: Record<IntakeStatus, PrismaIntakeStatus> = {
 const assertSameLiterals = <A extends string, B extends A>(
   _a: readonly A[],
   _b: readonly B[]
- ) => {
+) => {
   void _a;
   void _b;
 };

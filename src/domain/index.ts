@@ -1,3 +1,11 @@
+/**
+ * Domain core – framework agnostic.
+ *
+ * Allowed dependencies:
+ * - Other modules within src/domain
+ * - Language/runtime primitives only (no React, Next.js, Prisma, Nodemailer, or app-layer imports)
+ * - Shared wizard-result domain types via relative imports
+ */
 export {
   decideIntake,
   decideIntakeV2,
