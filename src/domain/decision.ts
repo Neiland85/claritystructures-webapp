@@ -18,6 +18,7 @@ export const INTAKE_ROUTE_BY_TONE: Record<IntakeTone, string> = {
 export const DECISION_MODEL_VERSION = 'decision-model/v1';
 export const DECISION_MODEL_VERSION_V1 = DECISION_MODEL_VERSION;
 export const DECISION_MODEL_VERSION_V2 = 'decision-model/v2';
+export const DECISION_MODEL_VERSION_V2 = '2.0.0';
 
 export type IntakeDecision = {
   route: string;
