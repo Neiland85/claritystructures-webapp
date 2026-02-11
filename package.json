@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
-    "test": "vitest run --coverage",
-    "test:watch": "vitest"
+    "test": "npm run build:test && node --test dist/tests/decision.spec.js",
+    "build:test": "tsc -p tsconfig.typecheck.json"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",
@@ -29,5 +29,8 @@
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20.9.0"
   }
 }
