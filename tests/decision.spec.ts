@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { DECISION_MODEL_VERSION, decideIntake } from '../src/domain/decision.ts';
-import type { WizardResult } from '../src/types/wizard.ts';
+import { DECISION_MODEL_VERSION, decideIntake } from '../src/domain/decision.js';
+import type { WizardResult } from '../src/types/wizard.js';
 
 function buildResult(overrides: Partial<WizardResult> = {}): WizardResult {
   return {

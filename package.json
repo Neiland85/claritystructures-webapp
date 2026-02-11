@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
-    "test": "node --test --experimental-strip-types tests/decision.spec.ts"
+    "test": "npm run build:test && node --test dist/tests/decision.spec.js",
+    "build:test": "tsc -p tsconfig.typecheck.json"
   },
   "dependencies": {
     "@prisma/client": "^6.8.2",
