@@ -27,4 +27,11 @@ export type WizardResult = {
   actionsTaken: string[];
   evidenceSources: string[];
   objective: string;
+
+  // Extended context signals (optional)
+  isOngoing?: boolean;
+  hasAccessToDevices?: boolean;
+  dataSensitivityLevel?: 'low' | 'medium' | 'high';
+  estimatedIncidentStart?: 'unknown' | 'recent' | 'weeks' | 'months';
+  thirdPartiesInvolved?: boolean;
 };
