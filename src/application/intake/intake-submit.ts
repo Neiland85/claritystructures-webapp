@@ -1,4 +1,4 @@
-import { decideIntakeWithExplanation, type WizardResult } from '@/domain';
+import { decideIntakeWithExplanation, type WizardResult } from '../../domain/index.js';
 
 export type IntakePayload = {
   conflictDescription: string;
@@ -93,12 +93,16 @@ export function buildIntakeSubmitHandler(deps: IntakeSubmitDeps) {
         contactPhone: body.contactPhone,
       });
 
-      await deps.notify({
-        intakeId: saved.id,
-        contactEmail: body.contactEmail,
-        urgency: body.urgency,
-        adminUrl: `${process.env.APP_BASE_URL ?? 'http://localhost:3000'}/admin/intakes`,
-      });
+      try {
+        await deps.notify({
+          intakeId: saved.id,
+          contactEmail: body.contactEmail,
+          urgency: body.urgency,
+          adminUrl: `${process.env.APP_BASE_URL ?? 'http://localhost:3000'}/admin/intakes`,
+        });
+      } catch (notifyError) {
+        deps.logger.error('[INTAKE_NOTIFY_ERROR]', notifyError);
+      }
 
       deps.logger.info('[INTAKE_SUBMITTED]', {
         intakeId: saved.id,

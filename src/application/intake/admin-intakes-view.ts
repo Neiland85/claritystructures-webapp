@@ -1,11 +1,14 @@
+import type { IntakeDecision } from '@/domain/decision';
+import type { DecisionExplanation } from '@/domain/decision-explanation';
+
 export type IntakeListItem = {
   id: string;
   contactEmail: string;
   contactPhone: string;
   createdAt: Date;
   needsReview: boolean;
-  decision: unknown;
-  explanation: unknown;
+  decision: IntakeDecision;
+  explanation: DecisionExplanation;
 };
 
 export type AdminIntakeRow = {
@@ -20,16 +23,13 @@ export type AdminIntakeRow = {
 
 export function toAdminIntakeRows(intakes: IntakeListItem[]): AdminIntakeRow[] {
   return intakes.map((intake) => {
-    const decision = intake.decision as { priority?: string };
-    const explanation = intake.explanation as { reasons?: string[] };
-
     return {
       id: intake.id,
       contactEmail: intake.contactEmail,
       contactPhone: intake.contactPhone,
       createdAtIso: intake.createdAt.toISOString(),
-      priority: decision.priority ?? 'unknown',
-      reasons: Array.isArray(explanation.reasons) ? explanation.reasons : [],
+      priority: intake.decision.priority ?? 'unknown',
+      reasons: Array.isArray(intake.explanation.reasons) ? intake.explanation.reasons : [],
       needsReview: intake.needsReview,
     };
   });

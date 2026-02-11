@@ -1,3 +1,5 @@
+import crypto from 'node:crypto';
+
 const REALM = 'Clarity Intake Review';
 
 function decodeBasicAuth(header: string): { username: string; password: string } | null {
@@ -34,7 +36,24 @@ export function isReviewerAuthorized(authHeader: string | null): boolean {
 
   const parsed = decodeBasicAuth(authHeader);
 
-  return parsed?.username === reviewerUser && parsed.password === reviewerPass;
+  if (!parsed) {
+    return false;
+  }
+
+  try {
+    const usernameMatch = crypto.timingSafeEqual(
+      Buffer.from(parsed.username),
+      Buffer.from(reviewerUser),
+    );
+    const passwordMatch = crypto.timingSafeEqual(
+      Buffer.from(parsed.password),
+      Buffer.from(reviewerPass),
+    );
+
+    return usernameMatch && passwordMatch;
+  } catch {
+    return false;
+  }
 }
 
 export function unauthorizedHeaders(): HeadersInit {

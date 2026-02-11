@@ -82,8 +82,19 @@ test('admin dashboard list rendering adapter returns expected fields', () => {
       contactPhone: '+1',
       createdAt: new Date('2026-01-01T00:00:00.000Z'),
       needsReview: false,
-      decision: { priority: 'high' },
-      explanation: { reasons: ['urgency_based_routing'] },
+      decision: {
+        priority: 'high',
+        route: '/contact/legal',
+        flags: [],
+        actionCode: 'PRIORITY_REVIEW_24_48H',
+        decisionModelVersion: 'decision-model/v2',
+      },
+      explanation: {
+        reasons: ['urgency_based_routing'],
+        baselinePriority: 'medium',
+        finalPriority: 'high',
+        modelVersion: 'decision-model/v2',
+      },
     },
   ]);
 

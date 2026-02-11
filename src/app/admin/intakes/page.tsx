@@ -1,14 +1,22 @@
 import { headers } from 'next/headers';
-import { notFound } from 'next/navigation';
+import { NextResponse } from 'next/server';
 
-import { isReviewerAuthorized } from '@/lib/admin-auth';
+import { isReviewerAuthorized, unauthorizedHeaders } from '@/lib/admin-auth';
 import { prisma } from '@/lib/prisma';
 import { toAdminIntakeRows } from '@/application/intake/admin-intakes-view';
+import type { IntakeDecision } from '@/domain/decision';
+import type { DecisionExplanation } from '@/domain/decision-explanation';
 
 export const runtime = 'nodejs';
 
 async function markForReview(formData: FormData) {
   'use server';
+
+  const authHeader = (await headers()).get('authorization');
+
+  if (!isReviewerAuthorized(authHeader)) {
+    throw new Error('Unauthorized');
+  }
 
   const intakeId = String(formData.get('intakeId') ?? '');
 
@@ -26,13 +34,23 @@ export default async function AdminIntakesPage() {
   const authHeader = (await headers()).get('authorization');
 
   if (!isReviewerAuthorized(authHeader)) {
-    notFound();
+    return new NextResponse('Unauthorized', {
+      status: 401,
+      headers: unauthorizedHeaders(),
+    });
   }
 
   const intakes = await prisma.intake.findMany({
     orderBy: { createdAt: 'desc' },
+    take: 100,
   });
-  const rows = toAdminIntakeRows(intakes);
+  const rows = toAdminIntakeRows(
+    intakes.map((intake) => ({
+      ...intake,
+      decision: intake.decision as IntakeDecision,
+      explanation: intake.explanation as DecisionExplanation,
+    })),
+  );
 
   return (
     <main className="mx-auto max-w-5xl p-6 md:p-10">
