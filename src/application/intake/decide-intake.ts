@@ -1,5 +1,4 @@
-import { resolveIntakeRoute } from '@/domain/flow';
-import { assessIntake } from '@/domain/priority';
+import { assessIntake, resolveIntakeRoute } from '@/domain';
 import type { IntakePriority } from '@/domain/intake-records';
 import type { WizardResult } from '@/types/wizard';
 
