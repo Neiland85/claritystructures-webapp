@@ -173,6 +173,7 @@ test('decideIntakeV2 matches V1 for baseline input without refinement fields', (
     }
   );
   assert.equal(v2.decisionModelVersion, DECISION_MODEL_VERSION_V2);
+  assert.equal(DECISION_MODEL_VERSION_V2, 'decision-model/v2');
 });
 
 test('decideIntakeV2 elevates priority only when refinement signals change risk meaningfully', () => {
