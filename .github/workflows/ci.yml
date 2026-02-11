@@ -28,6 +28,7 @@ jobs:
 
       - name: Generate Prisma client
         run: npx prisma generate
+        run: pnpm install --frozen-lockfile
 
       - name: Lint (app code)
         run: npx eslint . --ignore-pattern 'tests/**'
