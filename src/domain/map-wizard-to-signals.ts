@@ -1,4 +1,4 @@
-import type { WizardResult } from '@/types/wizard';
+import type { WizardResult } from './wizard-result';
 
 import type {
   EvidenceLevel,

@@ -1,4 +1,4 @@
-import type { WizardResult } from '@/types/wizard';
+import type { WizardResult } from './wizard-result';
 
 import { decideIntake, DECISION_MODEL_VERSION_V2, decideIntakeV2 } from './decision';
 import type { IntakeSignalSummary, IntakeSignals } from './intake-signals';
