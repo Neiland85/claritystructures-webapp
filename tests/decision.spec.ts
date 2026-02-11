@@ -248,6 +248,8 @@ describe('decision logic matrix', () => {
       ).toBe('Immediate human contact and evidence preservation guidance');
     });
   });
+});
+
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
