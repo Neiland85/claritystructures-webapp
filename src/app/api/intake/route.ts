@@ -10,6 +10,7 @@ import {
   decideIntake,
   type SubmitIntakePayload,
 } from '@/application/intake/decide-intake';
+import { createIntakeSubmissionEmailNotifier } from '@/infra/mail/intake-submission-email-notifier';
 
 export const runtime = 'nodejs';
 
@@ -46,6 +47,7 @@ function isSubmitIntakePayload(value: unknown): value is SubmitIntakePayload {
     isStringArray(candidate.evidenceSources) &&
     isString(candidate.objective) &&
     isString(candidate.email) &&
+    (candidate.phone === undefined || isString(candidate.phone)) &&
     isString(candidate.message) &&
     isBoolean(candidate.consent)
   );
@@ -60,11 +62,15 @@ const intakeRepository: IntakeRepository<SubmitIntakePayload> = {
   },
 };
 
+let emailNotifier: Notifier<SubmitIntakePayload> | undefined;
+
 const notifier: Notifier<SubmitIntakePayload> = {
   async intakeSubmitted(event) {
-    // Example notifier adapter.
-    // Replace with email/queue integration.
-    console.info('[INTAKE_NOTIFY]', event.intakeId);
+    if (!emailNotifier) {
+      emailNotifier = createIntakeSubmissionEmailNotifier();
+    }
+
+    await emailNotifier.intakeSubmitted(event);
   },
 };
 

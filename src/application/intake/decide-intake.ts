@@ -6,6 +6,7 @@ import type { IntakeDecision } from './submit-intake.usecase';
 
 export type SubmitIntakePayload = WizardResult & {
   email: string;
+  phone?: string;
   message: string;
   consent: boolean;
 };
