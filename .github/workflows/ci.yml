@@ -29,6 +29,9 @@ jobs:
       - name: Generate Prisma Client
         # @prisma/client enums/types must exist before tsc so CI matches local generated types.
         run: npx prisma generate
+      - name: Generate Prisma client
+        run: npx prisma generate
+        run: pnpm install --frozen-lockfile
 
       - name: Lint (app code)
         run: npx eslint . --ignore-pattern 'tests/**'
