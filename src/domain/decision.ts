@@ -1,4 +1,4 @@
-import type { WizardResult } from '@/types/wizard';
+import type { WizardResult } from './wizard-result';
 
 import { mapWizardToSignals } from './map-wizard-to-signals';
 import type {
