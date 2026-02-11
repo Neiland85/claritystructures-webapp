@@ -118,17 +118,53 @@ function deriveSensitivityFlags(result: WizardResult): SensitivityFlag[] {
   return [];
 }
 
+function refineRiskLevel(riskLevel: RiskLevel, result: WizardResult): RiskLevel {
+  if (result.dataSensitivityLevel === 'high' && (riskLevel === 'low' || riskLevel === 'medium')) {
+    return 'high';
+  }
+
+  return riskLevel;
+}
+
+function refineEvidenceLevel(evidenceLevel: EvidenceLevel, result: WizardResult): EvidenceLevel {
+  if (result.hasAccessToDevices === false && evidenceLevel !== 'none') {
+    return 'messages_only';
+  }
+
+  return evidenceLevel;
+}
+
+function refineExposureState(exposureState: ExposureState, result: WizardResult): ExposureState {
+  if (result.isOngoing) {
+    return 'active';
+  }
+
+  if (
+    exposureState === 'unknown' &&
+    (result.estimatedIncidentStart === 'weeks' || result.estimatedIncidentStart === 'months')
+  ) {
+    return 'potential';
+  }
+
+  return exposureState;
+}
+
 export function mapWizardToSignals(result: WizardResult): IntakeSignals {
+  const riskLevel = refineRiskLevel(deriveRiskLevel(result), result);
+  const evidenceLevel = refineEvidenceLevel(deriveEvidenceLevel(result), result);
+  const exposureState = refineExposureState(deriveExposureState(result), result);
+
   return {
     incidentType: deriveIncidentType(result),
-    riskLevel: deriveRiskLevel(result),
-    evidenceLevel: deriveEvidenceLevel(result),
-    exposureState: deriveExposureState(result),
+    riskLevel,
+    evidenceLevel,
+    exposureState,
     sensitivityFlags: deriveSensitivityFlags(result),
     devicesCount: result.devices,
     actionsTaken: result.actionsTaken,
     evidenceSources: result.evidenceSources,
     objective: result.objective,
     incidentSummary: result.incident,
+    thirdPartiesInvolved: Boolean(result.thirdPartiesInvolved),
   };
 }

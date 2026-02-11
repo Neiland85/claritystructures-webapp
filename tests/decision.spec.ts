@@ -104,6 +104,29 @@ test('mapWizardToSignals is deterministic for same input', () => {
   assert.equal(first.exposureState, 'potential');
 });
 
+
+test('mapWizardToSignals upgrades riskLevel when data sensitivity is high', () => {
+  const result = mapWizardToSignals(
+    buildResult({
+      urgency: 'informational',
+      dataSensitivityLevel: 'high',
+    })
+  );
+
+  assert.equal(result.riskLevel, 'high');
+});
+
+test('mapWizardToSignals sets exposureState to active when incident is ongoing', () => {
+  const result = mapWizardToSignals(
+    buildResult({
+      actionsTaken: [],
+      isOngoing: true,
+    })
+  );
+
+  assert.equal(result.exposureState, 'active');
+});
+
 test('mapWizardToSignals handles missing optional fields safely', () => {
   const result = mapWizardToSignals(
     buildResult({

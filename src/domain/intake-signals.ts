@@ -41,6 +41,7 @@ export type IntakeSignals = {
   evidenceSources: string[];
   objective: string;
   incidentSummary: string;
+  thirdPartiesInvolved: boolean;
 };
 
 export type IntakeSignalSummary = {
