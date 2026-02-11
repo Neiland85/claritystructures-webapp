@@ -42,21 +42,17 @@ test('isReviewerAuthorized returns false for invalid password', () => {
   assert.equal(isReviewerAuthorized(authHeader), false);
 });
 
-test('isReviewerAuthorized uses timing-safe comparison', async () => {
+test('isReviewerAuthorized uses timing-safe comparison', () => {
   process.env.INTAKE_REVIEWER_USER = 'admin';
   process.env.INTAKE_REVIEWER_PASS = 'secret123456';
 
   // Test with credentials that differ at the start
   const authHeader1 = 'Basic ' + Buffer.from('xdmin:secret123456').toString('base64');
-  const start1 = Date.now();
   const result1 = isReviewerAuthorized(authHeader1);
-  const time1 = Date.now() - start1;
 
   // Test with credentials that differ at the end
   const authHeader2 = 'Basic ' + Buffer.from('admin:secret12345x').toString('base64');
-  const start2 = Date.now();
   const result2 = isReviewerAuthorized(authHeader2);
-  const time2 = Date.now() - start2;
 
   assert.equal(result1, false);
   assert.equal(result2, false);

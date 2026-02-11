@@ -13,10 +13,7 @@ async function markForReview(formData: FormData) {
   const authHeader = (await headers()).get('authorization');
 
   if (!isReviewerAuthorized(authHeader)) {
-    return NextResponse.json(
-      { message: 'Unauthorized' },
-      { status: 401, headers: unauthorizedHeaders() },
-    );
+    throw new Error('Unauthorized: Invalid credentials');
   }
 
   const intakeId = String(formData.get('intakeId') ?? '');
