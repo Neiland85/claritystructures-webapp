@@ -41,14 +41,14 @@ export function isReviewerAuthorized(authHeader: string | null): boolean {
   }
 
   try {
-    const usernameMatch = crypto.timingSafeEqual(
-      Buffer.from(parsed.username),
-      Buffer.from(reviewerUser),
-    );
-    const passwordMatch = crypto.timingSafeEqual(
-      Buffer.from(parsed.password),
-      Buffer.from(reviewerPass),
-    );
+    // Hash both values to ensure equal length for timing-safe comparison
+    const providedUserHash = crypto.createHash('sha256').update(parsed.username).digest();
+    const expectedUserHash = crypto.createHash('sha256').update(reviewerUser).digest();
+    const providedPassHash = crypto.createHash('sha256').update(parsed.password).digest();
+    const expectedPassHash = crypto.createHash('sha256').update(reviewerPass).digest();
+
+    const usernameMatch = crypto.timingSafeEqual(providedUserHash, expectedUserHash);
+    const passwordMatch = crypto.timingSafeEqual(providedPassHash, expectedPassHash);
 
     return usernameMatch && passwordMatch;
   } catch {
