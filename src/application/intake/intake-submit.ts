@@ -1,4 +1,4 @@
-import { decideIntakeWithExplanation, type WizardResult } from '../../domain/decision-engine.js';
+import { decideIntakeWithExplanation, type WizardResult } from '@/domain';
 
 export type IntakePayload = {
   conflictDescription: string;
