@@ -1,3 +1,5 @@
+import { createHash, timingSafeEqual } from 'node:crypto';
+
 const REALM = 'Clarity Intake Review';
 
 function decodeBasicAuth(header: string): { username: string; password: string } | null {
@@ -34,7 +36,26 @@ export function isReviewerAuthorized(authHeader: string | null): boolean {
 
   const parsed = decodeBasicAuth(authHeader);
 
-  return parsed?.username === reviewerUser && parsed.password === reviewerPass;
+  if (!parsed) {
+    return false;
+  }
+
+  // Use timing-safe comparison with SHA-256 hashing to prevent timing attacks
+  const expectedUserHash = createHash('sha256').update(reviewerUser).digest();
+  const actualUserHash = createHash('sha256').update(parsed.username).digest();
+  
+  const expectedPassHash = createHash('sha256').update(reviewerPass).digest();
+  const actualPassHash = createHash('sha256').update(parsed.password).digest();
+
+  try {
+    return (
+      timingSafeEqual(expectedUserHash, actualUserHash) &&
+      timingSafeEqual(expectedPassHash, actualPassHash)
+    );
+  } catch {
+    // timingSafeEqual throws if buffer lengths differ
+    return false;
+  }
 }
 
 export function unauthorizedHeaders(): HeadersInit {

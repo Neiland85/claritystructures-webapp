@@ -40,6 +40,15 @@ function nonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0;
 }
 
+function isValidEmail(value: unknown): value is string {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    return false;
+  }
+  // RFC 5322 simplified email regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(value.trim());
+}
+
 export function isIntakePayload(value: unknown): value is IntakePayload {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -55,7 +64,7 @@ export function isIntakePayload(value: unknown): value is IntakePayload {
     (candidate.hasAccessToDevices === 'yes' || candidate.hasAccessToDevices === 'no') &&
     typeof candidate.estimatedIncidentStart === 'string' &&
     START_VALUES.has(candidate.estimatedIncidentStart) &&
-    nonEmptyString(candidate.contactEmail) &&
+    isValidEmail(candidate.contactEmail) &&
     nonEmptyString(candidate.contactPhone)
   );
 }
@@ -93,12 +102,17 @@ export function buildIntakeSubmitHandler(deps: IntakeSubmitDeps) {
         contactPhone: body.contactPhone,
       });
 
-      await deps.notify({
-        intakeId: saved.id,
-        contactEmail: body.contactEmail,
-        urgency: body.urgency,
-        adminUrl: `${process.env.APP_BASE_URL ?? 'http://localhost:3000'}/admin/intakes`,
-      });
+      // Best-effort notification - log errors instead of failing the submission
+      try {
+        await deps.notify({
+          intakeId: saved.id,
+          contactEmail: body.contactEmail,
+          urgency: body.urgency,
+          adminUrl: `${process.env.APP_BASE_URL ?? 'http://localhost:3000'}/admin/intakes`,
+        });
+      } catch (notifyError) {
+        deps.logger.error('[INTAKE_NOTIFY_ERROR]', notifyError);
+      }
 
       deps.logger.info('[INTAKE_SUBMITTED]', {
         intakeId: saved.id,
