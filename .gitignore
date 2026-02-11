@@ -30,3 +30,6 @@ pnpm-lock.yaml
 # TypeScript incremental cache
 tsconfig.tsbuildinfo
 .cache/
+
+# Build output
+dist/
