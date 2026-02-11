@@ -41,7 +41,9 @@ export default function IntakePage() {
       setSubmitState('error');
       setErrorMessage('Unable to submit your intake. Please try again shortly.');
     } catch (error) {
-      console.error('Failed to submit intake form:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to submit intake form:', error);
+      }
       setSubmitState('error');
       setErrorMessage('Unable to submit your intake due to a network error. Please check your connection and try again.');
     }
