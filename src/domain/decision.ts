@@ -17,7 +17,7 @@ export const INTAKE_ROUTE_BY_TONE: Record<IntakeTone, string> = {
 
 export const DECISION_MODEL_VERSION = 'decision-model/v1';
 export const DECISION_MODEL_VERSION_V1 = DECISION_MODEL_VERSION;
-export const DECISION_MODEL_VERSION_V2 = '2.0.0';
+export const DECISION_MODEL_VERSION_V2 = 'decision-model/v2';
 
 export type IntakeDecision = {
   route: string;
@@ -135,8 +135,7 @@ function maxPriority(left: IntakePriority, right: IntakePriority): IntakePriorit
  * Decision model V2 keeps V1 as baseline and applies signal-based refinements
  * only when contextual signal fields provide additional, meaningful context.
  */
-export function decideIntakeV2(result: WizardResult): IntakeDecision {
-  const baseline = decideIntake(result);
+function applySignalRefinements(baseline: IntakeDecision, result: WizardResult): IntakeDecision {
   const signals = mapWizardToSignals(result);
 
   const usesRefinedSignalInputs =
@@ -147,10 +146,7 @@ export function decideIntakeV2(result: WizardResult): IntakeDecision {
     result.estimatedIncidentStart === 'months';
 
   if (!usesRefinedSignalInputs) {
-    return {
-      ...baseline,
-      decisionModelVersion: DECISION_MODEL_VERSION_V2,
-    };
+    return baseline;
   }
 
   let refinedPriority = baseline.priority;
@@ -171,13 +167,22 @@ export function decideIntakeV2(result: WizardResult): IntakeDecision {
     signals.evidenceLevel === 'messages_only' &&
     refinedPriority === 'low'
   ) {
-    refinedPriority = 'medium';
+    refinedPriority = maxPriority(refinedPriority, 'medium');
   }
 
   return {
     ...baseline,
     priority: refinedPriority,
     actionCode: actionCodeFromPriority(refinedPriority),
+  };
+}
+
+export function decideIntakeV2(result: WizardResult): IntakeDecision {
+  const baseline = decideIntake(result);
+  const refinedDecision = applySignalRefinements(baseline, result);
+
+  return {
+    ...refinedDecision,
     decisionModelVersion: DECISION_MODEL_VERSION_V2,
   };
 }
