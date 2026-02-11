@@ -1,7 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { DECISION_MODEL_VERSION, decideIntake } from '../src/domain/decision.js';
+import {
+  DECISION_MODEL_VERSION,
+  DECISION_MODEL_VERSION_V2,
+  decideIntake,
+  decideIntakeV2,
+} from '../src/domain/decision.js';
 import { mapWizardToSignals } from '../src/domain/map-wizard-to-signals.js';
 import { assessIntake, assessIntakeWithSignals } from '../src/domain/priority.js';
 import type { WizardResult } from '../src/types/wizard.js';
@@ -142,6 +147,54 @@ test('mapWizardToSignals handles missing optional fields safely', () => {
   assert.equal(result.exposureState, 'unknown');
 });
 
+
+test('decideIntakeV2 matches V1 for baseline input without refinement fields', () => {
+  const input = buildResult({
+    clientProfile: 'legal_professional',
+    urgency: 'time_sensitive',
+    hasEmotionalDistress: true,
+  });
+
+  const v1 = decideIntake(input);
+  const v2 = decideIntakeV2(input);
+
+  assert.deepEqual(
+    {
+      route: v2.route,
+      priority: v2.priority,
+      flags: v2.flags,
+      actionCode: v2.actionCode,
+    },
+    {
+      route: v1.route,
+      priority: v1.priority,
+      flags: v1.flags,
+      actionCode: v1.actionCode,
+    }
+  );
+  assert.equal(v2.decisionModelVersion, DECISION_MODEL_VERSION_V2);
+});
+
+test('decideIntakeV2 elevates priority only when refinement signals change risk meaningfully', () => {
+  const input = buildResult({
+    urgency: 'informational',
+    dataSensitivityLevel: 'high',
+    hasAccessToDevices: false,
+    evidenceSources: ['chat export'],
+    devices: 0,
+  });
+
+  const v1 = decideIntake(input);
+  const v2 = decideIntakeV2(input);
+
+  assert.equal(v1.priority, 'low');
+  assert.equal(v1.actionCode, 'DEFERRED_INFORMATIONAL_RESPONSE');
+  assert.equal(v2.priority, 'critical');
+  assert.equal(v2.actionCode, 'IMMEDIATE_HUMAN_CONTACT');
+  assert.equal(v2.route, v1.route);
+  assert.deepEqual(v2.flags, v1.flags);
+});
+
 test('assessIntake default behavior remains unchanged when using signal-enabled helper', () => {
   const input = buildResult({
     clientProfile: 'family_inheritance_conflict',
@@ -167,4 +220,23 @@ test('assessIntake default behavior remains unchanged when using signal-enabled 
     },
     baseline
   );
+});
+
+
+test('assessIntakeWithSignals can expose decisionModelVersion and opt into V2', () => {
+  const input = buildResult({
+    urgency: 'informational',
+    dataSensitivityLevel: 'high',
+  });
+
+  const v1Default = assessIntakeWithSignals(input, { includeDecisionModelVersion: true });
+  const v2 = assessIntakeWithSignals(input, {
+    useDecisionModelV2: true,
+    includeDecisionModelVersion: true,
+  });
+
+  assert.equal(v1Default.decisionModelVersion, DECISION_MODEL_VERSION);
+  assert.equal(v2.decisionModelVersion, DECISION_MODEL_VERSION_V2);
+  assert.equal(v1Default.priority, 'low');
+  assert.equal(v2.priority, 'critical');
 });

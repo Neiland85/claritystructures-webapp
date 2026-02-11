@@ -1,5 +1,6 @@
 import type { WizardResult } from '@/types/wizard';
 
+import { mapWizardToSignals } from './map-wizard-to-signals';
 import type {
   IntakeActionCode,
   IntakeFlag,
@@ -15,6 +16,8 @@ export const INTAKE_ROUTE_BY_TONE: Record<IntakeTone, string> = {
 };
 
 export const DECISION_MODEL_VERSION = 'decision-model/v1';
+export const DECISION_MODEL_VERSION_V1 = DECISION_MODEL_VERSION;
+export const DECISION_MODEL_VERSION_V2 = '2.0';
 
 export type IntakeDecision = {
   route: string;
@@ -101,5 +104,80 @@ export function decideIntake(result: WizardResult): IntakeDecision {
     flags,
     actionCode: 'DEFERRED_INFORMATIONAL_RESPONSE',
     decisionModelVersion: DECISION_MODEL_VERSION,
+  };
+}
+
+const PRIORITY_RANK: Record<IntakePriority, number> = {
+  low: 0,
+  medium: 1,
+  high: 2,
+  critical: 3,
+};
+
+function actionCodeFromPriority(priority: IntakePriority): IntakeActionCode {
+  switch (priority) {
+    case 'critical':
+      return 'IMMEDIATE_HUMAN_CONTACT';
+    case 'high':
+      return 'PRIORITY_REVIEW_24_48H';
+    case 'medium':
+      return 'STANDARD_REVIEW';
+    default:
+      return 'DEFERRED_INFORMATIONAL_RESPONSE';
+  }
+}
+
+function maxPriority(left: IntakePriority, right: IntakePriority): IntakePriority {
+  return PRIORITY_RANK[left] >= PRIORITY_RANK[right] ? left : right;
+}
+
+/**
+ * Decision model V2 keeps V1 as baseline and applies signal-based refinements
+ * only when contextual signal fields provide additional, meaningful context.
+ */
+export function decideIntakeV2(result: WizardResult): IntakeDecision {
+  const baseline = decideIntake(result);
+  const signals = mapWizardToSignals(result);
+
+  const usesRefinedSignalInputs =
+    result.dataSensitivityLevel === 'high' ||
+    result.isOngoing === true ||
+    result.hasAccessToDevices === false ||
+    result.estimatedIncidentStart === 'weeks' ||
+    result.estimatedIncidentStart === 'months';
+
+  if (!usesRefinedSignalInputs) {
+    return {
+      ...baseline,
+      decisionModelVersion: DECISION_MODEL_VERSION_V2,
+    };
+  }
+
+  let refinedPriority = baseline.priority;
+
+  if (signals.exposureState === 'active' && baseline.priority !== 'critical') {
+    refinedPriority = maxPriority(refinedPriority, 'high');
+  }
+
+  if (
+    result.dataSensitivityLevel === 'high' &&
+    (signals.riskLevel === 'high' || signals.riskLevel === 'imminent')
+  ) {
+    refinedPriority = maxPriority(refinedPriority, 'critical');
+  }
+
+  if (
+    result.hasAccessToDevices === false &&
+    signals.evidenceLevel === 'messages_only' &&
+    refinedPriority === 'low'
+  ) {
+    refinedPriority = 'medium';
+  }
+
+  return {
+    ...baseline,
+    priority: refinedPriority,
+    actionCode: actionCodeFromPriority(refinedPriority),
+    decisionModelVersion: DECISION_MODEL_VERSION_V2,
   };
 }
