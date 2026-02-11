@@ -1,3 +1,4 @@
+import type { DecisionModelVersion } from './decision';
 import type { IntakePriority } from './intake-records';
 
 export type DecisionReason =
@@ -16,5 +17,5 @@ export type DecisionExplanation = {
   reasons: DecisionReason[];
   baselinePriority: IntakePriority;
   finalPriority: IntakePriority;
-  modelVersion: string;
+  modelVersion: DecisionModelVersion;
 };

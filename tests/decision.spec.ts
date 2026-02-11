@@ -7,6 +7,7 @@ import {
   decideIntake,
   decideIntakeV2,
   decideIntakeWithExplanation,
+  isDecisionModelV2,
 } from '../src/domain/decision.js';
 import { mapWizardToSignals } from '../src/domain/map-wizard-to-signals.js';
 import { assessIntake, assessIntakeWithSignals } from '../src/domain/priority.js';
@@ -300,4 +301,39 @@ test('decideIntakeWithExplanation is deterministic for identical input', () => {
   const second = decideIntakeWithExplanation(input, true);
 
   assert.deepEqual(first, second);
+});
+
+test('decision JSON hash remains stable across repeated runs', () => {
+  const input = buildResult({
+    urgency: 'informational',
+    dataSensitivityLevel: 'high',
+    isOngoing: true,
+    estimatedIncidentStart: 'months',
+  });
+
+  const signatures = Array.from({ length: 5 }, () =>
+    JSON.stringify(decideIntakeWithExplanation(input, true))
+  );
+
+  assert.equal(new Set(signatures).size, 1);
+});
+
+test('decision outputs are frozen to prevent mutation', () => {
+  const input = buildResult({ urgency: 'legal_risk' });
+  const decision = decideIntake(input);
+  const withExplanation = decideIntakeWithExplanation(input, true);
+
+  assert.equal(Object.isFrozen(decision), true);
+  assert.equal(Object.isFrozen(decision.flags), true);
+  assert.equal(Object.isFrozen(withExplanation), true);
+  assert.equal(Object.isFrozen(withExplanation.explanation), true);
+  assert.equal(Object.isFrozen(withExplanation.explanation.reasons), true);
+});
+
+test('isDecisionModelV2 narrows model version strictly', () => {
+  const v1 = decideIntake(buildResult());
+  const v2 = decideIntakeV2(buildResult());
+
+  assert.equal(isDecisionModelV2(v1), false);
+  assert.equal(isDecisionModelV2(v2), true);
 });
