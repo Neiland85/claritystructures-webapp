@@ -59,6 +59,15 @@ function sanitizeBoolean(value: unknown): boolean | undefined {
 }
 
 function sanitizeInteger(value: unknown, fallback: number = 0): number {
+  // Handle numeric strings from form fields
+  if (typeof value === 'string') {
+    const parsed = parseInt(value, 10);
+    if (!Number.isNaN(parsed) && Number.isFinite(parsed)) {
+      return Math.max(0, parsed);
+    }
+    return fallback;
+  }
+
   if (typeof value !== 'number' || !Number.isFinite(value)) {
     return fallback;
   }
@@ -74,15 +83,28 @@ function toWizardResult(payload: RawIntakePayload): WizardResult | null {
     return null;
   }
 
+  const incident = sanitizeString(payload.incident, 5000);
+  const objective = sanitizeString(payload.objective, 2000);
+  const devices = sanitizeInteger(payload.devices);
+
+  // Validate required fields: non-empty strings and at least one device.
+  if (!incident || !incident.trim() || !objective || !objective.trim()) {
+    return null;
+  }
+
+  if (!Number.isInteger(devices) || devices < 1) {
+    return null;
+  }
+
   const result: WizardResult = {
     clientProfile,
     urgency,
     hasEmotionalDistress: sanitizeBoolean(payload.hasEmotionalDistress),
-    incident: sanitizeString(payload.incident, 5000),
-    devices: sanitizeInteger(payload.devices),
+    incident,
+    devices,
     actionsTaken: sanitizeStringArray(payload.actionsTaken),
     evidenceSources: sanitizeStringArray(payload.evidenceSources),
-    objective: sanitizeString(payload.objective, 2000),
+    objective,
   };
 
   const isOngoing = sanitizeBoolean(payload.isOngoing);
