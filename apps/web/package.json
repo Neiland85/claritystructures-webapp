@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate --schema=../../packages/infra-prisma/prisma/schema.prisma && next build",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
