@@ -23,7 +23,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Prisma Generate
-        run: pnpm --filter @claritystructures/infra-prisma run build
+        run: pnpm --filter @claritystructures/infra-persistence run build
         env:
           DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
 

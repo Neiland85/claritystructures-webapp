@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { sendForensicIntakeEmail } from "@claritystructures/infra-alerts";
-import { decideIntake } from "@claritystructures/domain";
+import { createSubmitIntakeUseCase } from "@/application/di-container";
 import type { WizardResult } from "@claritystructures/domain";
 import { apiGuard } from "@/lib/api-guard";
 
@@ -15,7 +14,7 @@ export async function POST(req: NextRequest) {
         email: rawEmail,
         phone: rawPhone,
         message: rawMessage,
-        tone,
+        tone: rawTone,
         wizardResult,
       } = body;
 
@@ -23,6 +22,7 @@ export async function POST(req: NextRequest) {
       const email = rawEmail?.toLowerCase().trim();
       const phone = rawPhone?.trim();
       const message = rawMessage?.trim();
+      const tone = rawTone || "basic";
 
       // If we have a full wizard result, use it.
       const result: WizardResult = wizardResult || {
@@ -35,16 +35,23 @@ export async function POST(req: NextRequest) {
         objective: "contact",
       };
 
-      const decision = decideIntake(result);
+      const useCase = createSubmitIntakeUseCase();
 
-      await sendForensicIntakeEmail({
-        result,
-        decision,
-        userEmail: email,
-        userPhone: phone,
+      const { decision } = await useCase.execute({
+        tone,
+        route: tone, // Simplified mapping for now
+        priority: "medium", // Default, useCase will re-decide or we can pass decision result
+        email,
+        message,
+        phone,
+        status: "pending",
+        meta: result,
       });
 
-      return NextResponse.json({ success: true });
+      return NextResponse.json({
+        success: true,
+        decision: decision.decision,
+      });
     } catch (error) {
       console.error("Error in contact API:", error);
       return NextResponse.json({ error: "Failed to send" }, { status: 500 });

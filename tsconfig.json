@@ -12,7 +12,8 @@
     "paths": {
       "@claritystructures/types": [ "packages/types/src" ],
       "@claritystructures/domain": [ "packages/domain/src" ],
-      "@claritystructures/infra-alerts": [ "packages/infra-alerts/src" ],
+      "@claritystructures/infra-notifications": [ "packages/infra-notifications/src" ],
+      "@claritystructures/infra-persistence": [ "packages/infra-persistence/src" ],
       "@/*": [ "apps/web/src/*" ]
     }
   },
@@ -20,6 +21,8 @@
     "apps/web/src/**/*",
     "packages/types/src/**/*",
     "packages/domain/src/**/*",
+    "packages/infra-notifications/src/**/*",
+    "packages/infra-persistence/src/**/*",
     "prisma.config.ts",
     "vitest.config.ts"
   ]

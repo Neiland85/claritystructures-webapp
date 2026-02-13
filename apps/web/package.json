@@ -9,8 +9,8 @@
   "dependencies": {
     "@claritystructures/config": "workspace:*",
     "@claritystructures/domain": "workspace:*",
-    "@claritystructures/infra-alerts": "workspace:*",
-    "@claritystructures/infra-prisma": "workspace:*",
+    "@claritystructures/infra-notifications": "workspace:*",
+    "@claritystructures/infra-persistence": "workspace:*",
     "@claritystructures/types": "workspace:*",
     "cors": "^2.8.6",
     "helmet": "^8.1.0",

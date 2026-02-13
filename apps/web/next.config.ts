@@ -9,8 +9,8 @@ const nextConfig: NextConfig = {
     "@claritystructures/domain",
     "@claritystructures/types",
     "@claritystructures/config",
-    "@claritystructures/infra-alerts",
-    "@claritystructures/infra-prisma",
+    "@claritystructures/infra-notifications",
+    "@claritystructures/infra-persistence",
   ],
   async headers() {
     return [
