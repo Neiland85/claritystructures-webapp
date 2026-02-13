@@ -5,6 +5,8 @@ import type {
   IntakeRepository,
   ContactIntakeInput,
   IntakeStatus,
+  IntakeTone,
+  IntakePriority,
 } from "@claritystructures/domain";
 
 type ContactIntakeModel = Awaited<
@@ -15,15 +17,15 @@ function toIntakeRecord(row: ContactIntakeModel): IntakeRecord {
   return {
     id: row.id,
     createdAt: row.createdAt,
-    tone: row.tone,
+    tone: row.tone as IntakeTone,
     route: row.route,
-    priority: row.priority,
-    name: row.name,
+    priority: row.priority as IntakePriority,
+    name: row.name ?? undefined,
     email: row.email,
     message: row.message,
-    phone: row.phone,
-    status: row.status,
-    spamScore: row.spamScore,
+    phone: row.phone ?? undefined,
+    status: row.status as IntakeStatus,
+    spamScore: row.spamScore ?? undefined,
     meta: row.meta as ContactIntakeInput["meta"],
   };
 }
@@ -37,13 +39,13 @@ export class PrismaIntakeRepository implements IntakeRepository {
         tone: input.tone,
         route: input.route,
         priority: input.priority,
-        name: input.name,
+        name: input.name ?? null,
         email: input.email,
         message: input.message,
-        phone: input.phone,
+        phone: input.phone ?? null,
         status: input.status,
-        spamScore: input.spamScore,
-        meta: input.meta ?? undefined,
+        spamScore: input.spamScore ?? null,
+        meta: (input.meta as any) ?? null,
       },
     });
 

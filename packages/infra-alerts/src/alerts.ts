@@ -12,10 +12,11 @@ export async function sendForensicIntakeEmail(payload: ForensicIntakePayload) {
   const { result, decision, userEmail, userPhone } = payload;
 
   const recipient = process.env.ALERT_EMAIL || "admin@claritystructures.com";
+  const caseId = `${decision.priority.substring(0, 3).toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || "localhost",
-    port: Number(process.env.SMTP_PORT) || 1025, // Mailpit/Mailhog default
+    port: Number(process.env.SMTP_PORT) || 1025,
     auth: process.env.SMTP_USER
       ? {
           user: process.env.SMTP_USER,
@@ -30,9 +31,9 @@ export async function sendForensicIntakeEmail(payload: ForensicIntakePayload) {
 =========================================================
 CLARITY STRUCTURES - INFORME PRELIMINAR DE TRIAGE FORENSE
 =========================================================
-ID CASO: ${decision.priority.toUpperCase()}-${Date.now().toString().slice(-6)}
+ID CASO: ${caseId}
 FECHA: ${new Date().toLocaleString()}
-RECEPTOR: admin@claritystructures.com
+RECEPTOR: ${recipient}
 
 1. DATOS DEL CLIENTE
 --------------------
@@ -51,11 +52,11 @@ Nivel de urgencia: ${result.urgency}
 
 3. PERFIL COGNITIVO (SCREENING PSICO-FORENSE)
 --------------------------------------------
-- Coherencia Inicial: ${result.cognitiveProfile?.coherenceScore}/5
+- Coherencia Inicial: ${result.cognitiveProfile?.coherenceScore ?? "N/A"}/5
 - Distorsión Cognitiva: ${result.cognitiveProfile?.cognitiveDistortion ? "DETECTADA" : "Ausencia aparente"}
 - Percepción de Omnipotencia del Atacante: ${result.cognitiveProfile?.perceivedOmnipotenceOfAttacker ? "SÍ (Posible sesgo paranoide)" : "No"}
 - Verificabilidad de Información: ${result.cognitiveProfile?.isInformationVerifiable ? "Alta (Basada en pruebas)" : "Baja (Basada en intuiciones)"}
-- Nivel de Shock: ${result.cognitiveProfile?.emotionalShockLevel.toUpperCase()}
+- Nivel de Shock: ${(result.cognitiveProfile?.emotionalShockLevel || "N/A").toUpperCase()}
 
 4. TRAZADO DE NARRATIVA (EMERGENCIA)
 -----------------------------------
@@ -68,7 +69,7 @@ Nivel de urgencia: ${result.urgency}
 PRIORIDAD SUGERIDA: ${decision.priority.toUpperCase()}
 RUTA DE SEGUIMIENTO: ${decision.route}
 ACCIÓN INMEDIATA: ${decision.actionCode}
-FLAGS DE DEPURACIÓN: ${decision.flags.join(", ")}
+FLAGS DE DEPURACIÓN: ${decision.flags.join(", ") || "Ninguno"}
 
 5. RESUMEN DEL INCIDENTE (DECLARACIÓN ORIGINAL)
 -----------------------------------------------
@@ -96,17 +97,22 @@ Resumen rápido:
 Este email ha sido generado por el Decision Engine de Clarity Structures.
   `;
 
-  await transporter.sendMail({
-    from: '"Clarity Structures Engine" <no-reply@claritystructures.com>',
-    to: recipient,
-    replyTo: userEmail,
-    subject,
-    text: body,
-    attachments: [
-      {
-        filename: `Informe_Forense_${decision.priority.toUpperCase()}_${Date.now().toString().slice(-4)}.txt`,
-        content: reportContent,
-      },
-    ],
-  });
+  try {
+    await transporter.sendMail({
+      from: '"Clarity Structures Engine" <no-reply@claritystructures.com>',
+      to: recipient,
+      replyTo: userEmail,
+      subject,
+      text: body,
+      attachments: [
+        {
+          filename: `Informe_Forense_${caseId}.txt`,
+          content: reportContent,
+        },
+      ],
+    });
+  } catch (error) {
+    console.error("[CRITICAL] Failed to send forensic intake email:", error);
+    // Silent fail in production to avoid breaking the UI, but should be logged.
+  }
 }
