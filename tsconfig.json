@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": [ "ES2022", "DOM", "DOM.Iterable" ],
     "module": "ESNext",
     "moduleResolution": "Node",
     "jsx": "react-jsx",
@@ -10,14 +10,17 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "@claritystructures/types": ["packages/types/src"],
-      "@claritystructures/domain": ["packages/domain/src"],
-      "@/*": ["apps/web/src/*"]
+      "@claritystructures/types": [ "packages/types/src" ],
+      "@claritystructures/domain": [ "packages/domain/src" ],
+      "@claritystructures/infra-alerts": [ "packages/infra-alerts/src" ],
+      "@/*": [ "apps/web/src/*" ]
     }
   },
   "include": [
     "apps/web/src/**/*",
     "packages/types/src/**/*",
-    "packages/domain/src/**/*"
+    "packages/domain/src/**/*",
+    "prisma.config.ts",
+    "vitest.config.ts"
   ]
 }

@@ -6,47 +6,50 @@ export {
   decideIntake,
   decideIntakeV2,
   decideIntakeWithExplanation,
+  isDecisionModelV2,
   DECISION_MODEL_VERSION,
   DECISION_MODEL_VERSION_V1,
   DECISION_MODEL_VERSION_V2,
-} from './decision';
+} from "./decision";
 
-export type { IntakeDecision } from './decision';
+export { mapWizardToSignals } from "./map-wizard-to-signals";
 
-export { resolveIntakeRoute } from './flow';
+export type { IntakeDecision } from "./decision";
+
+export { resolveIntakeRoute } from "./flow";
 
 export {
   assessIntake,
   assessIntakeV2,
   assessIntakeWithSignals,
-} from './priority';
+} from "./priority";
 
 export type {
   AssessIntakeWithSignalsOptions,
   IntakeAssessment,
   IntakeAssessmentWithSignals,
-} from './priority';
+} from "./priority";
 
 export type {
   ClientProfile,
   UrgencyLevel,
-  WizardResult
-} from './wizard-result';
+  WizardResult,
+} from "./wizard-result";
 
 export type {
   DecisionExplanation,
-  DecisionReason
-} from './decision-explanation';
+  DecisionReason,
+} from "./decision-explanation";
 
 export type {
   IntakeTone,
   IntakeStatus,
   IntakePriority,
   IntakeActionCode,
-  IntakeFlag
-} from './intake-records';
+  IntakeFlag,
+} from "./intake-records";
 
-export type { ContactIntakeInput } from './contact-intake';
+export type { ContactIntakeInput } from "./contact-intake";
 
 export type {
   IncidentType,
@@ -55,7 +58,9 @@ export type {
   ExposureState,
   SensitivityFlag,
   IntakeSignals,
-  IntakeSignalSummary
-} from './intake-signals';
+  IntakeSignalSummary,
+} from "./intake-signals";
 
-export { buildSummary } from './intake-signals';
+export { buildSummary } from "./intake-signals";
+
+export * from "./ports";

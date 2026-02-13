@@ -1,13 +1,14 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 import type {
   IntakeRecord,
   IntakeRepository,
-} from '@claritystructures/application/intake/ports';
-import type { ContactIntakeInput, IntakeStatus } from '@claritystructures/domain/intake-records';
+  ContactIntakeInput,
+  IntakeStatus,
+} from "@claritystructures/domain";
 
 type ContactIntakeModel = Awaited<
-  ReturnType<PrismaClient['contactIntake']['create']>
+  ReturnType<PrismaClient["contactIntake"]["create"]>
 >;
 
 function toIntakeRecord(row: ContactIntakeModel): IntakeRecord {
@@ -23,14 +24,12 @@ function toIntakeRecord(row: ContactIntakeModel): IntakeRecord {
     phone: row.phone,
     status: row.status,
     spamScore: row.spamScore,
-    meta: row.meta as ContactIntakeInput['meta'],
+    meta: row.meta as ContactIntakeInput["meta"],
   };
 }
 
 export class PrismaIntakeRepository implements IntakeRepository {
-  constructor(
-    private readonly prisma: Pick<PrismaClient, 'contactIntake'>
-  ) { }
+  constructor(private readonly prisma: Pick<PrismaClient, "contactIntake">) {}
 
   async create(input: ContactIntakeInput): Promise<IntakeRecord> {
     const created = await this.prisma.contactIntake.create({
@@ -61,7 +60,7 @@ export class PrismaIntakeRepository implements IntakeRepository {
 
   async updateStatus(
     id: string,
-    status: IntakeStatus
+    status: IntakeStatus,
   ): Promise<IntakeRecord | null> {
     const existing = await this.prisma.contactIntake.findUnique({
       where: { id },

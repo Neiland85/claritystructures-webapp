@@ -3,5 +3,13 @@
   "private": true,
   "type": "module",
   "main": "./src/index.ts",
-  "types": "./src/index.ts"
+  "types": "./src/index.ts",
+  "dependencies": {
+    "nodemailer": "^6.9.7",
+    "@prisma/client": "^7.4.0",
+    "@claritystructures/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.14"
+  }
 }
