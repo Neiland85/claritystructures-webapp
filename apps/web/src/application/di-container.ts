@@ -18,7 +18,11 @@ import {
   MailNotifier,
   ConsoleAuditTrail,
 } from "@claritystructures/infra-notifications";
-import { SubmitIntakeUseCase } from "./use-cases";
+import {
+  SubmitIntakeUseCase,
+  ListIntakesUseCase,
+  UpdateIntakeStatusUseCase,
+} from "./use-cases";
 
 /**
  * Factory for SubmitIntakeUseCase with all dependencies injected
@@ -29,6 +33,23 @@ export function createSubmitIntakeUseCase(): SubmitIntakeUseCase {
   const audit = new ConsoleAuditTrail();
 
   return new SubmitIntakeUseCase(repository, notifier, audit);
+}
+
+/**
+ * Factory for ListIntakesUseCase
+ */
+export function createListIntakesUseCase(): ListIntakesUseCase {
+  const repository = new PrismaIntakeRepository(prisma);
+  return new ListIntakesUseCase(repository);
+}
+
+/**
+ * Factory for UpdateIntakeStatusUseCase
+ */
+export function createUpdateIntakeStatusUseCase(): UpdateIntakeStatusUseCase {
+  const repository = new PrismaIntakeRepository(prisma);
+  const audit = new ConsoleAuditTrail();
+  return new UpdateIntakeStatusUseCase(repository, audit);
 }
 
 /**

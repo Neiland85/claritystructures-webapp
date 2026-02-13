@@ -60,6 +60,14 @@ export class PrismaIntakeRepository implements IntakeRepository {
     return record ? toIntakeRecord(record) : null;
   }
 
+  async findAll(): Promise<IntakeRecord[]> {
+    const records = await this.prisma.contactIntake.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+
+    return records.map(toIntakeRecord);
+  }
+
   async updateStatus(
     id: string,
     status: IntakeStatus,

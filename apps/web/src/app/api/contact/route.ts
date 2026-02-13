@@ -5,6 +5,7 @@ import type { WizardResult } from "@claritystructures/domain";
 import { apiGuard } from "@/lib/api-guard";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   return apiGuard(req, async () => {

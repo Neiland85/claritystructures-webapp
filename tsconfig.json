@@ -10,10 +10,7 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
-      "@claritystructures/types": [ "packages/types/src" ],
-      "@claritystructures/domain": [ "packages/domain/src" ],
-      "@claritystructures/infra-notifications": [ "packages/infra-notifications/src" ],
-      "@claritystructures/infra-persistence": [ "packages/infra-persistence/src" ],
+      "@claritystructures/*": [ "packages/*/src" ],
       "@/*": [ "apps/web/src/*" ]
     }
   },

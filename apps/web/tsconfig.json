@@ -4,7 +4,8 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": [ "src/*" ]
+      "@/*": [ "src/*" ],
+      "@claritystructures/*": [ "../../packages/*/src" ]
     }
   },
   "include": [ "src", "next.config.ts" ]

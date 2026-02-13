@@ -9,6 +9,7 @@ export interface IntakeRepository {
   create(input: ContactIntakeInput): Promise<IntakeRecord>;
   findById(id: string): Promise<IntakeRecord | null>;
   updateStatus(id: string, status: IntakeStatus): Promise<IntakeRecord | null>;
+  findAll(): Promise<IntakeRecord[]>;
 }
 
 export interface Notifier {
