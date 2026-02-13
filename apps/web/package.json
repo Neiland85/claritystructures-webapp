@@ -7,13 +7,17 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@claritystructures/domain": "file:../../packages/domain",
-    "@claritystructures/types": "file:../../packages/types",
     "@claritystructures/config": "file:../../packages/config",
+    "@claritystructures/domain": "file:../../packages/domain",
     "@claritystructures/infra-alerts": "file:../../packages/infra-alerts",
     "@claritystructures/infra-prisma": "file:../../packages/infra-prisma",
+    "@claritystructures/types": "file:../../packages/types",
     "next": "^16.0.0",
+    "nodemailer": "^8.0.1",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^7.0.9"
   }
 }
