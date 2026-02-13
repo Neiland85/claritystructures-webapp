@@ -24,6 +24,8 @@ jobs:
 
       - name: Prisma Generate
         run: pnpm --filter @claritystructures/infra-prisma run build
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
 
       - name: Typecheck
         run: pnpm -r run typecheck
