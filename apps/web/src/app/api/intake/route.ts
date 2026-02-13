@@ -1,7 +1,5 @@
-import { NextResponse } from 'next/server';
 
 import {
-  createSubmitIntakeUseCase,
   type AuditTrail,
   type IntakeRepository,
   type Notifier
