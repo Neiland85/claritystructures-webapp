@@ -1,0 +1,11 @@
+{
+  "name": "@claritystructures/infra-prisma",
+  "private": true,
+  "type": "module",
+  "main": "./prisma/client.ts",
+  "types": "./prisma/client.ts",
+  "dependencies": {
+    "@prisma/client": "^7.4.0",
+    "prisma": "^7.4.0"
+  }
+}

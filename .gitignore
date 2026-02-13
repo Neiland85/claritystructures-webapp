@@ -30,3 +30,15 @@ pnpm-lock.yaml
 # TypeScript incremental cache
 tsconfig.tsbuildinfo
 .cache/
+.vercel
+
+# Build artifacts
+node_modules
+packages/*/dist
+**/*.js
+**/*.d.ts
+**/*.tsbuildinfo
+apps/web/dist
+
+# Embedded repos
+welcome-to-docker

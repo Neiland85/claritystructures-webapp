@@ -6,10 +6,10 @@ import {
   DECISION_MODEL_VERSION_V2,
   decideIntake,
   decideIntakeV2,
-} from '../src/domain/decision.js';
-import { mapWizardToSignals } from '../src/domain/map-wizard-to-signals.js';
-import { assessIntake, assessIntakeWithSignals } from '../src/domain/priority.js';
-import type { WizardResult } from '../src/types/wizard.js';
+} from '../packages/domain/src/decision.js';
+import { mapWizardToSignals } from '../packages/domain/src/map-wizard-to-signals.js';
+import { assessIntake, assessIntakeWithSignals } from '../packages/domain/src/priority.js';
+import type { WizardResult } from '../packages/types/src/wizard.js';
 
 function buildResult(overrides: Partial<WizardResult> = {}): WizardResult {
   return {
