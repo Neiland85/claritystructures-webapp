@@ -6,10 +6,12 @@ import {
   DECISION_MODEL_VERSION_V2,
   decideIntake,
   decideIntakeV2,
-} from '../packages/domain/src/decision.js';
-import { mapWizardToSignals } from '../packages/domain/src/map-wizard-to-signals.js';
-import { assessIntake, assessIntakeWithSignals } from '../packages/domain/src/priority.js';
-import type { WizardResult } from '../packages/types/src/wizard.js';
+  decideIntakeWithExplanation,
+  isDecisionModelV2,
+} from '../src/domain/decision.js';
+import { mapWizardToSignals } from '../src/domain/map-wizard-to-signals.js';
+import { assessIntake, assessIntakeWithSignals } from '../src/domain/priority.js';
+import type { WizardResult } from '../src/types/wizard.js';
 
 function buildResult(overrides: Partial<WizardResult> = {}): WizardResult {
   return {
@@ -173,6 +175,7 @@ test('decideIntakeV2 matches V1 for baseline input without refinement fields', (
     }
   );
   assert.equal(v2.decisionModelVersion, DECISION_MODEL_VERSION_V2);
+  assert.equal(DECISION_MODEL_VERSION_V2, 'decision-model/v2');
 });
 
 test('decideIntakeV2 elevates priority only when refinement signals change risk meaningfully', () => {
@@ -239,4 +242,98 @@ test('assessIntakeWithSignals can expose decisionModelVersion and opt into V2', 
   assert.equal(v2.decisionModelVersion, DECISION_MODEL_VERSION_V2);
   assert.equal(v1Default.priority, 'low');
   assert.equal(v2.priority, 'critical');
+});
+
+
+test('decideIntakeWithExplanation includes expected V1 reasons and no V2-only reasons', () => {
+  const input = buildResult({
+    clientProfile: 'family_inheritance_conflict',
+    urgency: 'time_sensitive',
+    hasEmotionalDistress: true,
+  });
+
+  const { decision, explanation } = decideIntakeWithExplanation(input);
+
+  assert.deepEqual(decision, decideIntake(input));
+  assert.equal(explanation.modelVersion, DECISION_MODEL_VERSION);
+  assert.equal(explanation.baselinePriority, 'high');
+  assert.equal(explanation.finalPriority, 'high');
+  assert.deepEqual(explanation.reasons, [
+    'client_profile_routing',
+    'family_conflict_flag',
+    'emotional_distress_flag',
+  ]);
+  assert.equal(
+    explanation.reasons.some((reason) =>
+      [
+        'data_sensitivity_escalation',
+        'ongoing_incident_escalation',
+        'device_access_constraint',
+        'long_duration_exposure_hint',
+      ].includes(reason)
+    ),
+    false
+  );
+});
+
+test('decideIntakeWithExplanation includes V2 escalation reasons when applicable', () => {
+  const input = buildResult({
+    urgency: 'informational',
+    dataSensitivityLevel: 'high',
+  });
+
+  const { decision, explanation } = decideIntakeWithExplanation(input, true);
+
+  assert.deepEqual(decision, decideIntakeV2(input));
+  assert.equal(explanation.modelVersion, DECISION_MODEL_VERSION_V2);
+  assert.equal(explanation.baselinePriority, 'low');
+  assert.equal(explanation.finalPriority, 'critical');
+  assert.deepEqual(explanation.reasons, ['data_sensitivity_escalation']);
+});
+
+test('decideIntakeWithExplanation is deterministic for identical input', () => {
+  const input = buildResult({
+    isOngoing: true,
+    estimatedIncidentStart: 'months',
+  });
+
+  const first = decideIntakeWithExplanation(input, true);
+  const second = decideIntakeWithExplanation(input, true);
+
+  assert.deepEqual(first, second);
+});
+
+test('decision JSON hash remains stable across repeated runs', () => {
+  const input = buildResult({
+    urgency: 'informational',
+    dataSensitivityLevel: 'high',
+    isOngoing: true,
+    estimatedIncidentStart: 'months',
+  });
+
+  const signatures = Array.from({ length: 5 }, () =>
+    JSON.stringify(decideIntakeWithExplanation(input, true))
+  );
+
+  assert.equal(new Set(signatures).size, 1);
+});
+
+test('decision outputs are frozen to prevent mutation', () => {
+  const input = buildResult({ urgency: 'legal_risk' });
+  const decision = decideIntake(input);
+  const withExplanation = decideIntakeWithExplanation(input, true);
+
+  assert.equal(Object.isFrozen(decision), true);
+  assert.equal(Object.isFrozen(decision.flags), true);
+  assert.equal(Object.isFrozen(withExplanation), true);
+  assert.equal(Object.isFrozen(withExplanation.explanation), true);
+  assert.equal(Object.isFrozen(withExplanation.explanation.reasons), true);
+});
+
+test('isDecisionModelV2 narrows model version strictly', () => {
+  const v1 = decideIntake(buildResult());
+  const v2 = decideIntakeV2(buildResult());
+
+  assert.equal(isDecisionModelV2(v1), false);
+  assert.equal(isDecisionModelV2(v2), true);
 });

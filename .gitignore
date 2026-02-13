@@ -23,6 +23,7 @@ pnpm-debug.log*
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
+!apps/web/next.config.js
 
 # Package manager locks (workspace noise)
 pnpm-lock.yaml
@@ -30,14 +31,6 @@ pnpm-lock.yaml
 # TypeScript incremental cache
 tsconfig.tsbuildinfo
 .cache/
-.vercel
 
-# Build artifacts
-node_modules
-packages/*/dist
-**/*.d.ts
-**/*.tsbuildinfo
-apps/web/dist
-
-# Embedded repos
-welcome-to-docker
+# Build output
+dist/

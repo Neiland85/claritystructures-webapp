@@ -2,8 +2,8 @@
 
 import { useRouter, useParams } from 'next/navigation';
 import Wizard from './Wizard';
-import { decideIntake } from '@claritystructures/domain';
-import type { WizardResult } from '@claritystructures/types';
+import { decideIntake } from '@/domain';
+import type { WizardResult } from '@/types/wizard';
 
 export default function Hero() {
   const router = useRouter();

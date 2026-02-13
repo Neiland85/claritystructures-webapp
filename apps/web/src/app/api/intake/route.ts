@@ -1,11 +1,13 @@
-import { NextResponse } from 'next/server'
-import { decideIntake } from '@claritystructures/domain'
-import type { WizardResult } from '@claritystructures/types'
+import { NextResponse } from 'next/server';
 
-export const runtime = 'nodejs'
+import {
+  createSubmitIntakeUseCase,
+  type AuditTrail,
+  type IntakeRepository,
+  type Notifier
+} from '@/application/intake/submit-intake.usecase';
 
-export async function POST(req: Request) {
-  const body = (await req.json()) as WizardResult
-  const decision = decideIntake(body)
-  return NextResponse.json(decision)
-}
+import type { ContactIntakeInput } from '@claritystructures/domain';
+import { decideIntake } from '@claritystructures/domain';
+
+export const runtime = 'nodejs';
