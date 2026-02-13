@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type FormEvent, type ChangeEvent } from 'react';
-import type { WizardResult } from '@claritystructures/types';
+import type { WizardResult } from '@claritystructures/domain';
 
 type Props = {
   context: WizardResult;

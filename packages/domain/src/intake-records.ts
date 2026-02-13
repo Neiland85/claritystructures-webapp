@@ -1,13 +1,20 @@
-export {
-  INTAKE_TONES,
-  type IntakeTone
-} from '@claritystructures/types';
+import type { WizardResult } from './wizard-result';
 
-export const INTAKE_PRIORITIES = ['low','medium','high','critical'] as const;
-export type IntakePriority = typeof INTAKE_PRIORITIES[number];
+export const INTAKE_STATUSES = [
+  'pending',
+  'accepted',
+  'rejected',
+] as const;
 
-export const INTAKE_STATUSES = ['RECEIVED','ALERT_QUEUED','DONE'] as const;
 export type IntakeStatus = typeof INTAKE_STATUSES[number];
+
+export type IntakeTone =
+  | 'basic'
+  | 'family'
+  | 'legal'
+  | 'critical';
+
+export type IntakePriority = 'low' | 'medium' | 'high' | 'critical';
 
 export type IntakeActionCode =
   | 'IMMEDIATE_HUMAN_CONTACT'
@@ -20,3 +27,12 @@ export type IntakeFlag =
   | 'active_procedure'
   | 'legal_professional'
   | 'emotional_distress';
+
+export interface IntakeRecord {
+  id: string;
+  email: string;
+  message: string;
+  tone: IntakeTone;
+  status: IntakeStatus;
+  createdAt: Date;
+}

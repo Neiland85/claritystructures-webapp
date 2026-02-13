@@ -1,36 +1,37 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
 import type {
   IntakeRecord,
   IntakeRepository,
-} from '@claritystructures/application/intake/ports';
-import type { ContactIntakeInput, IntakeStatus } from '@claritystructures/domain/intake-records';
+  ContactIntakeInput,
+  IntakeStatus,
+  IntakeTone,
+  IntakePriority,
+} from "@claritystructures/domain";
 
 type ContactIntakeModel = Awaited<
-  ReturnType<PrismaClient['contactIntake']['create']>
+  ReturnType<PrismaClient["contactIntake"]["create"]>
 >;
 
 function toIntakeRecord(row: ContactIntakeModel): IntakeRecord {
   return {
     id: row.id,
     createdAt: row.createdAt,
-    tone: row.tone,
+    tone: row.tone as IntakeTone,
     route: row.route,
-    priority: row.priority,
-    name: row.name,
+    priority: row.priority as IntakePriority,
+    name: row.name ?? undefined,
     email: row.email,
     message: row.message,
-    phone: row.phone,
-    status: row.status,
-    spamScore: row.spamScore,
-    meta: row.meta as ContactIntakeInput['meta'],
+    phone: row.phone ?? undefined,
+    status: row.status as IntakeStatus,
+    spamScore: row.spamScore ?? undefined,
+    meta: row.meta as ContactIntakeInput["meta"],
   };
 }
 
 export class PrismaIntakeRepository implements IntakeRepository {
-  constructor(
-    private readonly prisma: Pick<PrismaClient, 'contactIntake'>
-  ) {}
+  constructor(private readonly prisma: Pick<PrismaClient, "contactIntake">) {}
 
   async create(input: ContactIntakeInput): Promise<IntakeRecord> {
     const created = await this.prisma.contactIntake.create({
@@ -38,13 +39,13 @@ export class PrismaIntakeRepository implements IntakeRepository {
         tone: input.tone,
         route: input.route,
         priority: input.priority,
-        name: input.name,
+        name: input.name ?? null,
         email: input.email,
         message: input.message,
-        phone: input.phone,
+        phone: input.phone ?? null,
         status: input.status,
-        spamScore: input.spamScore,
-        meta: input.meta ?? undefined,
+        spamScore: input.spamScore ?? null,
+        meta: (input.meta as any) ?? null,
       },
     });
 
@@ -61,7 +62,7 @@ export class PrismaIntakeRepository implements IntakeRepository {
 
   async updateStatus(
     id: string,
-    status: IntakeStatus
+    status: IntakeStatus,
   ): Promise<IntakeRecord | null> {
     const existing = await this.prisma.contactIntake.findUnique({
       where: { id },

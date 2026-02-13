@@ -1,4 +1,4 @@
-import type { AuditEvent, AuditTrail } from '@claritystructures/application/intake/ports';
+import type { AuditEvent, AuditTrail } from "@claritystructures/domain";
 
 export class ConsoleAuditTrail implements AuditTrail {
   record(event: AuditEvent): void {
@@ -9,6 +9,6 @@ export class ConsoleAuditTrail implements AuditTrail {
       occurredAt: (event.occurredAt ?? new Date()).toISOString(),
     };
 
-    console.info('[AuditTrail]', JSON.stringify(payload));
+    console.info("[AuditTrail]", JSON.stringify(payload));
   }
 }
