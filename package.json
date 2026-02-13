@@ -1,18 +1,12 @@
 {
   "name": "claritystructures-webapp",
   "private": true,
-  "workspaces": [
-    "packages/*",
-    "apps/*"
-  ],
+  "packageManager": "pnpm@10.29.3",
   "scripts": {
-    "build": "npm run build --workspaces",
-    "dev": "npm run dev --workspace=@claritystructures/web",
-    "lint": "npm run lint --workspaces"
+    "build": "pnpm -r run build",
+    "typecheck": "pnpm -r run typecheck"
   },
-  "dependencies": {
-    "@claritystructures/domain": "workspace:*",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3"
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }
