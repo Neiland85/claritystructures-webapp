@@ -1,5 +1,3 @@
-import type { WizardResult } from "./wizard-result";
-
 export const INTAKE_STATUSES = ["pending", "accepted", "rejected"] as const;
 
 export type IntakeStatus = (typeof INTAKE_STATUSES)[number];
@@ -23,12 +21,3 @@ export type IntakeFlag =
   | "active_procedure"
   | "legal_professional"
   | "emotional_distress";
-
-export interface IntakeRecord {
-  id: string;
-  email: string;
-  message: string;
-  tone: IntakeTone;
-  status: IntakeStatus;
-  createdAt: Date;
-}

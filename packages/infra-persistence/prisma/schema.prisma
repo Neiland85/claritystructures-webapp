@@ -1,27 +1,72 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+enum IntakeTone {
+  basic
+  family
+  legal
+  critical
+}
+
+enum IntakePriority {
+  low
+  medium
+  high
+  critical
+}
+
+enum IntakeStatus {
+  pending
+  accepted
+  rejected
+}
+
 model ContactIntake {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  tone      String
+  id        String       @id @default(uuid())
+  createdAt DateTime     @default(now())
+  tone      IntakeTone
   route     String
-  priority  String
+  priority  IntakePriority
   name      String?
   email     String
   message   String
   phone     String?
-  status    String   @default("pending")
+  status    IntakeStatus @default(pending)
   spamScore Float?
   meta      Json?
 
-  @@map("contact_intakes")
+  consentAcceptances ConsentAcceptance[]
+}
+
+model ConsentVersion {
+  id             String   @id @default(uuid())
+  version        String   @unique
+  content        String
+  checksumSha256 String
+  createdAt      DateTime @default(now())
+  isActive       Boolean  @default(false)
+
+  acceptances ConsentAcceptance[]
+}
+
+model ConsentAcceptance {
+  id               String   @id @default(uuid())
+  consentVersionId String
+  intakeId         String
+  acceptedAt       DateTime @default(now())
+  ipHash           String?
+  userAgent        String?
+  locale           String?
+
+  consentVersion ConsentVersion @relation(fields: [consentVersionId], references: [id])
+  intake         ContactIntake  @relation(fields: [intakeId], references: [id])
+
+  @@index([consentVersionId])
+  @@index([intakeId])
 }

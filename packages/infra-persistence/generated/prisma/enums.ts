@@ -9,7 +9,30 @@
 * 🟢 You can import this file directly.
 */
 
+export const IntakeTone = {
+  basic: 'basic',
+  family: 'family',
+  legal: 'legal',
+  critical: 'critical'
+} as const
+
+export type IntakeTone = (typeof IntakeTone)[keyof typeof IntakeTone]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const IntakePriority = {
+  low: 'low',
+  medium: 'medium',
+  high: 'high',
+  critical: 'critical'
+} as const
+
+export type IntakePriority = (typeof IntakePriority)[keyof typeof IntakePriority]
+
+
+export const IntakeStatus = {
+  pending: 'pending',
+  accepted: 'accepted',
+  rejected: 'rejected'
+} as const
+
+export type IntakeStatus = (typeof IntakeStatus)[keyof typeof IntakeStatus]

@@ -8,8 +8,13 @@
     "build": "prisma generate --config=../../prisma.config.ts"
   },
   "dependencies": {
+    "@claritystructures/domain": "workspace:*",
+    "@prisma/adapter-pg": "^7.4.0",
     "@prisma/client": "^7.4.0",
-    "prisma": "^7.4.0",
-    "@claritystructures/domain": "workspace:*"
+    "pg": "^8.18.0",
+    "prisma": "^7.4.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.16.0"
   }
 }

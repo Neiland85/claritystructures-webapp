@@ -384,7 +384,9 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
-
+  ContactIntake: 'ContactIntake',
+  ConsentVersion: 'ConsentVersion',
+  ConsentAcceptance: 'ConsentAcceptance'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -400,10 +402,233 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: never
+    modelProps: "contactIntake" | "consentVersion" | "consentAcceptance"
     txIsolationLevel: TransactionIsolationLevel
   }
-  model: {}
+  model: {
+    ContactIntake: {
+      payload: Prisma.$ContactIntakePayload<ExtArgs>
+      fields: Prisma.ContactIntakeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ContactIntakeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContactIntakePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ContactIntakeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContactIntakePayload>
+        }
+        findFirst: {
+          args: Prisma.ContactIntakeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContactIntakePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ContactIntakeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContactIntakePayload>
+        }
+        findMany: {
+          args: Prisma.ContactIntakeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContactIntakePayload>[]
+        }
+        create: {
+          args: Prisma.ContactIntakeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContactIntakePayload>
+        }
+        createMany: {
+          args: Prisma.ContactIntakeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ContactIntakeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContactIntakePayload>[]
+        }
+        delete: {
+          args: Prisma.ContactIntakeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContactIntakePayload>
+        }
+        update: {
+          args: Prisma.ContactIntakeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContactIntakePayload>
+        }
+        deleteMany: {
+          args: Prisma.ContactIntakeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ContactIntakeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ContactIntakeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContactIntakePayload>[]
+        }
+        upsert: {
+          args: Prisma.ContactIntakeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContactIntakePayload>
+        }
+        aggregate: {
+          args: Prisma.ContactIntakeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateContactIntake>
+        }
+        groupBy: {
+          args: Prisma.ContactIntakeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContactIntakeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ContactIntakeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContactIntakeCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConsentVersion: {
+      payload: Prisma.$ConsentVersionPayload<ExtArgs>
+      fields: Prisma.ConsentVersionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConsentVersionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentVersionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConsentVersionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentVersionPayload>
+        }
+        findFirst: {
+          args: Prisma.ConsentVersionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentVersionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConsentVersionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentVersionPayload>
+        }
+        findMany: {
+          args: Prisma.ConsentVersionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentVersionPayload>[]
+        }
+        create: {
+          args: Prisma.ConsentVersionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentVersionPayload>
+        }
+        createMany: {
+          args: Prisma.ConsentVersionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConsentVersionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentVersionPayload>[]
+        }
+        delete: {
+          args: Prisma.ConsentVersionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentVersionPayload>
+        }
+        update: {
+          args: Prisma.ConsentVersionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentVersionPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConsentVersionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConsentVersionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConsentVersionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentVersionPayload>[]
+        }
+        upsert: {
+          args: Prisma.ConsentVersionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentVersionPayload>
+        }
+        aggregate: {
+          args: Prisma.ConsentVersionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConsentVersion>
+        }
+        groupBy: {
+          args: Prisma.ConsentVersionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConsentVersionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConsentVersionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConsentVersionCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConsentAcceptance: {
+      payload: Prisma.$ConsentAcceptancePayload<ExtArgs>
+      fields: Prisma.ConsentAcceptanceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConsentAcceptanceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentAcceptancePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConsentAcceptanceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentAcceptancePayload>
+        }
+        findFirst: {
+          args: Prisma.ConsentAcceptanceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentAcceptancePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConsentAcceptanceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentAcceptancePayload>
+        }
+        findMany: {
+          args: Prisma.ConsentAcceptanceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentAcceptancePayload>[]
+        }
+        create: {
+          args: Prisma.ConsentAcceptanceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentAcceptancePayload>
+        }
+        createMany: {
+          args: Prisma.ConsentAcceptanceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ConsentAcceptanceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentAcceptancePayload>[]
+        }
+        delete: {
+          args: Prisma.ConsentAcceptanceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentAcceptancePayload>
+        }
+        update: {
+          args: Prisma.ConsentAcceptanceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentAcceptancePayload>
+        }
+        deleteMany: {
+          args: Prisma.ConsentAcceptanceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConsentAcceptanceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ConsentAcceptanceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentAcceptancePayload>[]
+        }
+        upsert: {
+          args: Prisma.ConsentAcceptanceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsentAcceptancePayload>
+        }
+        aggregate: {
+          args: Prisma.ConsentAcceptanceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConsentAcceptance>
+        }
+        groupBy: {
+          args: Prisma.ConsentAcceptanceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConsentAcceptanceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConsentAcceptanceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConsentAcceptanceCountAggregateOutputType> | number
+        }
+      }
+    }
+  }
 } & {
   other: {
     payload: any
@@ -442,7 +667,213 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
+export const ContactIntakeScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  tone: 'tone',
+  route: 'route',
+  priority: 'priority',
+  name: 'name',
+  email: 'email',
+  message: 'message',
+  phone: 'phone',
+  status: 'status',
+  spamScore: 'spamScore',
+  meta: 'meta'
+} as const
 
+export type ContactIntakeScalarFieldEnum = (typeof ContactIntakeScalarFieldEnum)[keyof typeof ContactIntakeScalarFieldEnum]
+
+
+export const ConsentVersionScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  content: 'content',
+  checksumSha256: 'checksumSha256',
+  createdAt: 'createdAt',
+  isActive: 'isActive'
+} as const
+
+export type ConsentVersionScalarFieldEnum = (typeof ConsentVersionScalarFieldEnum)[keyof typeof ConsentVersionScalarFieldEnum]
+
+
+export const ConsentAcceptanceScalarFieldEnum = {
+  id: 'id',
+  consentVersionId: 'consentVersionId',
+  intakeId: 'intakeId',
+  acceptedAt: 'acceptedAt',
+  ipHash: 'ipHash',
+  userAgent: 'userAgent',
+  locale: 'locale'
+} as const
+
+export type ConsentAcceptanceScalarFieldEnum = (typeof ConsentAcceptanceScalarFieldEnum)[keyof typeof ConsentAcceptanceScalarFieldEnum]
+
+
+export const SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+} as const
+
+export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+
+/**
+ * Field references
+ */
+
+
+/**
+ * Reference to a field of type 'String'
+ */
+export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String'>
+    
+
+
+/**
+ * Reference to a field of type 'String[]'
+ */
+export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'String[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime[]'
+ */
+export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'IntakeTone'
+ */
+export type EnumIntakeToneFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'IntakeTone'>
+    
+
+
+/**
+ * Reference to a field of type 'IntakeTone[]'
+ */
+export type ListEnumIntakeToneFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'IntakeTone[]'>
+    
+
+
+/**
+ * Reference to a field of type 'IntakePriority'
+ */
+export type EnumIntakePriorityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'IntakePriority'>
+    
+
+
+/**
+ * Reference to a field of type 'IntakePriority[]'
+ */
+export type ListEnumIntakePriorityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'IntakePriority[]'>
+    
+
+
+/**
+ * Reference to a field of type 'IntakeStatus'
+ */
+export type EnumIntakeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'IntakeStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'IntakeStatus[]'
+ */
+export type ListEnumIntakeStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'IntakeStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
 
 /**
  * Batch Payload for updateMany & deleteMany & createMany
@@ -538,7 +969,11 @@ export type PrismaClientOptions = ({
    */
   comments?: runtime.SqlCommenterPlugin[]
 }
-export type GlobalOmitConfig = {}
+export type GlobalOmitConfig = {
+  contactIntake?: Prisma.ContactIntakeOmit
+  consentVersion?: Prisma.ConsentVersionOmit
+  consentAcceptance?: Prisma.ConsentAcceptanceOmit
+}
 
 /* Types for Logging */
 export type LogLevel = 'info' | 'query' | 'warn' | 'error'

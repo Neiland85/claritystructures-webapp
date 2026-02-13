@@ -1,28 +1,29 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient } from "../generated/prisma/client.js";
+import { PrismaPg } from "@prisma/adapter-pg";
+import pg from "pg";
 
 /**
  * Prisma Client singleton for Prisma 7
  *
- * In Prisma 7, connection URLs are moved to prisma.config.ts for the CLI,
- * and should be passed to the constructor for the Client.
+ * Uses @prisma/adapter-pg for direct PostgreSQL connection.
+ * CLI commands (migrate, generate) use prisma.config.ts for the URL.
  */
 
 const prismaClientSingleton = () => {
-  const datasourceUrl =
+  const connectionString =
     process.env.DATABASE_URL ||
     "postgresql://postgres:postgres@localhost:5432/postgres?schema=public";
 
+  const pool = new pg.Pool({ connectionString });
+  const adapter = new PrismaPg(pool);
+
   return new PrismaClient({
-    datasources: {
-      db: {
-        url: datasourceUrl,
-      },
-    },
+    adapter,
     log:
       process.env.NODE_ENV === "development"
         ? ["query", "error", "warn"]
         : ["error"],
-  } as any);
+  });
 };
 
 declare global {
@@ -44,15 +45,15 @@ const getPrisma = () => {
  * Lazy-loaded Prisma Client.
  * Only instantiates the real PrismaClient on first property access.
  */
-const prismaProxy = new Proxy({} as any, {
-  get(target, prop, receiver) {
-    const p = getPrisma() as any;
-    const value = p[prop];
+const prismaProxy = new Proxy({} as PrismaClient, {
+  get(_target, prop, _receiver) {
+    const p = getPrisma();
+    const value = (p as unknown as Record<string | symbol, unknown>)[prop];
     if (typeof value === "function") {
-      return value.bind(p);
+      return (value as Function).bind(p);
     }
     return value;
   },
 });
 
-export default prismaProxy as ReturnType<typeof prismaClientSingleton>;
+export default prismaProxy as PrismaClient;

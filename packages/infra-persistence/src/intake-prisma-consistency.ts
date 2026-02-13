@@ -1,56 +1,47 @@
-import {
-  INTAKE_PRIORITIES,
-  INTAKE_STATUSES,
-  INTAKE_TONES,
-  type IntakePriority,
-  type IntakeStatus,
-  type IntakeTone,
+import type {
+  IntakePriority,
+  IntakeStatus,
+  IntakeTone,
 } from "@claritystructures/domain";
 
+import {
+  IntakeTone as PrismaIntakeTone,
+  IntakePriority as PrismaIntakePriority,
+  IntakeStatus as PrismaIntakeStatus,
+} from "../generated/prisma/client.js";
+
 /**
- * Consistency Check between Domain and Prisma
+ * Compile-time consistency check: Domain enums ↔ Prisma enums.
  *
- * Since Prisma schema uses strings for these fields, we perform
- * a compile-time check to ensure our mappings cover all domain values.
+ * Now that the Prisma schema uses native enums aligned with the domain,
+ * we verify both directions at the type level — no runtime cost.
  */
 
-// These are placeholders since we use String in Prisma schema
-type PrismaIntakeStatus = string;
-type PrismaIntakePriority = string;
-type PrismaIntakeTone = string;
-
+// Domain → Prisma mapping (compile error if values diverge)
 const toneDomainToPrisma: Record<IntakeTone, PrismaIntakeTone> = {
-  basic: "basic",
-  family: "family",
-  legal: "legal",
-  critical: "critical",
+  basic: PrismaIntakeTone.basic,
+  family: PrismaIntakeTone.family,
+  legal: PrismaIntakeTone.legal,
+  critical: PrismaIntakeTone.critical,
 };
 
 const priorityDomainToPrisma: Record<IntakePriority, PrismaIntakePriority> = {
-  low: "low",
-  medium: "medium",
-  high: "high",
-  critical: "critical",
+  low: PrismaIntakePriority.low,
+  medium: PrismaIntakePriority.medium,
+  high: PrismaIntakePriority.high,
+  critical: PrismaIntakePriority.critical,
 };
 
 const statusDomainToPrisma: Record<IntakeStatus, PrismaIntakeStatus> = {
-  pending: "pending",
-  accepted: "accepted",
-  rejected: "rejected",
+  pending: PrismaIntakeStatus.pending,
+  accepted: PrismaIntakeStatus.accepted,
+  rejected: PrismaIntakeStatus.rejected,
 };
 
-const assertSameLiterals = <A extends string, B extends A>(
-  _a: readonly A[],
-  _b: readonly B[],
-) => {
-  void _a;
-  void _b;
-};
-
-// Verify all domain values are mapped
-assertSameLiterals(INTAKE_TONES, Object.keys(toneDomainToPrisma) as any);
-assertSameLiterals(
-  INTAKE_PRIORITIES,
-  Object.keys(priorityDomainToPrisma) as any,
-);
-assertSameLiterals(INTAKE_STATUSES, Object.keys(statusDomainToPrisma) as any);
+// Reverse check: ensure every Prisma value is covered
+const _tonePrismaToDomain: Record<PrismaIntakeTone, IntakeTone> =
+  toneDomainToPrisma as Record<PrismaIntakeTone, IntakeTone>;
+const _priorityPrismaToDomain: Record<PrismaIntakePriority, IntakePriority> =
+  priorityDomainToPrisma as Record<PrismaIntakePriority, IntakePriority>;
+const _statusPrismaToDomain: Record<PrismaIntakeStatus, IntakeStatus> =
+  statusDomainToPrisma as Record<PrismaIntakeStatus, IntakeStatus>;

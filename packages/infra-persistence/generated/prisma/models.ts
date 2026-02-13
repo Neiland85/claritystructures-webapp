@@ -8,4 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/ContactIntake.js'
+export type * from './models/ConsentVersion.js'
+export type * from './models/ConsentAcceptance.js'
 export type * from './commonInputTypes.js'

@@ -1,12 +1,10 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../generated/prisma/client.js";
 
 import type {
   IntakeRecord,
   IntakeRepository,
   ContactIntakeInput,
   IntakeStatus,
-  IntakeTone,
-  IntakePriority,
 } from "@claritystructures/domain";
 
 type ContactIntakeModel = Awaited<
@@ -17,14 +15,14 @@ function toIntakeRecord(row: ContactIntakeModel): IntakeRecord {
   return {
     id: row.id,
     createdAt: row.createdAt,
-    tone: row.tone as IntakeTone,
+    tone: row.tone,
     route: row.route,
-    priority: row.priority as IntakePriority,
+    priority: row.priority,
     name: row.name ?? undefined,
     email: row.email,
     message: row.message,
     phone: row.phone ?? undefined,
-    status: row.status as IntakeStatus,
+    status: row.status,
     spamScore: row.spamScore ?? undefined,
     meta: row.meta as ContactIntakeInput["meta"],
   };

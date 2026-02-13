@@ -51,7 +51,9 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-
+  ContactIntake: 'ContactIntake',
+  ConsentVersion: 'ConsentVersion',
+  ConsentAcceptance: 'ConsentAcceptance'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -68,4 +70,88 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 } as const)
 
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
+
+
+export const ContactIntakeScalarFieldEnum = {
+  id: 'id',
+  createdAt: 'createdAt',
+  tone: 'tone',
+  route: 'route',
+  priority: 'priority',
+  name: 'name',
+  email: 'email',
+  message: 'message',
+  phone: 'phone',
+  status: 'status',
+  spamScore: 'spamScore',
+  meta: 'meta'
+} as const
+
+export type ContactIntakeScalarFieldEnum = (typeof ContactIntakeScalarFieldEnum)[keyof typeof ContactIntakeScalarFieldEnum]
+
+
+export const ConsentVersionScalarFieldEnum = {
+  id: 'id',
+  version: 'version',
+  content: 'content',
+  checksumSha256: 'checksumSha256',
+  createdAt: 'createdAt',
+  isActive: 'isActive'
+} as const
+
+export type ConsentVersionScalarFieldEnum = (typeof ConsentVersionScalarFieldEnum)[keyof typeof ConsentVersionScalarFieldEnum]
+
+
+export const ConsentAcceptanceScalarFieldEnum = {
+  id: 'id',
+  consentVersionId: 'consentVersionId',
+  intakeId: 'intakeId',
+  acceptedAt: 'acceptedAt',
+  ipHash: 'ipHash',
+  userAgent: 'userAgent',
+  locale: 'locale'
+} as const
+
+export type ConsentAcceptanceScalarFieldEnum = (typeof ConsentAcceptanceScalarFieldEnum)[keyof typeof ConsentAcceptanceScalarFieldEnum]
+
+
+export const SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+} as const
+
+export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
