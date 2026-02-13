@@ -25,9 +25,6 @@ pnpm-debug.log*
 !.vscode/extensions.json
 !apps/web/next.config.js
 
-# Package manager locks (workspace noise)
-pnpm-lock.yaml
-
 # TypeScript incremental cache
 tsconfig.tsbuildinfo
 .cache/

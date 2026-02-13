@@ -3,17 +3,33 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "build": "prisma generate --config=../../prisma.config.ts && next build",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@claritystructures/domain": "file:../../packages/domain",
-    "@claritystructures/types": "file:../../packages/types",
-    "@claritystructures/config": "file:../../packages/config",
-    "@claritystructures/infra-alerts": "file:../../packages/infra-alerts",
-    "@claritystructures/infra-prisma": "file:../../packages/infra-prisma",
-    "next": "^16.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0"
+    "@claritystructures/config": "workspace:*",
+    "@claritystructures/domain": "workspace:*",
+    "@claritystructures/infra-alerts": "workspace:*",
+    "@claritystructures/infra-prisma": "workspace:*",
+    "@claritystructures/types": "workspace:*",
+    "cors": "^2.8.6",
+    "helmet": "^8.1.0",
+    "next": "16.1.6",
+    "nodemailer": "^7.0.11",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/cors": "^2.8.19",
+    "@types/helmet": "^4.0.0",
+    "@types/node": "^22.0.0",
+    "@types/nodemailer": "^7.0.9",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "autoprefixer": "^10.4.24",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3"
   }
 }

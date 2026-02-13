@@ -1,32 +1,45 @@
 export const INCIDENT_TYPES = [
-  'private_case',
-  'family_dispute',
-  'legal_professional_case',
-  'court_proceeding',
-  'unknown',
+  "private_case",
+  "family_dispute",
+  "legal_professional_case",
+  "court_proceeding",
+  "unknown",
 ] as const;
 
 export type IncidentType = (typeof INCIDENT_TYPES)[number];
 
-export const RISK_LEVELS = ['low', 'medium', 'high', 'imminent'] as const;
+export const RISK_LEVELS = ["low", "medium", "high", "imminent"] as const;
 
 export type RiskLevel = (typeof RISK_LEVELS)[number];
 
 export const EVIDENCE_LEVELS = [
-  'none',
-  'messages_only',
-  'screenshots',
-  'full_device',
-  'mixed',
+  "none",
+  "messages_only",
+  "screenshots",
+  "full_device",
+  "mixed",
 ] as const;
 
 export type EvidenceLevel = (typeof EVIDENCE_LEVELS)[number];
 
-export const EXPOSURE_STATES = ['unknown', 'potential', 'active', 'contained'] as const;
+export const EXPOSURE_STATES = [
+  "unknown",
+  "potential",
+  "active",
+  "contained",
+] as const;
 
 export type ExposureState = (typeof EXPOSURE_STATES)[number];
 
-export const SENSITIVITY_FLAGS = ['emotional_distress'] as const;
+export const SENSITIVITY_FLAGS = [
+  "emotional_distress",
+  "physical_risk",
+  "financial_risk",
+  "access_compromised",
+  "evidence_volatility",
+  "cognitive_distortion",
+  "severe_shock",
+] as const;
 
 export type SensitivityFlag = (typeof SENSITIVITY_FLAGS)[number];
 
@@ -52,15 +65,15 @@ export type IntakeSignalSummary = {
 
 export function buildSummary(signals: IntakeSignals): IntakeSignalSummary {
   return {
-    headline: `${signals.riskLevel.toUpperCase()} risk ${signals.incidentType.replace(/_/g, ' ')}`,
+    headline: `${signals.riskLevel.toUpperCase()} risk ${signals.incidentType.replace(/_/g, " ")}`,
     bullets: [
-      `Evidence: ${signals.evidenceLevel.replace(/_/g, ' ')}`,
-      `Exposure: ${signals.exposureState.replace(/_/g, ' ')}`,
+      `Evidence: ${signals.evidenceLevel.replace(/_/g, " ")}`,
+      `Exposure: ${signals.exposureState.replace(/_/g, " ")}`,
       `Devices: ${signals.devicesCount}`,
     ],
     recommendedNextStep:
-      signals.riskLevel === 'imminent' || signals.riskLevel === 'high'
-        ? 'Prioritize prompt specialist review'
-        : 'Follow standard intake review workflow',
+      signals.riskLevel === "imminent" || signals.riskLevel === "high"
+        ? "Prioritize prompt specialist review"
+        : "Follow standard intake review workflow",
   };
 }

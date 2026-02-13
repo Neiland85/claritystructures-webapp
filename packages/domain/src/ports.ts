@@ -1,7 +1,4 @@
-import type {
-  ContactIntakeInput,
-  IntakeStatus,
-} from '@claritystructures/domain';
+import type { ContactIntakeInput, IntakeStatus } from "./index";
 
 export type IntakeRecord = ContactIntakeInput & {
   id: string;

@@ -8,10 +8,11 @@ import {
   decideIntakeV2,
   decideIntakeWithExplanation,
   isDecisionModelV2,
-} from '../src/domain/decision.js';
-import { mapWizardToSignals } from '../src/domain/map-wizard-to-signals.js';
-import { assessIntake, assessIntakeWithSignals } from '../src/domain/priority.js';
-import type { WizardResult } from '../src/types/wizard.js';
+  mapWizardToSignals,
+  assessIntake,
+  assessIntakeWithSignals,
+} from '@claritystructures/domain';
+import type { WizardResult } from '@claritystructures/domain';
 
 function buildResult(overrides: Partial<WizardResult> = {}): WizardResult {
   return {

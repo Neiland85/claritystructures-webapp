@@ -20,5 +20,6 @@
   "github.copilot.experimental.agent": false,
 
   // Evitar ejecuciones implícitas
-  "npm.enableRunFromFolder": false
+  "npm.enableRunFromFolder": false,
+  "prisma.pinToPrisma6": true
 }
