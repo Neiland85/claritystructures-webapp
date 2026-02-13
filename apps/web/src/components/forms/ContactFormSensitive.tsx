@@ -1,4 +1,4 @@
-import type { WizardResult } from '@claritystructures/types';
+import type { WizardResult } from '@claritystructures/domain';
 
 import type {
   EvidenceLevel,

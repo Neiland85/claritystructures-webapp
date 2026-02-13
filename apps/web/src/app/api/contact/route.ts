@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import nodemailer from 'nodemailer'
 
-import type { WizardResult } from '@claritystructures/types'
+import type { WizardResult } from '@claritystructures/domain'
 import type { IntakeTone } from '@claritystructures/domain'
 import { decideIntake } from '@claritystructures/domain'
 

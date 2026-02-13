@@ -30,7 +30,7 @@ function toIntakeRecord(row: ContactIntakeModel): IntakeRecord {
 export class PrismaIntakeRepository implements IntakeRepository {
   constructor(
     private readonly prisma: Pick<PrismaClient, 'contactIntake'>
-  ) {}
+  ) { }
 
   async create(input: ContactIntakeInput): Promise<IntakeRecord> {
     const created = await this.prisma.contactIntake.create({

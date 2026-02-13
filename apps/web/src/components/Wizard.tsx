@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { WizardResult, ClientProfile, UrgencyLevel } from '@claritystructures/types';
+import type { WizardResult, ClientProfile, UrgencyLevel } from '@claritystructures/domain';
 import { clientProfiles, urgencyLevels } from '@/constants/wizardOptions';
 
 type Props = {
@@ -37,9 +37,8 @@ export default function Wizard({ onComplete }: Props) {
           <button
             key={opt.value}
             onClick={() => setClientProfile(opt.value)}
-            className={`block w-full text-left p-3 border ${
-              clientProfile === opt.value ? 'border-white' : 'border-neutral-700'
-            }`}
+            className={`block w-full text-left p-3 border ${clientProfile === opt.value ? 'border-white' : 'border-neutral-700'
+              }`}
           >
             <div>{opt.label}</div>
             {opt.description && (
@@ -56,9 +55,8 @@ export default function Wizard({ onComplete }: Props) {
           <button
             key={opt.value}
             onClick={() => setUrgency(opt.value)}
-            className={`block w-full text-left p-3 border ${
-              urgency === opt.value ? 'border-white' : 'border-neutral-700'
-            }`}
+            className={`block w-full text-left p-3 border ${urgency === opt.value ? 'border-white' : 'border-neutral-700'
+              }`}
           >
             {opt.label}
           </button>
