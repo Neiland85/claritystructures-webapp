@@ -23,6 +23,7 @@ pnpm-debug.log*
 .vscode/*
 !.vscode/settings.json
 !.vscode/extensions.json
+!apps/web/next.config.js
 
 # Package manager locks (workspace noise)
 pnpm-lock.yaml
