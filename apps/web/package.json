@@ -1,0 +1,19 @@
+{
+  "name": "@claritystructures/web",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@claritystructures/domain": "file:../../packages/domain",
+    "@claritystructures/types": "file:../../packages/types",
+    "@claritystructures/config": "file:../../packages/config",
+    "@claritystructures/infra-alerts": "file:../../packages/infra-alerts",
+    "@claritystructures/infra-prisma": "file:../../packages/infra-prisma",
+    "next": "^16.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  }
+}
