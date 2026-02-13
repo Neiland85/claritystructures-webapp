@@ -1,12 +1,12 @@
-import { defineConfig } from 'vitest/config';
-import { resolve } from 'node:path';
+import { defineConfig } from "vitest/config";
+import { resolve } from "node:path";
 
 export default defineConfig({
   test: {
-    include: ['tests/**/*.spec.ts'],
+    include: ["tests/**/*.spec.ts"],
     coverage: {
-      provider: 'v8',
-      include: ['src/domain/flow.ts', 'src/domain/priority.ts'],
+      provider: "v8",
+      include: ["packages/domain/src/**/*.ts", "packages/infra-*/src/**/*.ts"],
       thresholds: {
         lines: 90,
         functions: 90,
@@ -17,7 +17,19 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
+      "@": resolve(__dirname, "src"),
+      "@claritystructures/domain": resolve(
+        __dirname,
+        "packages/domain/src/index.ts",
+      ),
+      "@claritystructures/types": resolve(
+        __dirname,
+        "packages/types/src/index.ts",
+      ),
+      "@claritystructures/config": resolve(
+        __dirname,
+        "packages/config/index.ts",
+      ),
     },
   },
 });

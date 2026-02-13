@@ -1,5 +1,5 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
+import test from "node:test";
+import assert from "node:assert/strict";
 
 import {
   DECISION_MODEL_VERSION_V1,
@@ -7,176 +7,176 @@ import {
   decideIntake,
   decideIntakeV2,
   type IntakeDecision,
-} from '../src/domain/decision.js';
-import { canonicalDecisionCases } from './decision-scenarios/canonical-cases.js';
+} from "@claritystructures/domain";
+import { canonicalDecisionCases } from "./decision-scenarios/canonical-cases.js";
 
 const expectedDecisionSnapshots: Record<
   string,
   { v1: IntakeDecision; v2: IntakeDecision }
 > = {
-  'low informational baseline': {
+  "low informational baseline": {
     v1: {
-      route: '/contact/basic',
-      priority: 'low',
+      route: "/contact/basic",
+      priority: "low",
       flags: [],
-      actionCode: 'DEFERRED_INFORMATIONAL_RESPONSE',
-      decisionModelVersion: 'decision-model/v1',
+      actionCode: "DEFERRED_INFORMATIONAL_RESPONSE",
+      decisionModelVersion: "decision-model/v1",
     },
     v2: {
-      route: '/contact/basic',
-      priority: 'low',
+      route: "/contact/basic",
+      priority: "low",
       flags: [],
-      actionCode: 'DEFERRED_INFORMATIONAL_RESPONSE',
-      decisionModelVersion: 'decision-model/v2',
+      actionCode: "DEFERRED_INFORMATIONAL_RESPONSE",
+      decisionModelVersion: "decision-model/v2",
     },
   },
-  'medium time sensitive baseline': {
+  "medium time sensitive baseline": {
     v1: {
-      route: '/contact/basic',
-      priority: 'medium',
-      flags: ['emotional_distress'],
-      actionCode: 'STANDARD_REVIEW',
-      decisionModelVersion: 'decision-model/v1',
+      route: "/contact/basic",
+      priority: "medium",
+      flags: ["emotional_distress"],
+      actionCode: "STANDARD_REVIEW",
+      decisionModelVersion: "decision-model/v1",
     },
     v2: {
-      route: '/contact/basic',
-      priority: 'medium',
-      flags: ['emotional_distress'],
-      actionCode: 'STANDARD_REVIEW',
-      decisionModelVersion: 'decision-model/v2',
+      route: "/contact/basic",
+      priority: "medium",
+      flags: ["emotional_distress"],
+      actionCode: "STANDARD_REVIEW",
+      decisionModelVersion: "decision-model/v2",
     },
   },
-  'high legal risk baseline': {
+  "high legal risk baseline": {
     v1: {
-      route: '/contact/legal',
-      priority: 'high',
-      flags: ['legal_professional'],
-      actionCode: 'PRIORITY_REVIEW_24_48H',
-      decisionModelVersion: 'decision-model/v1',
+      route: "/contact/legal",
+      priority: "high",
+      flags: ["legal_professional"],
+      actionCode: "PRIORITY_REVIEW_24_48H",
+      decisionModelVersion: "decision-model/v1",
     },
     v2: {
-      route: '/contact/legal',
-      priority: 'high',
-      flags: ['legal_professional'],
-      actionCode: 'PRIORITY_REVIEW_24_48H',
-      decisionModelVersion: 'decision-model/v2',
+      route: "/contact/legal",
+      priority: "high",
+      flags: ["legal_professional"],
+      actionCode: "PRIORITY_REVIEW_24_48H",
+      decisionModelVersion: "decision-model/v2",
     },
   },
-  'critical urgency route override': {
+  "critical urgency route override": {
     v1: {
-      route: '/contact/critical',
-      priority: 'critical',
-      flags: ['family_conflict'],
-      actionCode: 'IMMEDIATE_HUMAN_CONTACT',
-      decisionModelVersion: 'decision-model/v1',
+      route: "/contact/critical",
+      priority: "critical",
+      flags: ["family_conflict"],
+      actionCode: "IMMEDIATE_HUMAN_CONTACT",
+      decisionModelVersion: "decision-model/v1",
     },
     v2: {
-      route: '/contact/critical',
-      priority: 'critical',
-      flags: ['family_conflict'],
-      actionCode: 'IMMEDIATE_HUMAN_CONTACT',
-      decisionModelVersion: 'decision-model/v2',
+      route: "/contact/critical",
+      priority: "critical",
+      flags: ["family_conflict"],
+      actionCode: "IMMEDIATE_HUMAN_CONTACT",
+      decisionModelVersion: "decision-model/v2",
     },
   },
-  'high data sensitivity refinement': {
+  "high data sensitivity refinement": {
     v1: {
-      route: '/contact/basic',
-      priority: 'low',
+      route: "/contact/basic",
+      priority: "low",
       flags: [],
-      actionCode: 'DEFERRED_INFORMATIONAL_RESPONSE',
-      decisionModelVersion: 'decision-model/v1',
+      actionCode: "DEFERRED_INFORMATIONAL_RESPONSE",
+      decisionModelVersion: "decision-model/v1",
     },
     v2: {
-      route: '/contact/basic',
-      priority: 'critical',
+      route: "/contact/basic",
+      priority: "critical",
       flags: [],
-      actionCode: 'IMMEDIATE_HUMAN_CONTACT',
-      decisionModelVersion: 'decision-model/v2',
+      actionCode: "IMMEDIATE_HUMAN_CONTACT",
+      decisionModelVersion: "decision-model/v2",
     },
   },
-  'ongoing incident exposure refinement': {
+  "ongoing incident exposure refinement": {
     v1: {
-      route: '/contact/basic',
-      priority: 'low',
+      route: "/contact/basic",
+      priority: "low",
       flags: [],
-      actionCode: 'DEFERRED_INFORMATIONAL_RESPONSE',
-      decisionModelVersion: 'decision-model/v1',
+      actionCode: "DEFERRED_INFORMATIONAL_RESPONSE",
+      decisionModelVersion: "decision-model/v1",
     },
     v2: {
-      route: '/contact/basic',
-      priority: 'high',
+      route: "/contact/basic",
+      priority: "high",
       flags: [],
-      actionCode: 'PRIORITY_REVIEW_24_48H',
-      decisionModelVersion: 'decision-model/v2',
+      actionCode: "PRIORITY_REVIEW_24_48H",
+      decisionModelVersion: "decision-model/v2",
     },
   },
-  'no device access with messages only evidence': {
+  "no device access with messages only evidence": {
     v1: {
-      route: '/contact/basic',
-      priority: 'low',
+      route: "/contact/basic",
+      priority: "low",
       flags: [],
-      actionCode: 'DEFERRED_INFORMATIONAL_RESPONSE',
-      decisionModelVersion: 'decision-model/v1',
+      actionCode: "DEFERRED_INFORMATIONAL_RESPONSE",
+      decisionModelVersion: "decision-model/v1",
     },
     v2: {
-      route: '/contact/basic',
-      priority: 'medium',
+      route: "/contact/basic",
+      priority: "medium",
       flags: [],
-      actionCode: 'STANDARD_REVIEW',
-      decisionModelVersion: 'decision-model/v2',
+      actionCode: "STANDARD_REVIEW",
+      decisionModelVersion: "decision-model/v2",
     },
   },
-  'long duration incident months': {
+  "long duration incident months": {
     v1: {
-      route: '/contact/basic',
-      priority: 'low',
+      route: "/contact/basic",
+      priority: "low",
       flags: [],
-      actionCode: 'DEFERRED_INFORMATIONAL_RESPONSE',
-      decisionModelVersion: 'decision-model/v1',
+      actionCode: "DEFERRED_INFORMATIONAL_RESPONSE",
+      decisionModelVersion: "decision-model/v1",
     },
     v2: {
-      route: '/contact/basic',
-      priority: 'low',
+      route: "/contact/basic",
+      priority: "low",
       flags: [],
-      actionCode: 'DEFERRED_INFORMATIONAL_RESPONSE',
-      decisionModelVersion: 'decision-model/v2',
+      actionCode: "DEFERRED_INFORMATIONAL_RESPONSE",
+      decisionModelVersion: "decision-model/v2",
     },
   },
-  'family conflict profile': {
+  "family conflict profile": {
     v1: {
-      route: '/contact/family',
-      priority: 'high',
-      flags: ['family_conflict'],
-      actionCode: 'PRIORITY_REVIEW_24_48H',
-      decisionModelVersion: 'decision-model/v1',
+      route: "/contact/family",
+      priority: "high",
+      flags: ["family_conflict"],
+      actionCode: "PRIORITY_REVIEW_24_48H",
+      decisionModelVersion: "decision-model/v1",
     },
     v2: {
-      route: '/contact/family',
-      priority: 'high',
-      flags: ['family_conflict'],
-      actionCode: 'PRIORITY_REVIEW_24_48H',
-      decisionModelVersion: 'decision-model/v2',
+      route: "/contact/family",
+      priority: "high",
+      flags: ["family_conflict"],
+      actionCode: "PRIORITY_REVIEW_24_48H",
+      decisionModelVersion: "decision-model/v2",
     },
   },
-  'court related legal escalation': {
+  "court related legal escalation": {
     v1: {
-      route: '/contact/legal',
-      priority: 'critical',
-      flags: ['active_procedure'],
-      actionCode: 'IMMEDIATE_HUMAN_CONTACT',
-      decisionModelVersion: 'decision-model/v1',
+      route: "/contact/legal",
+      priority: "critical",
+      flags: ["active_procedure"],
+      actionCode: "IMMEDIATE_HUMAN_CONTACT",
+      decisionModelVersion: "decision-model/v1",
     },
     v2: {
-      route: '/contact/legal',
-      priority: 'critical',
-      flags: ['active_procedure'],
-      actionCode: 'IMMEDIATE_HUMAN_CONTACT',
-      decisionModelVersion: 'decision-model/v2',
+      route: "/contact/legal",
+      priority: "critical",
+      flags: ["active_procedure"],
+      actionCode: "IMMEDIATE_HUMAN_CONTACT",
+      decisionModelVersion: "decision-model/v2",
     },
   },
 };
 
-test('canonical scenario snapshots are stable for V1 and V2', () => {
+test("canonical scenario snapshots are stable for V1 and V2", () => {
   for (const scenario of canonicalDecisionCases) {
     const expected = expectedDecisionSnapshots[scenario.name];
 
@@ -186,7 +186,7 @@ test('canonical scenario snapshots are stable for V1 and V2', () => {
   }
 });
 
-test('decision engines are deterministic for repeated identical input', () => {
+test("decision engines are deterministic for repeated identical input", () => {
   for (const scenario of canonicalDecisionCases) {
     const v1First = decideIntake(scenario.input);
     const v1Second = decideIntake(scenario.input);
@@ -198,7 +198,7 @@ test('decision engines are deterministic for repeated identical input', () => {
   }
 });
 
-test('decision model versions remain distinct and V1 behavior is snapshot-locked', () => {
+test("decision model versions remain distinct and V1 behavior is snapshot-locked", () => {
   assert.notEqual(DECISION_MODEL_VERSION_V1, DECISION_MODEL_VERSION_V2);
 
   for (const scenario of canonicalDecisionCases) {

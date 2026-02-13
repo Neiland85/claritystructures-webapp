@@ -1,4 +1,4 @@
-import type { WizardResult } from '../../src/types/wizard.js';
+import type { WizardResult } from "@claritystructures/domain";
 
 export type CanonicalDecisionScenario = {
   name: string;
@@ -7,87 +7,87 @@ export type CanonicalDecisionScenario = {
 
 function buildResult(overrides: Partial<WizardResult> = {}): WizardResult {
   return {
-    clientProfile: 'private_individual',
-    urgency: 'informational',
+    clientProfile: "private_individual",
+    urgency: "informational",
     hasEmotionalDistress: false,
-    incident: 'Suspicious profile activity under review',
+    incident: "Suspicious profile activity under review",
     devices: 1,
     actionsTaken: [],
     evidenceSources: [],
-    objective: 'Understand legal and technical next steps',
+    objective: "Understand legal and technical next steps",
     ...overrides,
   };
 }
 
 export const canonicalDecisionCases: CanonicalDecisionScenario[] = [
   {
-    name: 'low informational baseline',
+    name: "low informational baseline",
     input: buildResult({
-      urgency: 'informational',
+      urgency: "informational",
     }),
   },
   {
-    name: 'medium time sensitive baseline',
+    name: "medium time sensitive baseline",
     input: buildResult({
-      urgency: 'time_sensitive',
+      urgency: "time_sensitive",
       hasEmotionalDistress: true,
     }),
   },
   {
-    name: 'high legal risk baseline',
+    name: "high legal risk baseline",
     input: buildResult({
-      clientProfile: 'legal_professional',
-      urgency: 'legal_risk',
+      clientProfile: "legal_professional",
+      urgency: "legal_risk",
     }),
   },
   {
-    name: 'critical urgency route override',
+    name: "critical urgency route override",
     input: buildResult({
-      clientProfile: 'family_inheritance_conflict',
-      urgency: 'critical',
+      clientProfile: "family_inheritance_conflict",
+      urgency: "critical",
     }),
   },
   {
-    name: 'high data sensitivity refinement',
+    name: "high data sensitivity refinement",
     input: buildResult({
-      urgency: 'informational',
-      dataSensitivityLevel: 'high',
+      urgency: "informational",
+      dataSensitivityLevel: "high",
     }),
   },
   {
-    name: 'ongoing incident exposure refinement',
+    name: "ongoing incident exposure refinement",
     input: buildResult({
-      urgency: 'informational',
+      urgency: "informational",
       isOngoing: true,
     }),
   },
   {
-    name: 'no device access with messages only evidence',
+    name: "no device access with messages only evidence",
     input: buildResult({
       hasAccessToDevices: false,
-      evidenceSources: ['chat export from mobile app'],
+      evidenceSources: ["chat export from mobile app"],
       devices: 0,
     }),
   },
   {
-    name: 'long duration incident months',
+    name: "long duration incident months",
     input: buildResult({
-      urgency: 'informational',
-      estimatedIncidentStart: 'months',
+      urgency: "informational",
+      estimatedIncidentStart: "months",
     }),
   },
   {
-    name: 'family conflict profile',
+    name: "family conflict profile",
     input: buildResult({
-      clientProfile: 'family_inheritance_conflict',
-      urgency: 'time_sensitive',
+      clientProfile: "family_inheritance_conflict",
+      urgency: "time_sensitive",
     }),
   },
   {
-    name: 'court related legal escalation',
+    name: "court related legal escalation",
     input: buildResult({
-      clientProfile: 'court_related',
-      urgency: 'legal_risk',
+      clientProfile: "court_related",
+      urgency: "legal_risk",
     }),
   },
 ];
