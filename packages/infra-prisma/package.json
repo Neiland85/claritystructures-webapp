@@ -5,7 +5,7 @@
   "main": "./prisma/client.ts",
   "types": "./prisma/client.ts",
   "scripts": {
-    "build": "prisma generate"
+    "build": "prisma generate --config=../../prisma.config.ts"
   },
   "dependencies": {
     "@prisma/client": "^7.4.0",
