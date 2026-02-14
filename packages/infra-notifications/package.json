@@ -1,0 +1,15 @@
+{
+  "name": "@claritystructures/infra-notifications",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "nodemailer": "^7.0.11",
+    "@prisma/client": "^7.4.0",
+    "@claritystructures/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.14"
+  }
+}

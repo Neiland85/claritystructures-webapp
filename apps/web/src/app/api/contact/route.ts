@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { sendForensicIntakeEmail } from "@claritystructures/infra-alerts";
-import { decideIntake } from "@claritystructures/domain";
+import { createSubmitIntakeUseCase } from "@/application/di-container";
 import type { WizardResult } from "@claritystructures/domain";
 import { apiGuard } from "@/lib/api-guard";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   return apiGuard(req, async () => {
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
         email: rawEmail,
         phone: rawPhone,
         message: rawMessage,
-        tone,
+        tone: rawTone,
         wizardResult,
       } = body;
 
@@ -23,6 +23,24 @@ export async function POST(req: NextRequest) {
       const email = rawEmail?.toLowerCase().trim();
       const phone = rawPhone?.trim();
       const message = rawMessage?.trim();
+      const tone = rawTone || "basic";
+
+      // Validation
+      if (!email || !message) {
+        return NextResponse.json(
+          { error: "Email and message are required" },
+          { status: 400 },
+        );
+      }
+
+      // Basic email regex validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return NextResponse.json(
+          { error: "Invalid email format" },
+          { status: 400 },
+        );
+      }
 
       // If we have a full wizard result, use it.
       const result: WizardResult = wizardResult || {
@@ -35,16 +53,24 @@ export async function POST(req: NextRequest) {
         objective: "contact",
       };
 
-      const decision = decideIntake(result);
+      const useCase = createSubmitIntakeUseCase();
 
-      await sendForensicIntakeEmail({
-        result,
-        decision,
-        userEmail: email,
-        userPhone: phone,
+      // Execute use case
+      // Note: priority and route are computed by the use case based on the decision engine
+      const { decision } = await useCase.execute({
+        tone,
+        priority: "medium", // Default hint, will be overridden by use case decision
+        email,
+        message,
+        phone,
+        status: "pending",
+        meta: result,
       });
 
-      return NextResponse.json({ success: true });
+      return NextResponse.json({
+        success: true,
+        decision: decision.decision,
+      });
     } catch (error) {
       console.error("Error in contact API:", error);
       return NextResponse.json({ error: "Failed to send" }, { status: 500 });

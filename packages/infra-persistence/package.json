@@ -1,0 +1,21 @@
+{
+  "name": "@claritystructures/infra-persistence",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "prisma generate --config=../../prisma.config.ts"
+  },
+  "dependencies": {
+    "@claritystructures/domain": "workspace:*",
+    "@prisma/adapter-pg": "^7.4.0",
+    "@prisma/client": "^7.4.0",
+    "@prisma/client-runtime-utils": "7.4.0",
+    "pg": "^8.18.0",
+    "prisma": "^7.4.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.16.0"
+  }
+}

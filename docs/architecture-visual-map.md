@@ -182,30 +182,35 @@ HTTP Request
 ## Package Structure
 
 ```
-claritystructures-webapp/
-├── packages/
-│   ├── domain/              ← 🎯 CORE (innermost)
-│   │   └── src/
-│   │       ├── decision.ts
-│   │       ├── ports.ts     ← 🔌 PORTS
-│   │       └── index.ts
-│   │
-│   ├── infra-alerts/        ← 🔧 ADAPTERS
-│   │   └── src/
-│   │       ├── prisma/intake.repository.ts
-│   │       ├── mail/notifier.ts
-│   │       └── audit/console.audit.ts
-│   │
-│   └── infra-prisma/        ← 🔧 ADAPTERS
-│       └── prisma/
-│           └── schema.prisma
-│
-└── apps/
-    └── web/
-        └── src/
-            ├── app/api/     ← 🖥️ PRESENTATION
-            ├── application/ ← 🎬 APPLICATION (to add)
-            └── components/  ← 🖥️ PRESENTATION
+ claritystructures-webapp/
+ ├── packages/
+ │   ├── domain/              ← 🎯 CORE (innermost)
+ │   │   └── src/
+ │   │       ├── decision.ts
+ │   │       ├── ports.ts     ← 🔌 PORTS
+ │   │       └── index.ts
+ │   │
+ │   ├── infra-notifications/ ← 🔧 ADAPTERS
+ │   │   └── src/
+ │   │       ├── mail/notifier.ts
+ │   │       ├── audit/console.audit.ts
+ │   │       └── index.ts
+ │   │
+ │   └── infra-persistence/   ← 🔧 ADAPTERS
+ │       ├── prisma/
+ │       │   └── schema.prisma
+ │       └── src/
+ │           ├── repositories/intake.repository.ts
+ │           └── index.ts
+ │
+ └── apps/
+     └── web/
+         └── src/
+             ├── app/api/     ← 🖥️ PRESENTATION
+             ├── application/ ← 🎬 APPLICATION
+             │   ├── di-container.ts
+             │   └── use-cases/
+             └── components/  ← 🖥️ PRESENTATION
 ```
 
 ---
