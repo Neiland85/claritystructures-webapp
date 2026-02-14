@@ -27,12 +27,16 @@ import {
 /**
  * Factory for SubmitIntakeUseCase with all dependencies injected
  */
+// Singleton instances for stateless services
+const mailNotifier = new MailNotifier();
+const consoleAudit = new ConsoleAuditTrail();
+
+/**
+ * Factory for SubmitIntakeUseCase with all dependencies injected
+ */
 export function createSubmitIntakeUseCase(): SubmitIntakeUseCase {
   const repository = new PrismaIntakeRepository(prisma);
-  const notifier = new MailNotifier();
-  const audit = new ConsoleAuditTrail();
-
-  return new SubmitIntakeUseCase(repository, notifier, audit);
+  return new SubmitIntakeUseCase(repository, mailNotifier, consoleAudit);
 }
 
 /**
@@ -48,8 +52,7 @@ export function createListIntakesUseCase(): ListIntakesUseCase {
  */
 export function createUpdateIntakeStatusUseCase(): UpdateIntakeStatusUseCase {
   const repository = new PrismaIntakeRepository(prisma);
-  const audit = new ConsoleAuditTrail();
-  return new UpdateIntakeStatusUseCase(repository, audit);
+  return new UpdateIntakeStatusUseCase(repository, consoleAudit);
 }
 
 /**
@@ -57,4 +60,14 @@ export function createUpdateIntakeStatusUseCase(): UpdateIntakeStatusUseCase {
  */
 export async function closeDependencies(): Promise<void> {
   await prisma.$disconnect();
+}
+
+// Automatically register graceful shutdown handlers when running in a Node.js environment
+if (typeof process !== "undefined" && typeof process.on === "function") {
+  const shutdown = () => {
+    void closeDependencies();
+  };
+  process.on("beforeExit", shutdown);
+  process.on("SIGTERM", shutdown);
+  process.on("SIGINT", shutdown);
 }

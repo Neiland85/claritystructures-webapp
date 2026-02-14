@@ -8,7 +8,7 @@ import {
   IntakeTone as PrismaIntakeTone,
   IntakePriority as PrismaIntakePriority,
   IntakeStatus as PrismaIntakeStatus,
-} from "../generated/prisma/client.js";
+} from "../generated/prisma/index";
 
 /**
  * Compile-time consistency check: Domain enums ↔ Prisma enums.
@@ -38,10 +38,36 @@ const statusDomainToPrisma: Record<IntakeStatus, PrismaIntakeStatus> = {
   rejected: PrismaIntakeStatus.rejected,
 };
 
-// Reverse check: ensure every Prisma value is covered
-const _tonePrismaToDomain: Record<PrismaIntakeTone, IntakeTone> =
-  toneDomainToPrisma as Record<PrismaIntakeTone, IntakeTone>;
-const _priorityPrismaToDomain: Record<PrismaIntakePriority, IntakePriority> =
-  priorityDomainToPrisma as Record<PrismaIntakePriority, IntakePriority>;
-const _statusPrismaToDomain: Record<PrismaIntakeStatus, IntakeStatus> =
-  statusDomainToPrisma as Record<PrismaIntakeStatus, IntakeStatus>;
+// Helper to ensure exhaustive mapping
+type AssertKeys<T, U> = T extends U ? (U extends T ? true : never) : never;
+
+// Compile-time check: Ensure Domain Enum keys match mapped keys
+type _CheckTone = AssertKeys<IntakeTone, keyof typeof toneDomainToPrisma>;
+type _CheckPriority = AssertKeys<
+  IntakePriority,
+  keyof typeof priorityDomainToPrisma
+>;
+type _CheckStatus = AssertKeys<IntakeStatus, keyof typeof statusDomainToPrisma>;
+
+// Runtime check: Verify values actually match (bidirectional)
+const verifyBidirectionalMapping = <
+  DomainKey extends string,
+  PrismaValue extends string,
+>(
+  mapping: Record<DomainKey, PrismaValue>,
+  domainName: string,
+) => {
+  const domainValues = new Set(Object.keys(mapping));
+  const prismaValues = new Set(Object.values(mapping));
+
+  if (domainValues.size !== prismaValues.size) {
+    throw new Error(
+      `[Consistency] ${domainName} mapping is not 1:1. Domain: ${domainValues.size}, Prisma: ${prismaValues.size}`,
+    );
+  }
+};
+
+// Execute checks
+verifyBidirectionalMapping(toneDomainToPrisma, "IntakeTone");
+verifyBidirectionalMapping(priorityDomainToPrisma, "IntakePriority");
+verifyBidirectionalMapping(statusDomainToPrisma, "IntakeStatus");

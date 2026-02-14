@@ -25,6 +25,23 @@ export async function POST(req: NextRequest) {
       const message = rawMessage?.trim();
       const tone = rawTone || "basic";
 
+      // Validation
+      if (!email || !message) {
+        return NextResponse.json(
+          { error: "Email and message are required" },
+          { status: 400 },
+        );
+      }
+
+      // Basic email regex validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return NextResponse.json(
+          { error: "Invalid email format" },
+          { status: 400 },
+        );
+      }
+
       // If we have a full wizard result, use it.
       const result: WizardResult = wizardResult || {
         clientProfile: "other",
@@ -38,10 +55,11 @@ export async function POST(req: NextRequest) {
 
       const useCase = createSubmitIntakeUseCase();
 
+      // Execute use case
+      // Note: priority and route are computed by the use case based on the decision engine
       const { decision } = await useCase.execute({
         tone,
-        route: tone, // Simplified mapping for now
-        priority: "medium", // Default, useCase will re-decide or we can pass decision result
+        priority: "medium", // Default hint, will be overridden by use case decision
         email,
         message,
         phone,
