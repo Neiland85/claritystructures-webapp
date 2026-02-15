@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(__dirname, "../.."),
   },
+
   transpilePackages: [
     "@claritystructures/domain",
     "@claritystructures/types",
@@ -12,6 +13,7 @@ const nextConfig: NextConfig = {
     "@claritystructures/infra-notifications",
     "@claritystructures/infra-persistence",
   ],
+
   async headers() {
     return [
       {

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { checkRateLimit, getIdentifier } from "./lib/rate-limit/memory";
+import { checkRateLimit, getIdentifier } from "./lib/rate-limit/upstash";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = NextResponse.next();
 
   // Generate nonce using Web Crypto API (Edge Runtime compatible)
@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest) {
     );
   }
 
-  // Rate limiting for API routes
+  // Rate limiting for API routes with Upstash Redis
   if (request.nextUrl.pathname.startsWith("/api/")) {
     const identifier = getIdentifier(request);
     const { success, remaining } = await checkRateLimit(identifier, 10, 10000);
