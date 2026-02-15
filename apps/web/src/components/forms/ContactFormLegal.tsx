@@ -8,7 +8,7 @@ type Props = {
 
 export default function ContactFormLegal({ context }: Props) {
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("");
+  const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -24,23 +24,22 @@ export default function ContactFormLegal({ context }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...context,
           email,
-          role,
+          phone,
           message,
           tone: "legal",
-          consent: true,
-          consentVersion: "v1",
+          wizardResult: context,
         }),
       });
 
       if (!res.ok) {
-        throw new Error("Error al enviar");
+        const data = await res.json();
+        throw new Error(data.error || "Error al enviar");
       }
 
       setSent(true);
-    } catch (err) {
-      setError("No se pudo enviar. Inténtalo de nuevo.");
+    } catch (err: any) {
+      setError(err.message || "No se pudo enviar. Inténtalo de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -76,37 +75,39 @@ export default function ContactFormLegal({ context }: Props) {
         onChange={(e: ChangeEvent<HTMLInputElement>) =>
           setEmail(e.target.value)
         }
-        className="w-full border p-3 bg-black text-white"
+        className="w-full border border-gray-600 p-3 bg-black text-white rounded"
         disabled={loading}
       />
 
       <input
-        placeholder="Afectado (rol, situación, etc.)"
-        value={role}
-        required
-        onChange={(e: ChangeEvent<HTMLInputElement>) => setRole(e.target.value)}
-        className="w-full border p-3 bg-black text-white"
+        type="tel"
+        placeholder="Teléfono (opcional)"
+        value={phone}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          setPhone(e.target.value)
+        }
+        className="w-full border border-gray-600 p-3 bg-black text-white rounded"
         disabled={loading}
       />
 
       <textarea
         rows={4}
-        placeholder="Contexto técnico o procesal"
+        placeholder="Describe tu situación o consulta"
         value={message}
         required
         onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
           setMessage(e.target.value)
         }
-        className="w-full border p-3 bg-black text-white"
+        className="w-full border border-gray-600 p-3 bg-black text-white rounded"
         disabled={loading}
       />
 
       <button
         type="submit"
-        className="bg-white text-black px-6 py-3 rounded hover:bg-gray-200 disabled:opacity-50"
+        className="bg-white text-black px-6 py-3 rounded hover:bg-gray-200 disabled:opacity-50 transition"
         disabled={loading}
       >
-        {loading ? "Enviando..." : "Enviar"}
+        {loading ? "Enviando..." : "Enviar consulta"}
       </button>
     </form>
   );
