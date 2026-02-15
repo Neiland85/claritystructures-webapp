@@ -25,5 +25,13 @@
       "lodash": ">=4.17.23",
       "hono": ">=4.11.7"
     }
+  },
+  "dependencies": {
+    "@t3-oss/env-nextjs": "^0.13.10",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.36.2",
+    "isomorphic-dompurify": "3.0.0-rc.2",
+    "next": "16.1.6",
+    "zod": "^4.3.6"
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type {
   WizardResult,
   ClientProfile,
@@ -8,6 +8,7 @@ import type {
 } from "@claritystructures/domain";
 import { clientProfiles, urgencyLevels } from "@/constants/wizardOptions";
 import AnimatedLogo from "./AnimatedLogo";
+import { trackEvent } from "@/lib/analytics";
 
 type Props = {
   onComplete: (data: WizardResult) => void;
@@ -60,9 +61,38 @@ export default function Wizard({ onComplete }: Props) {
 
   const isStep1Complete = clientProfile && urgency;
 
+  useEffect(() => {
+    trackEvent({
+      name: "wizard.step_view",
+      timestamp: Date.now(),
+      payload: { phase },
+    });
+  }, [phase]);
+
   function submit() {
     if (!clientProfile || !urgency) return;
 
+    const severityScore =
+      (urgency === "critical" ? 40 : 0) +
+      (physicalSafetyRisk ? 30 : 0) +
+      (financialAssetRisk ? 15 : 0) +
+      (attackerHasPasswords ? 10 : 0) +
+      (evidenceIsAutoDeleted ? 5 : 0);
+
+    trackEvent({
+      name: "wizard.step_submit",
+      timestamp: Date.now(),
+      payload: { phase, severityScore },
+    });
+
+    trackEvent({
+      name: "wizard.risk_classified",
+      timestamp: Date.now(),
+      payload: {
+        severityScore,
+        critical: severityScore >= 70,
+      },
+    });
     onComplete({
       clientProfile,
       urgency,
