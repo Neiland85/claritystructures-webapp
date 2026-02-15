@@ -42,6 +42,13 @@ model ContactIntake {
   meta      Json?
 
   consentAcceptances ConsentAcceptance[]
+
+  // Performance indexes
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt(sort: Desc)])
+  @@index([status, priority])
+  @@index([email])
 }
 
 model ConsentVersion {

@@ -17,6 +17,7 @@
     "test:integration": "vitest run tests/integration"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.1.6",
     "@prisma/client": "^7.4.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
