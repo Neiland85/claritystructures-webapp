@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import createDOMPurify from 'isomorphic-dompurify';
-
-const DOMPurify = createDOMPurify();
+import DOMPurify from 'isomorphic-dompurify';
 
 export async function validateRequest<T>(
   request: NextRequest,
