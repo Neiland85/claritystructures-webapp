@@ -1,6 +1,12 @@
 import { defineConfig, globalIgnores } from "eslint/config";
+import tseslint from "typescript-eslint";
 
 const eslintConfig = defineConfig([
+  {
+    // Enable TypeScript parsing for all TS/TSX files
+    files: ["**/*.ts", "**/*.tsx"],
+    extends: [tseslint.configs.base],
+  },
   {
     // Domain boundary isolation: packages/domain must not import framework code
     files: ["packages/domain/src/**/*.ts"],
