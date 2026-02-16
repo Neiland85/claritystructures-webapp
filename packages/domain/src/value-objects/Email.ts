@@ -27,7 +27,7 @@ export class Email {
   }
 
   getDomain(): string {
-    return this.value.split('@')[1];
+    return this.value.split("@")[1];
   }
 
   equals(other: Email): boolean {

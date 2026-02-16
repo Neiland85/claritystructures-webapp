@@ -1,6 +1,6 @@
-import { expect, afterEach } from 'vitest';
-import { cleanup } from '@testing-library/react';
-import * as matchers from '@testing-library/jest-dom/matchers';
+import { expect, afterEach } from "vitest";
+import { cleanup } from "@testing-library/react";
+import * as matchers from "@testing-library/jest-dom/matchers";
 
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers);
@@ -11,5 +11,5 @@ afterEach(() => {
 });
 
 // Mock environment variables for tests
-process.env.NODE_ENV = 'test';
-process.env.SKIP_ENV_VALIDATION = 'true';
+process.env.NODE_ENV = "test";
+process.env.SKIP_ENV_VALIDATION = "true";

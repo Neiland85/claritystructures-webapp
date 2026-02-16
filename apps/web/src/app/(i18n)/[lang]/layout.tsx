@@ -1,13 +1,9 @@
-import { LanguageProvider } from '@/components/LanguageProvider';
+import { LanguageProvider } from "@/components/LanguageProvider";
 
 export default function LangLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <LanguageProvider>
-      {children}
-    </LanguageProvider>
-  );
+  return <LanguageProvider>{children}</LanguageProvider>;
 }

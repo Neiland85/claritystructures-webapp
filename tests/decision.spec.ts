@@ -1,5 +1,5 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
+import test from "node:test";
+import assert from "node:assert/strict";
 
 import {
   DECISION_MODEL_VERSION,
@@ -11,95 +11,95 @@ import {
   mapWizardToSignals,
   assessIntake,
   assessIntakeWithSignals,
-} from '@claritystructures/domain';
-import type { WizardResult } from '@claritystructures/domain';
+} from "@claritystructures/domain";
+import type { WizardResult } from "@claritystructures/domain";
 
 function buildResult(overrides: Partial<WizardResult> = {}): WizardResult {
   return {
-    clientProfile: 'private_individual',
-    urgency: 'informational',
+    clientProfile: "private_individual",
+    urgency: "informational",
     hasEmotionalDistress: false,
-    incident: 'incident',
+    incident: "incident",
     devices: 1,
     actionsTaken: [],
     evidenceSources: [],
-    objective: 'objective',
+    objective: "objective",
     ...overrides,
   };
 }
 
-test('returns default low-priority basic route decision', () => {
+test("returns default low-priority basic route decision", () => {
   const result = decideIntake(buildResult());
 
-  assert.equal(result.route, '/contact/basic');
-  assert.equal(result.priority, 'low');
+  assert.equal(result.route, "/contact/basic");
+  assert.equal(result.priority, "low");
   assert.deepEqual(result.flags, []);
-  assert.equal(result.actionCode, 'DEFERRED_INFORMATIONAL_RESPONSE');
+  assert.equal(result.actionCode, "DEFERRED_INFORMATIONAL_RESPONSE");
   assert.equal(result.decisionModelVersion, DECISION_MODEL_VERSION);
 });
 
-test('critical urgency forces critical route and critical action', () => {
+test("critical urgency forces critical route and critical action", () => {
   const result = decideIntake(
     buildResult({
-      clientProfile: 'family_inheritance_conflict',
-      urgency: 'critical',
+      clientProfile: "family_inheritance_conflict",
+      urgency: "critical",
       hasEmotionalDistress: true,
-    })
+    }),
   );
 
-  assert.equal(result.route, '/contact/critical');
-  assert.equal(result.priority, 'critical');
-  assert.deepEqual(result.flags, ['family_conflict', 'emotional_distress']);
-  assert.equal(result.actionCode, 'IMMEDIATE_HUMAN_CONTACT');
+  assert.equal(result.route, "/contact/critical");
+  assert.equal(result.priority, "critical");
+  assert.deepEqual(result.flags, ["family_conflict", "emotional_distress"]);
+  assert.equal(result.actionCode, "IMMEDIATE_HUMAN_CONTACT");
 });
 
-test('court-related legal risk yields critical priority with legal route', () => {
+test("court-related legal risk yields critical priority with legal route", () => {
   const result = decideIntake(
     buildResult({
-      clientProfile: 'court_related',
-      urgency: 'legal_risk',
-    })
+      clientProfile: "court_related",
+      urgency: "legal_risk",
+    }),
   );
 
-  assert.equal(result.route, '/contact/legal');
-  assert.equal(result.priority, 'critical');
-  assert.deepEqual(result.flags, ['active_procedure']);
-  assert.equal(result.actionCode, 'IMMEDIATE_HUMAN_CONTACT');
+  assert.equal(result.route, "/contact/legal");
+  assert.equal(result.priority, "critical");
+  assert.deepEqual(result.flags, ["active_procedure"]);
+  assert.equal(result.actionCode, "IMMEDIATE_HUMAN_CONTACT");
 });
 
-test('family conflict + time-sensitive yields high priority with family route', () => {
+test("family conflict + time-sensitive yields high priority with family route", () => {
   const result = decideIntake(
     buildResult({
-      clientProfile: 'family_inheritance_conflict',
-      urgency: 'time_sensitive',
-    })
+      clientProfile: "family_inheritance_conflict",
+      urgency: "time_sensitive",
+    }),
   );
 
-  assert.equal(result.route, '/contact/family');
-  assert.equal(result.priority, 'high');
-  assert.deepEqual(result.flags, ['family_conflict']);
-  assert.equal(result.actionCode, 'PRIORITY_REVIEW_24_48H');
+  assert.equal(result.route, "/contact/family");
+  assert.equal(result.priority, "high");
+  assert.deepEqual(result.flags, ["family_conflict"]);
+  assert.equal(result.actionCode, "PRIORITY_REVIEW_24_48H");
 });
 
-test('legal professional only yields low priority and legal route', () => {
+test("legal professional only yields low priority and legal route", () => {
   const result = decideIntake(
     buildResult({
-      clientProfile: 'legal_professional',
-      urgency: 'informational',
-    })
+      clientProfile: "legal_professional",
+      urgency: "informational",
+    }),
   );
 
-  assert.equal(result.route, '/contact/legal');
-  assert.equal(result.priority, 'low');
-  assert.deepEqual(result.flags, ['legal_professional']);
-  assert.equal(result.actionCode, 'DEFERRED_INFORMATIONAL_RESPONSE');
+  assert.equal(result.route, "/contact/legal");
+  assert.equal(result.priority, "low");
+  assert.deepEqual(result.flags, ["legal_professional"]);
+  assert.equal(result.actionCode, "DEFERRED_INFORMATIONAL_RESPONSE");
 });
 
-test('mapWizardToSignals is deterministic for same input', () => {
+test("mapWizardToSignals is deterministic for same input", () => {
   const input = buildResult({
-    urgency: 'legal_risk',
-    evidenceSources: ['email thread', 'screenshots from app'],
-    actionsTaken: ['monitor'],
+    urgency: "legal_risk",
+    evidenceSources: ["email thread", "screenshots from app"],
+    actionsTaken: ["monitor"],
     devices: 0,
   });
 
@@ -107,54 +107,52 @@ test('mapWizardToSignals is deterministic for same input', () => {
   const second = mapWizardToSignals(input);
 
   assert.deepEqual(first, second);
-  assert.equal(first.riskLevel, 'high');
-  assert.equal(first.evidenceLevel, 'mixed');
-  assert.equal(first.exposureState, 'potential');
+  assert.equal(first.riskLevel, "high");
+  assert.equal(first.evidenceLevel, "mixed");
+  assert.equal(first.exposureState, "potential");
 });
 
-
-test('mapWizardToSignals upgrades riskLevel when data sensitivity is high', () => {
+test("mapWizardToSignals upgrades riskLevel when data sensitivity is high", () => {
   const result = mapWizardToSignals(
     buildResult({
-      urgency: 'informational',
-      dataSensitivityLevel: 'high',
-    })
+      urgency: "informational",
+      dataSensitivityLevel: "high",
+    }),
   );
 
-  assert.equal(result.riskLevel, 'high');
+  assert.equal(result.riskLevel, "high");
 });
 
-test('mapWizardToSignals sets exposureState to active when incident is ongoing', () => {
+test("mapWizardToSignals sets exposureState to active when incident is ongoing", () => {
   const result = mapWizardToSignals(
     buildResult({
       actionsTaken: [],
       isOngoing: true,
-    })
+    }),
   );
 
-  assert.equal(result.exposureState, 'active');
+  assert.equal(result.exposureState, "active");
 });
 
-test('mapWizardToSignals handles missing optional fields safely', () => {
+test("mapWizardToSignals handles missing optional fields safely", () => {
   const result = mapWizardToSignals(
     buildResult({
       hasEmotionalDistress: undefined,
       evidenceSources: [],
       actionsTaken: [],
       devices: 0,
-    })
+    }),
   );
 
   assert.equal(result.sensitivityFlags.length, 0);
-  assert.equal(result.evidenceLevel, 'none');
-  assert.equal(result.exposureState, 'unknown');
+  assert.equal(result.evidenceLevel, "none");
+  assert.equal(result.exposureState, "unknown");
 });
 
-
-test('decideIntakeV2 matches V1 for baseline input without refinement fields', () => {
+test("decideIntakeV2 matches V1 for baseline input without refinement fields", () => {
   const input = buildResult({
-    clientProfile: 'legal_professional',
-    urgency: 'time_sensitive',
+    clientProfile: "legal_professional",
+    urgency: "time_sensitive",
     hasEmotionalDistress: true,
   });
 
@@ -173,67 +171,65 @@ test('decideIntakeV2 matches V1 for baseline input without refinement fields', (
       priority: v1.priority,
       flags: v1.flags,
       actionCode: v1.actionCode,
-    }
+    },
   );
   assert.equal(v2.decisionModelVersion, DECISION_MODEL_VERSION_V2);
-  assert.equal(DECISION_MODEL_VERSION_V2, 'decision-model/v2');
+  assert.equal(DECISION_MODEL_VERSION_V2, "decision-model/v2");
 });
 
-test('decideIntakeV2 elevates priority only when refinement signals change risk meaningfully', () => {
+test("decideIntakeV2 elevates priority only when refinement signals change risk meaningfully", () => {
   const input = buildResult({
-    urgency: 'informational',
-    dataSensitivityLevel: 'high',
+    urgency: "informational",
+    dataSensitivityLevel: "high",
     hasAccessToDevices: false,
-    evidenceSources: ['chat export'],
+    evidenceSources: ["chat export"],
     devices: 0,
   });
 
   const v1 = decideIntake(input);
   const v2 = decideIntakeV2(input);
 
-  assert.equal(v1.priority, 'low');
-  assert.equal(v1.actionCode, 'DEFERRED_INFORMATIONAL_RESPONSE');
-  assert.equal(v2.priority, 'critical');
-  assert.equal(v2.actionCode, 'IMMEDIATE_HUMAN_CONTACT');
+  assert.equal(v1.priority, "low");
+  assert.equal(v1.actionCode, "DEFERRED_INFORMATIONAL_RESPONSE");
+  assert.equal(v2.priority, "critical");
+  assert.equal(v2.actionCode, "IMMEDIATE_HUMAN_CONTACT");
   assert.equal(v2.route, v1.route);
   assert.deepEqual(v2.flags, v1.flags);
 });
 
-test('assessIntake default behavior remains unchanged when using signal-enabled helper', () => {
+test("assessIntake default behavior remains unchanged when using signal-enabled helper", () => {
   const input = buildResult({
-    clientProfile: 'family_inheritance_conflict',
-    urgency: 'time_sensitive',
+    clientProfile: "family_inheritance_conflict",
+    urgency: "time_sensitive",
   });
 
   const baseline = assessIntake(input);
   const withSignals = assessIntakeWithSignals(input);
 
-  assert.deepEqual(
-    baseline,
-    {
-      priority: 'high',
-      flags: ['family_conflict'],
-      actionCode: 'PRIORITY_REVIEW_24_48H',
-    }
-  );
+  assert.deepEqual(baseline, {
+    priority: "high",
+    flags: ["family_conflict"],
+    actionCode: "PRIORITY_REVIEW_24_48H",
+  });
   assert.deepEqual(
     {
       priority: withSignals.priority,
       flags: withSignals.flags,
       actionCode: withSignals.actionCode,
     },
-    baseline
+    baseline,
   );
 });
 
-
-test('assessIntakeWithSignals can expose decisionModelVersion and opt into V2', () => {
+test("assessIntakeWithSignals can expose decisionModelVersion and opt into V2", () => {
   const input = buildResult({
-    urgency: 'informational',
-    dataSensitivityLevel: 'high',
+    urgency: "informational",
+    dataSensitivityLevel: "high",
   });
 
-  const v1Default = assessIntakeWithSignals(input, { includeDecisionModelVersion: true });
+  const v1Default = assessIntakeWithSignals(input, {
+    includeDecisionModelVersion: true,
+  });
   const v2 = assessIntakeWithSignals(input, {
     useDecisionModelV2: true,
     includeDecisionModelVersion: true,
@@ -241,15 +237,14 @@ test('assessIntakeWithSignals can expose decisionModelVersion and opt into V2', 
 
   assert.equal(v1Default.decisionModelVersion, DECISION_MODEL_VERSION);
   assert.equal(v2.decisionModelVersion, DECISION_MODEL_VERSION_V2);
-  assert.equal(v1Default.priority, 'low');
-  assert.equal(v2.priority, 'critical');
+  assert.equal(v1Default.priority, "low");
+  assert.equal(v2.priority, "critical");
 });
 
-
-test('decideIntakeWithExplanation includes expected V1 reasons and no V2-only reasons', () => {
+test("decideIntakeWithExplanation includes expected V1 reasons and no V2-only reasons", () => {
   const input = buildResult({
-    clientProfile: 'family_inheritance_conflict',
-    urgency: 'time_sensitive',
+    clientProfile: "family_inheritance_conflict",
+    urgency: "time_sensitive",
     hasEmotionalDistress: true,
   });
 
@@ -257,45 +252,45 @@ test('decideIntakeWithExplanation includes expected V1 reasons and no V2-only re
 
   assert.deepEqual(decision, decideIntake(input));
   assert.equal(explanation.modelVersion, DECISION_MODEL_VERSION);
-  assert.equal(explanation.baselinePriority, 'high');
-  assert.equal(explanation.finalPriority, 'high');
+  assert.equal(explanation.baselinePriority, "high");
+  assert.equal(explanation.finalPriority, "high");
   assert.deepEqual(explanation.reasons, [
-    'client_profile_routing',
-    'family_conflict_flag',
-    'emotional_distress_flag',
+    "client_profile_routing",
+    "family_conflict_flag",
+    "emotional_distress_flag",
   ]);
   assert.equal(
     explanation.reasons.some((reason) =>
       [
-        'data_sensitivity_escalation',
-        'ongoing_incident_escalation',
-        'device_access_constraint',
-        'long_duration_exposure_hint',
-      ].includes(reason)
+        "data_sensitivity_escalation",
+        "ongoing_incident_escalation",
+        "device_access_constraint",
+        "long_duration_exposure_hint",
+      ].includes(reason),
     ),
-    false
+    false,
   );
 });
 
-test('decideIntakeWithExplanation includes V2 escalation reasons when applicable', () => {
+test("decideIntakeWithExplanation includes V2 escalation reasons when applicable", () => {
   const input = buildResult({
-    urgency: 'informational',
-    dataSensitivityLevel: 'high',
+    urgency: "informational",
+    dataSensitivityLevel: "high",
   });
 
   const { decision, explanation } = decideIntakeWithExplanation(input, true);
 
   assert.deepEqual(decision, decideIntakeV2(input));
   assert.equal(explanation.modelVersion, DECISION_MODEL_VERSION_V2);
-  assert.equal(explanation.baselinePriority, 'low');
-  assert.equal(explanation.finalPriority, 'critical');
-  assert.deepEqual(explanation.reasons, ['data_sensitivity_escalation']);
+  assert.equal(explanation.baselinePriority, "low");
+  assert.equal(explanation.finalPriority, "critical");
+  assert.deepEqual(explanation.reasons, ["data_sensitivity_escalation"]);
 });
 
-test('decideIntakeWithExplanation is deterministic for identical input', () => {
+test("decideIntakeWithExplanation is deterministic for identical input", () => {
   const input = buildResult({
     isOngoing: true,
-    estimatedIncidentStart: 'months',
+    estimatedIncidentStart: "months",
   });
 
   const first = decideIntakeWithExplanation(input, true);
@@ -304,23 +299,23 @@ test('decideIntakeWithExplanation is deterministic for identical input', () => {
   assert.deepEqual(first, second);
 });
 
-test('decision JSON hash remains stable across repeated runs', () => {
+test("decision JSON hash remains stable across repeated runs", () => {
   const input = buildResult({
-    urgency: 'informational',
-    dataSensitivityLevel: 'high',
+    urgency: "informational",
+    dataSensitivityLevel: "high",
     isOngoing: true,
-    estimatedIncidentStart: 'months',
+    estimatedIncidentStart: "months",
   });
 
   const signatures = Array.from({ length: 5 }, () =>
-    JSON.stringify(decideIntakeWithExplanation(input, true))
+    JSON.stringify(decideIntakeWithExplanation(input, true)),
   );
 
   assert.equal(new Set(signatures).size, 1);
 });
 
-test('decision outputs are frozen to prevent mutation', () => {
-  const input = buildResult({ urgency: 'legal_risk' });
+test("decision outputs are frozen to prevent mutation", () => {
+  const input = buildResult({ urgency: "legal_risk" });
   const decision = decideIntake(input);
   const withExplanation = decideIntakeWithExplanation(input, true);
 
@@ -331,7 +326,7 @@ test('decision outputs are frozen to prevent mutation', () => {
   assert.equal(Object.isFrozen(withExplanation.explanation.reasons), true);
 });
 
-test('isDecisionModelV2 narrows model version strictly', () => {
+test("isDecisionModelV2 narrows model version strictly", () => {
   const v1 = decideIntake(buildResult());
   const v2 = decideIntakeV2(buildResult());
 

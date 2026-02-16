@@ -1,6 +1,6 @@
-import type { WizardResult } from './wizard-result';
+import type { WizardResult } from "./wizard-result";
 
-import { decideIntake, INTAKE_ROUTE_BY_TONE } from './decision';
+import { decideIntake, INTAKE_ROUTE_BY_TONE } from "./decision";
 
 export { INTAKE_ROUTE_BY_TONE };
 

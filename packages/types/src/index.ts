@@ -3,7 +3,7 @@ export type {
   IntakeDecision,
   IntakeTone,
   ClientProfile,
-  UrgencyLevel
+  UrgencyLevel,
 } from "@claritystructures/domain";
 
 export * from "./intake";

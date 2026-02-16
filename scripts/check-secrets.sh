@@ -11,8 +11,11 @@ NC='\033[0m'
 
 ISSUES_FOUND=0
 
+# Common exclude flags (avoid brace expansion for portability)
+EXCLUDE_DIRS="--exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.next --exclude-dir=dist --exclude-dir=build --exclude-dir=generated --exclude-dir=coverage"
+
 echo -e "\n${YELLOW}1. Checking for hardcoded secrets...${NC}"
-if grep -r --exclude-dir={node_modules,.git,.next,dist,build} --exclude="*.md" --include="*.ts" --include="*.tsx" -E "(password|secret|api_key|apikey|token|private_key).*=.*['\"][^'\"]{8,}['\"]" . 2>/dev/null; then
+if grep -r $EXCLUDE_DIRS --exclude="*.md" --include="*.ts" --include="*.tsx" -E "(password|secret|api_key|apikey|token|private_key).*=.*['\"][^'\"]{8,}['\"]" . 2>/dev/null; then
     echo -e "${RED}WARNING: Found potential hardcoded secrets!${NC}"
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
 else
@@ -20,7 +23,7 @@ else
 fi
 
 echo -e "\n${YELLOW}2. Checking NEXT_PUBLIC_ variables...${NC}"
-if grep -r --exclude-dir={node_modules,.git,.next,dist,build} --include="*.ts" --include="*.tsx" --include="*.env*" -E "NEXT_PUBLIC_.*(SECRET|PASSWORD|TOKEN|PRIVATE)" . 2>/dev/null | grep -v "POSTHOG_KEY" | grep -v "^$"; then
+if grep -r $EXCLUDE_DIRS --include="*.ts" --include="*.tsx" --include="*.env*" -E "NEXT_PUBLIC_.*(SECRET|PASSWORD|TOKEN|PRIVATE)" . 2>/dev/null | grep -v "POSTHOG_KEY" | grep -v "^$"; then
     echo -e "${RED}WARNING: Found NEXT_PUBLIC_ with sensitive names!${NC}"
     ISSUES_FOUND=$((ISSUES_FOUND + 1))
 else

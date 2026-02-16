@@ -1,5 +1,5 @@
-import { Specification } from './Specification';
-import type { IntakeDecision } from '../decision';
+import { Specification } from "./Specification";
+import type { IntakeDecision } from "../decision";
 
 /**
  * HighPrioritySpecification
@@ -7,7 +7,7 @@ import type { IntakeDecision } from '../decision';
  */
 export class HighPrioritySpecification extends Specification<IntakeDecision> {
   isSatisfiedBy(intake: IntakeDecision): boolean {
-    return intake.priority === 'high' || intake.priority === 'critical';
+    return intake.priority === "high" || intake.priority === "critical";
   }
 }
 
@@ -17,7 +17,7 @@ export class HighPrioritySpecification extends Specification<IntakeDecision> {
  */
 export class CriticalPrioritySpecification extends Specification<IntakeDecision> {
   isSatisfiedBy(intake: IntakeDecision): boolean {
-    return intake.priority === 'critical';
+    return intake.priority === "critical";
   }
 }
 
@@ -45,7 +45,7 @@ export class RequiresImmediateActionSpecification extends Specification<IntakeDe
   constructor() {
     super();
     this.spec = new CriticalPrioritySpecification().or(
-      new HasFlagSpecification('legal_risk')
+      new HasFlagSpecification("legal_risk"),
     );
   }
 

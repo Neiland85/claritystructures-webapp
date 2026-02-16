@@ -1,15 +1,19 @@
-import type { WizardResult } from './wizard-result';
+import type { WizardResult } from "./wizard-result";
 
 import {
   decideIntake,
   DECISION_MODEL_VERSION_V2,
   decideIntakeV2,
   type DecisionModelVersion,
-} from './decision';
-import type { IntakeSignalSummary, IntakeSignals } from './intake-signals';
-import { buildSummary } from './intake-signals';
-import type { IntakeActionCode, IntakeFlag, IntakePriority } from './intake-records';
-import { mapWizardToSignals } from './map-wizard-to-signals';
+} from "./decision";
+import type { IntakeSignalSummary, IntakeSignals } from "./intake-signals";
+import { buildSummary } from "./intake-signals";
+import type {
+  IntakeActionCode,
+  IntakeFlag,
+  IntakePriority,
+} from "./intake-records";
+import { mapWizardToSignals } from "./map-wizard-to-signals";
 
 export type IntakeAssessment = {
   priority: IntakePriority;
@@ -48,11 +52,14 @@ export function assessIntakeV2(result: WizardResult): IntakeAssessment {
 
 export function assessIntakeWithSignals(
   result: WizardResult,
-  options: AssessIntakeWithSignalsOptions = {}
+  options: AssessIntakeWithSignalsOptions = {},
 ): IntakeAssessmentWithSignals {
   const useDecisionModelV2: boolean = options.useDecisionModelV2 ?? false;
-  const includeDecisionModelVersion: boolean = options.includeDecisionModelVersion ?? false;
-  const decision = useDecisionModelV2 ? decideIntakeV2(result) : decideIntake(result);
+  const includeDecisionModelVersion: boolean =
+    options.includeDecisionModelVersion ?? false;
+  const decision = useDecisionModelV2
+    ? decideIntakeV2(result)
+    : decideIntake(result);
   const signals = mapWizardToSignals(result);
 
   return {

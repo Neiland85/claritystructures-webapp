@@ -1,5 +1,5 @@
-import { DomainEvent } from './DomainEvent';
-import type { IntakePriority } from '../intake-records';
+import { DomainEvent } from "./DomainEvent";
+import type { IntakePriority } from "../intake-records";
 
 /**
  * IntakeReceivedEvent
@@ -9,13 +9,13 @@ export class IntakeReceivedEvent extends DomainEvent {
   constructor(
     public readonly intakeId: string,
     public readonly email: string,
-    public readonly urgency: string
+    public readonly urgency: string,
   ) {
     super();
   }
 
   get eventName(): string {
-    return 'IntakeReceived';
+    return "IntakeReceived";
   }
 
   protected eventData() {
@@ -35,13 +35,13 @@ export class IntakePriorityAssessedEvent extends DomainEvent {
   constructor(
     public readonly intakeId: string,
     public readonly priority: IntakePriority,
-    public readonly assessedBy: string
+    public readonly assessedBy: string,
   ) {
     super();
   }
 
   get eventName(): string {
-    return 'IntakePriorityAssessed';
+    return "IntakePriorityAssessed";
   }
 
   protected eventData() {
@@ -60,13 +60,13 @@ export class IntakePriorityAssessedEvent extends DomainEvent {
 export class IntakeAssignedEvent extends DomainEvent {
   constructor(
     public readonly intakeId: string,
-    public readonly assignedTo: string
+    public readonly assignedTo: string,
   ) {
     super();
   }
 
   get eventName(): string {
-    return 'IntakeAssigned';
+    return "IntakeAssigned";
   }
 
   protected eventData() {
@@ -84,13 +84,13 @@ export class IntakeAssignedEvent extends DomainEvent {
 export class IntakeClosedEvent extends DomainEvent {
   constructor(
     public readonly intakeId: string,
-    public readonly reason: string
+    public readonly reason: string,
   ) {
     super();
   }
 
   get eventName(): string {
-    return 'IntakeClosed';
+    return "IntakeClosed";
   }
 
   protected eventData() {

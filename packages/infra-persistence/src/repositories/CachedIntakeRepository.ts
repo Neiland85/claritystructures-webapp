@@ -3,7 +3,7 @@
  * This shows how to use Next.js cache with Prisma
  */
 
-import { unstable_cache } from 'next/cache';
+import { unstable_cache } from "next/cache";
 
 export class CachedIntakeRepository {
   /**
@@ -16,11 +16,11 @@ export class CachedIntakeRepository {
       // return intake;
       return null;
     },
-    ['intake-by-id'],
+    ["intake-by-id"],
     {
-      tags: ['intakes'],
+      tags: ["intakes"],
       revalidate: 300, // 5 minutes
-    }
+    },
   );
 
   /**
@@ -39,10 +39,10 @@ export class CachedIntakeRepository {
       // return intakes;
       return [];
     },
-    ['intakes-list'],
+    ["intakes-list"],
     {
-      tags: ['intakes'],
+      tags: ["intakes"],
       revalidate: 60, // 1 minute
-    }
+    },
   );
 }

@@ -1,4 +1,4 @@
-import type { WizardResult } from '@claritystructures/domain';
+import type { WizardResult } from "@claritystructures/domain";
 
 type Props = {
   data: WizardResult;

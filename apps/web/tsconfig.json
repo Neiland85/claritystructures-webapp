@@ -5,9 +5,9 @@
     "baseUrl": ".",
     "moduleResolution": "Bundler",
     "paths": {
-      "@/*": [ "src/*" ],
-      "@claritystructures/*": [ "../../packages/*/src" ]
+      "@/*": ["src/*"],
+      "@claritystructures/*": ["../../packages/*/src"]
     }
   },
-  "include": [ "src", "next.config.ts" ]
+  "include": ["src", "next.config.ts"]
 }

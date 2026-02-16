@@ -3,6 +3,7 @@
 Thanks for improving the project.
 
 ## Local validation
+
 Run the same checks used for release readiness:
 
 ```bash
@@ -15,6 +16,7 @@ npm run demo:decision-engine
 ```
 
 ## Proposing Decision Engine V2 changes safely
+
 - Keep domain logic isolated to `src/domain/*` and avoid UI/infra side effects.
 - Preserve deterministic behavior for identical `WizardResult` inputs.
 - Do not remove or loosen snapshot assertions in `tests/decision.snapshot.spec.ts`.

@@ -8,7 +8,7 @@ const store = new Map<string, RateLimitEntry>();
 export async function checkRateLimit(
   identifier: string,
   limit: number = 10,
-  windowMs: number = 10000
+  windowMs: number = 10000,
 ): Promise<{
   success: boolean;
   limit: number;
@@ -16,7 +16,7 @@ export async function checkRateLimit(
   reset: number;
 }> {
   const now = Date.now();
-  
+
   if (Math.random() < 0.1) {
     for (const [k, v] of store.entries()) {
       if (v.resetAt < now) {
@@ -24,15 +24,15 @@ export async function checkRateLimit(
       }
     }
   }
-  
+
   const entry = store.get(identifier);
-  
+
   if (!entry || entry.resetAt < now) {
     store.set(identifier, {
       count: 1,
       resetAt: now + windowMs,
     });
-    
+
     return {
       success: true,
       limit,
@@ -40,9 +40,9 @@ export async function checkRateLimit(
       reset: now + windowMs,
     };
   }
-  
+
   entry.count++;
-  
+
   if (entry.count > limit) {
     return {
       success: false,
@@ -51,7 +51,7 @@ export async function checkRateLimit(
       reset: entry.resetAt,
     };
   }
-  
+
   return {
     success: true,
     limit,
@@ -61,7 +61,7 @@ export async function checkRateLimit(
 }
 
 export function getIdentifier(request: Request): string {
-  const forwarded = request.headers.get('x-forwarded-for');
-  const realIp = request.headers.get('x-real-ip');
-  return forwarded?.split(',')[0] ?? realIp ?? '127.0.0.1';
+  const forwarded = request.headers.get("x-forwarded-for");
+  const realIp = request.headers.get("x-real-ip");
+  return forwarded?.split(",")[0] ?? realIp ?? "127.0.0.1";
 }

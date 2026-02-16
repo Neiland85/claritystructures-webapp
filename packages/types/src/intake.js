@@ -1,1 +1,1 @@
-export const INTAKE_TONES = ['basic', 'family', 'legal', 'critical'];
+export const INTAKE_TONES = ["basic", "family", "legal", "critical"];

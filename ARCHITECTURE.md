@@ -1,6 +1,7 @@
 # Architecture
 
 ## Overview
+
 Clarity Structures Webapp is organized around a lightweight **hexagonal (ports-and-adapters) style**:
 
 - **Domain core (`src/domain`)**: business rules and deterministic decision logic.
@@ -12,6 +13,7 @@ This keeps core classification/routing logic independent from framework details.
 ## Hexagonal layout
 
 ### 1) Domain (inside)
+
 The domain layer owns the intake model and core decisions:
 
 - `resolveIntakeRoute` maps wizard context to canonical intake routes (`basic`, `family`, `legal`, `critical`).
@@ -21,6 +23,7 @@ The domain layer owns the intake model and core decisions:
 These functions are pure and testable, with no transport/framework dependency.
 
 ### 2) Application/use-case layer
+
 The application layer coordinates user interactions and invokes domain rules:
 
 - `Wizard` captures decision inputs (`clientProfile`, `urgency`, emotional distress).
@@ -28,6 +31,7 @@ The application layer coordinates user interactions and invokes domain rules:
 - Contact routes (`/contact/basic`, `/contact/family`, `/contact/legal`, `/contact/critical`) represent channelized intake paths.
 
 ### 3) Infrastructure/adapters (outside)
+
 External effects are isolated in adapters:
 
 - API route `src/app/api/contact/route.ts` parses payload, calls `assessIntake`, and sends an internal email via SMTP.
@@ -54,18 +58,22 @@ External effects are isolated in adapters:
 ## Decision model details
 
 ### Inputs
+
 - `clientProfile`: contextual actor type (`private_individual`, `family_inheritance_conflict`, `legal_professional`, `court_related`, `other`).
 - `urgency`: urgency class (`informational`, `time_sensitive`, `legal_risk`, `critical`).
 - `hasEmotionalDistress`: optional emotional impact indicator.
 
 ### Routing model (`resolveIntakeRoute`)
+
 Rule order:
+
 1. if `urgency === critical` → `/contact/critical`
 2. else if `clientProfile === family_inheritance_conflict` → `/contact/family`
 3. else if `clientProfile in {legal_professional, court_related}` → `/contact/legal`
 4. else → `/contact/basic`
 
 ### Priority model (`assessIntake`)
+
 Score contributions:
 
 - Profile
@@ -79,27 +87,33 @@ Score contributions:
 - Emotional distress: +2
 
 Thresholds:
+
 - `score >= 8` → `critical`
 - `score >= 5` → `high`
 - `score >= 3` → `medium`
 - otherwise → `low`
 
 Output contract:
+
 - `priority`: one of `low | medium | high | critical`
 - `flags`: explainability tags
 - `recommendedAction`: operational guidance string
 
 ## ADR links
+
 There is no dedicated ADR directory in the current repository.
 
 Current decision references:
+
 - [AI_RULES.md](./AI_RULES.md) — implementation governance constraints.
 - [CHANGELOG.md](./CHANGELOG.md) — release-level evolution trace.
 
 Recommended future location for formal ADRs:
+
 - `docs/adr/` (for example: `docs/adr/0001-hexagonal-layout.md`).
 
 ## Conventions (architecture-level)
+
 - Keep business logic in `src/domain` and free of framework/runtime dependencies.
 - Keep side effects in adapters (`src/app/api`, `src/infra`).
 - Keep use-case orchestration thin (`src/components`, route handlers).
