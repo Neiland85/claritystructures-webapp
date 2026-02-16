@@ -1,4 +1,4 @@
-import type { DecisionExplanation } from './decision-explanation';
+import type { DecisionExplanation } from "./decision-explanation";
 import {
   DECISION_MODEL_VERSION_V1,
   DECISION_MODEL_VERSION_V2,
@@ -6,8 +6,8 @@ import {
   decideIntakeV2,
   decideIntakeWithExplanation,
   type IntakeDecision,
-} from './decision';
-import type { WizardResult } from './wizard-result';
+} from "./decision";
+import type { WizardResult } from "./wizard-result";
 
 export {
   decideIntake,

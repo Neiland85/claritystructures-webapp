@@ -1,6 +1,6 @@
-import type { IntakeTone } from './intake';
+import type { IntakeTone } from "./intake";
 
-export type ConsentVersion = 'v1';
+export type ConsentVersion = "v1";
 
 export type ConsentPayload = {
   tone: IntakeTone;

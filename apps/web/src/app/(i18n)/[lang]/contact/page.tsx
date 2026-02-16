@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 
 export default function ContactIndex() {
-  redirect('./contact/basic');
+  redirect("./contact/basic");
 }

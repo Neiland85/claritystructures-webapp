@@ -1,11 +1,13 @@
 # ADR 0003: Decision Model for Policy and Intake Evolution
 
 ## Context
+
 The project handles sensitive user-supplied intake information and policy-gated consent. Architectural governance requires a repeatable decision model so teams can classify and approve changes consistently across domain, infrastructure, and UX boundaries.
 
 Without a model, decisions may be made ad hoc, producing inconsistent policy interpretation and hidden coupling.
 
 ## Decision
+
 We establish a four-tier decision model for changes in this bounded context:
 
 1. **Domain Decision (Tier 1)**
@@ -28,12 +30,14 @@ Decision protocol:
 - Tier 3/4 changes that alter domain meaning are reclassified to Tier 1.
 
 ## Consequences
+
 - Better governance traceability and reduced semantic regression in sensitive intake flows.
 - Faster reviews by using tier classification as a common language.
 - Additional process overhead for major changes, accepted to protect policy integrity.
 - ADR inventory becomes the authoritative decision ledger for architecture and policy interpretation.
 
 ## Links to related code modules
+
 - Tier 1 (domain): `src/domain/intake.ts`, `src/domain/intake-records.ts`, `src/domain/priority.ts`, `src/domain/flow.ts`.
 - Tier 2 (application): `src/app/api/contact/route.ts`, `src/components/ContactForm.tsx`, `src/components/Wizard.tsx`.
 - Tier 3 (adapters): `src/components/forms/ContactFormBasic.tsx`, `src/components/forms/ContactFormLegal.tsx`, `src/components/forms/ContactFormSensitive.tsx`, `src/infra/alerts.ts`, `prisma/schema.prisma`.

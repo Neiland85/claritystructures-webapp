@@ -1,1 +1,1 @@
-export * from './contact-intake.schema';
+export * from "./contact-intake.schema";

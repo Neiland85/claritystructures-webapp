@@ -72,10 +72,10 @@ export { buildSummary } from "./intake-signals";
 export * from "./ports";
 
 // Value Objects
-export { IntakeId, Email, Priority, Status } from './value-objects';
+export { IntakeId, Email, Priority, Status } from "./value-objects";
 
 // Domain Events
-export * from './events';
+export * from "./events";
 
 // Specifications
-export * from './specifications';
+export * from "./specifications";

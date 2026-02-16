@@ -3,10 +3,15 @@
  * Type-safe priority levels
  */
 export class Priority {
-  private static readonly VALID_LEVELS = ['low', 'medium', 'high', 'critical'] as const;
-  private readonly level: typeof Priority.VALID_LEVELS[number];
+  private static readonly VALID_LEVELS = [
+    "low",
+    "medium",
+    "high",
+    "critical",
+  ] as const;
+  private readonly level: (typeof Priority.VALID_LEVELS)[number];
 
-  private constructor(level: typeof Priority.VALID_LEVELS[number]) {
+  private constructor(level: (typeof Priority.VALID_LEVELS)[number]) {
     this.level = level;
   }
 
@@ -15,7 +20,7 @@ export class Priority {
     if (!Priority.isValid(normalized)) {
       throw new Error(`Invalid priority: ${level}`);
     }
-    return new Priority(normalized as typeof Priority.VALID_LEVELS[number]);
+    return new Priority(normalized as (typeof Priority.VALID_LEVELS)[number]);
   }
 
   static isValid(level: string): boolean {
@@ -23,19 +28,19 @@ export class Priority {
   }
 
   static low(): Priority {
-    return new Priority('low');
+    return new Priority("low");
   }
 
   static medium(): Priority {
-    return new Priority('medium');
+    return new Priority("medium");
   }
 
   static high(): Priority {
-    return new Priority('high');
+    return new Priority("high");
   }
 
   static critical(): Priority {
-    return new Priority('critical');
+    return new Priority("critical");
   }
 
   isHigherThan(other: Priority): boolean {
