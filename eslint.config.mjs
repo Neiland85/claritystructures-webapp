@@ -6,33 +6,36 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
-    files: ["src/domain/**/*.ts", "src/domain/**/*.tsx"],
+    // Domain boundary isolation: packages/domain must not import framework code
+    files: ["packages/domain/src/**/*.ts"],
     rules: {
       "no-restricted-imports": [
         "error",
         {
           patterns: [
-            "../*",
-            "@/app/*",
-            "@/components/*",
-            "@/application/*",
-            "@/types/*",
             "next/*",
             "react",
+            "react-dom",
             "nodemailer",
             "@prisma/client",
+            "@claritystructures/infra-*",
+            "@claritystructures/web",
           ],
         },
       ],
     },
   },
-  // Override default ignores of eslint-config-next.
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
+    "coverage/**",
+    "generated/**",
+    "packages/infra-persistence/generated/**",
     "next-env.d.ts",
+    "*.config.js",
+    "*.config.mjs",
+    "*.config.ts",
   ]),
 ]);
 
