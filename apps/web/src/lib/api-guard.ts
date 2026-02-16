@@ -30,7 +30,7 @@ export function withSecurityHeaders(response: NextResponse) {
 export function validateCors(req: NextRequest) {
   const origin = req.headers.get("origin");
   const allowedOrigins = [
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   ];
 
   if (origin && !allowedOrigins.includes(origin)) {
@@ -46,9 +46,8 @@ export function apiGuard(
 ) {
   // CORS validation
   if (!validateCors(req)) {
-    return NextResponse.json(
-      { error: "Security Violation: CORS" },
-      { status: 403 },
+    return withSecurityHeaders(
+      NextResponse.json({ error: "Security Violation: CORS" }, { status: 403 }),
     );
   }
 
@@ -56,9 +55,11 @@ export function apiGuard(
   if (options.requireAuth) {
     const authResult = verifyBearerToken(req.headers.get("authorization"));
     if (!authResult.authenticated) {
-      return NextResponse.json(
-        { error: authResult.error || "Unauthorized" },
-        { status: 401 },
+      return withSecurityHeaders(
+        NextResponse.json(
+          { error: authResult.error || "Unauthorized" },
+          { status: 401 },
+        ),
       );
     }
   }
@@ -67,9 +68,11 @@ export function apiGuard(
   if (options.requireCsrf) {
     const csrfResult = validateCsrf(req);
     if (!csrfResult.valid) {
-      return NextResponse.json(
-        { error: csrfResult.error || "CSRF validation failed" },
-        { status: 403 },
+      return withSecurityHeaders(
+        NextResponse.json(
+          { error: csrfResult.error || "CSRF validation failed" },
+          { status: 403 },
+        ),
       );
     }
   }

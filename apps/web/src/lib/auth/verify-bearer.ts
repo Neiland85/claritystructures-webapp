@@ -6,7 +6,8 @@ export interface AuthResult {
 }
 
 /**
- * Verify bearer token against JWT_SECRET using constant-time comparison.
+ * Verify bearer token using constant-time comparison.
+ * Checks ADMIN_API_TOKEN first (dedicated), falls back to JWT_SECRET.
  * Fails closed: no secret configured → no access.
  */
 export function verifyBearerToken(authHeader: string | null): AuthResult {
@@ -18,7 +19,7 @@ export function verifyBearerToken(authHeader: string | null): AuthResult {
   }
 
   const token = authHeader.slice(7);
-  const secret = process.env.JWT_SECRET;
+  const secret = process.env.ADMIN_API_TOKEN || process.env.JWT_SECRET;
 
   if (!secret) {
     return { authenticated: false, error: "Server misconfiguration" };

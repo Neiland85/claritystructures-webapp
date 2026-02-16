@@ -26,7 +26,7 @@ const okHandler = async () => NextResponse.json({ ok: true });
 describe("api-guard", () => {
   beforeEach(() => {
     vi.stubEnv("JWT_SECRET", SECRET);
-    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "http://localhost:3000");
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "http://localhost:3000");
   });
   afterEach(() => {
     vi.unstubAllEnvs();
@@ -74,6 +74,13 @@ describe("api-guard", () => {
       const req = buildRequest("GET", { origin: "https://evil.com" });
       const res = await apiGuard(req, okHandler);
       expect(res.status).toBe(403);
+    });
+
+    it("includes security headers on error responses", async () => {
+      const req = buildRequest("GET", { origin: "https://evil.com" });
+      const res = await apiGuard(req, okHandler);
+      expect(res.headers.get("X-Content-Type-Options")).toBe("nosniff");
+      expect(res.headers.get("X-Frame-Options")).toBe("SAMEORIGIN");
     });
   });
 

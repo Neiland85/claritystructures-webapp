@@ -53,4 +53,15 @@ describe("verifyBearerToken", () => {
     expect(result.authenticated).toBe(false);
     expect(result.error).toBe("Server misconfiguration");
   });
+
+  it("prefers ADMIN_API_TOKEN over JWT_SECRET", () => {
+    const adminToken = "admin-token-that-is-different-32c";
+    vi.stubEnv("ADMIN_API_TOKEN", adminToken);
+    // Should authenticate with ADMIN_API_TOKEN, not JWT_SECRET
+    const result = verifyBearerToken(`Bearer ${adminToken}`);
+    expect(result).toEqual({ authenticated: true });
+    // JWT_SECRET should NOT work when ADMIN_API_TOKEN is set
+    const result2 = verifyBearerToken(`Bearer ${REAL_SECRET}`);
+    expect(result2.authenticated).toBe(false);
+  });
 });
