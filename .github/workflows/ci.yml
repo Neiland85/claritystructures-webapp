@@ -14,89 +14,98 @@ jobs:
   quality-gates:
     name: Quality Gates
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🔧 Setup pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: 🔧 Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
-      - name: 📦 Install dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: 🔍 Type check
+      - name: Type check
         run: pnpm typecheck
 
-      - name: 🧪 Run tests
+      - name: Lint (ESLint)
+        run: pnpm lint
+
+      - name: Unit tests (Vitest)
         run: pnpm test:run
 
-      - name: 📊 Coverage check
+      - name: Domain tests (node:test)
+        run: node --test tests/decision.spec.ts tests/decision.snapshot.spec.ts
+
+      - name: Integration tests (node:test)
+        run: node --test tests/intake-funnel.integration.spec.ts
+
+      - name: Coverage check
         run: pnpm test:coverage
 
-      - name: 🔒 Security audit
+      - name: Security audit
         run: ./scripts/check-secrets.sh
 
-      - name: 🏗️ Build
+      - name: Build
         env:
           SKIP_ENV_VALIDATION: true
         run: pnpm build
 
   lint:
-    name: Lint & Format
+    name: Format Check
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🔧 Setup pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: 🔧 Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
-      - name: 📦 Install dependencies
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: 🎨 Check formatting
-        run: pnpm exec prettier --check "**/*.{ts,tsx,js,jsx,json,md}"
+      - name: Check formatting (Prettier)
+        run: pnpm format:check
 
   deploy-preview:
     name: Deploy Preview
     runs-on: ubuntu-latest
     needs: [quality-gates, lint]
     if: github.event_name == 'pull_request'
-    
+
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🚀 Deploy to preview
-        run: echo "Preview deployment would go here"
+      - name: Deploy to preview
+        run: echo "Preview deployment via Vercel GitHub integration"
 
   deploy-production:
     name: Deploy Production
     runs-on: ubuntu-latest
     needs: [quality-gates, lint]
     if: github.ref == 'refs/heads/main'
-    
+
     steps:
-      - name: 📥 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🚀 Deploy to production
-        run: echo "Production deployment would go here"
+      - name: Deploy to production
+        run: echo "Production deployment via Vercel GitHub integration"

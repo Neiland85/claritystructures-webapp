@@ -1,0 +1,16 @@
+node_modules
+.next
+.git
+.github
+coverage
+*.md
+!README.md
+.env*
+.turbo
+.vscode
+.claude
+tests
+docs
+scripts/demo-*
+generated
+packages/infra-persistence/generated

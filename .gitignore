@@ -31,3 +31,17 @@ tsconfig.tsbuildinfo
 
 # Build output
 dist/
+
+# Generated artifacts (never version-control)
+coverage/
+packages/infra-persistence/generated/
+generated/
+
+# Prisma generated client
+prisma/generated/
+
+# Turbo
+.turbo/
+
+# Build info
+*.tsbuildinfo
