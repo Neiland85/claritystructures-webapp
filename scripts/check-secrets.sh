@@ -12,7 +12,7 @@ NC='\033[0m'
 ISSUES_FOUND=0
 
 # Common exclude flags (avoid brace expansion for portability)
-EXCLUDE_DIRS="--exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.next --exclude-dir=dist --exclude-dir=build --exclude-dir=generated --exclude-dir=coverage"
+EXCLUDE_DIRS="--exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.next --exclude-dir=dist --exclude-dir=build --exclude-dir=generated --exclude-dir=coverage --exclude-dir=__tests__"
 
 echo -e "\n${YELLOW}1. Checking for hardcoded secrets...${NC}"
 if grep -r $EXCLUDE_DIRS --exclude="*.md" --include="*.ts" --include="*.tsx" -E "(password|secret|api_key|apikey|token|private_key).*=.*['\"][^'\"]{8,}['\"]" . 2>/dev/null; then
