@@ -4,7 +4,7 @@
   "packageManager": "pnpm@10.29.3",
   "scripts": {
     "build": "pnpm -r run build",
-    "lint": "pnpm -r exec eslint .",
+    "lint": "eslint .",
     "db:generate": "prisma generate --config prisma.config.ts",
     "db:migrate": "prisma migrate dev --config prisma.config.ts",
     "db:studio": "prisma studio --config prisma.config.ts",
@@ -19,7 +19,7 @@
     "prepare": "husky",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "lint:fix": "pnpm -r exec eslint --fix ."
+    "lint:fix": "eslint --fix ."
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^16.1.6",
