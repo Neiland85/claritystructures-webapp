@@ -25,6 +25,7 @@ vi.mock("@/lib/api/validate-request", () => ({
   sanitizeHtml: (dirty: string) => dirty.replace(/<[^>]*>/g, ""),
   isBot: (data: { website?: string }) =>
     !!data.website && data.website.length > 0,
+  apiGuard: (_req: NextRequest, handler: () => Promise<Response>) => handler(),
 }));
 
 // Import route AFTER mocks are set up
