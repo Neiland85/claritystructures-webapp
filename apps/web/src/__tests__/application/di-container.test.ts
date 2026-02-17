@@ -88,4 +88,16 @@ describe("DI Container", () => {
       expect(persistence.prisma.$disconnect).toHaveBeenCalled();
     });
   });
+
+  describe("graceful shutdown handlers", () => {
+    it("should call closeDependencies on beforeExit", async () => {
+      // The module registers process.on("beforeExit", shutdown) on import.
+      // Emitting "beforeExit" triggers the shutdown callback (lines 67-69).
+      vi.clearAllMocks();
+      process.emit("beforeExit", 0);
+      // Allow microtask (void closeDependencies()) to settle
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(persistence.prisma.$disconnect).toHaveBeenCalled();
+    });
+  });
 });
