@@ -97,22 +97,6 @@ export function createDeleteUserDataUseCase(): DeleteUserDataUseCase {
 }
 
 /**
- * Factory for GetUserDataUseCase (ARCO-POL: Acceso)
- */
-export function createGetUserDataUseCase(): GetUserDataUseCase {
-  const repository = new PrismaIntakeRepository(prisma);
-  return new GetUserDataUseCase(repository, consoleAudit);
-}
-
-/**
- * Factory for DeleteUserDataUseCase (ARCO-POL: Supresión)
- */
-export function createDeleteUserDataUseCase(): DeleteUserDataUseCase {
-  const repository = new PrismaIntakeRepository(prisma);
-  return new DeleteUserDataUseCase(repository, consoleAudit);
-}
-
-/**
  * Cleanup function for graceful shutdown
  */
 export async function closeDependencies(): Promise<void> {

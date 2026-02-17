@@ -54,14 +54,19 @@ describe("PrismaAuditTrail", () => {
 
     await trail.record(event);
 
-    const call = mockPrisma.auditLog.create.mock.calls[0][0] as {
-      data: {
-        action: string;
-        intakeId: string | null;
-        metadata: unknown;
-        occurredAt: Date;
-      };
-    };
+    const calls = mockPrisma.auditLog.create.mock.calls as unknown as [
+      [
+        {
+          data: {
+            action: string;
+            intakeId: string | null;
+            metadata: unknown;
+            occurredAt: Date;
+          };
+        },
+      ],
+    ];
+    const call = calls[0][0];
     expect(call.data.action).toBe("arcopol_access_requested");
     expect(call.data.intakeId).toBeNull();
     // Prisma.JsonNull is a special sentinel object, not plain null
