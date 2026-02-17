@@ -26,6 +26,7 @@ describe("trackEvent", () => {
   });
 
   it("should call posthog.capture with event data when consent given", async () => {
+  it("should call posthog.capture with event data", async () => {
     const { trackEvent } = await import("@/lib/analytics");
     const event: FunnelEvent = {
       name: "contact.submit_success",
