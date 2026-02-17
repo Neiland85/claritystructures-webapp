@@ -6,6 +6,32 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname, "../.."),
   },
 
+  // Production optimizations
+  reactStrictMode: true,
+  productionBrowserSourceMaps: false,
+
+  // Compiler optimizations — strip console.log/debug/info in production
+  compiler: {
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? {
+            exclude: ["error", "warn"],
+          }
+        : false,
+  },
+
+  // Image optimization
+  images: {
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+
+  // Experimental features
+  experimental: {
+    optimizePackageImports: ["lucide-react", "date-fns"],
+  },
+
   transpilePackages: [
     "@claritystructures/domain",
     "@claritystructures/types",
@@ -14,6 +40,7 @@ const nextConfig: NextConfig = {
     "@claritystructures/infra-persistence",
   ],
 
+  // Security headers (CSP is handled dynamically in proxy.ts with nonce)
   async headers() {
     return [
       {
@@ -42,11 +69,6 @@ const nextConfig: NextConfig = {
           {
             key: "Referrer-Policy",
             value: "origin-when-cross-origin",
-          },
-          {
-            key: "Content-Security-Policy",
-            value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data:; font-src 'self' https://fonts.gstatic.com; connect-src 'self';",
           },
         ],
       },
