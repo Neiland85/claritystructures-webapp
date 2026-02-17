@@ -28,3 +28,32 @@ export type AuditEvent = {
 export interface AuditTrail {
   record(event: AuditEvent): Promise<void> | void;
 }
+
+export type ConsentRecord = {
+  intakeId: string;
+  consentVersion: string;
+  ipHash?: string;
+  userAgent?: string;
+  locale?: string;
+};
+
+export interface ConsentRepository {
+  recordAcceptance(record: ConsentRecord): Promise<void>;
+  findActiveVersion(): Promise<{ id: string; version: string } | null>;
+}
+
+export interface SlaRepository {
+  createTimers(intakeId: string, decisionTimestamp: Date): Promise<void>;
+  completeMilestone(intakeId: string, milestone: string): Promise<void>;
+  findByIntakeId(intakeId: string): Promise<SlaTimerSummary[]>;
+  findBreached(): Promise<SlaTimerSummary[]>;
+}
+
+export type SlaTimerSummary = {
+  id: string;
+  intakeId: string;
+  milestone: string;
+  deadlineAt: Date;
+  completedAt: Date | null;
+  status: string;
+};

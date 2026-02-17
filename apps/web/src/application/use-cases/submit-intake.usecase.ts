@@ -4,6 +4,7 @@ import type {
   IntakeRepository,
   Notifier,
   AuditTrail,
+  ConsentRepository,
   WizardResult,
 } from "@claritystructures/domain";
 import { decideIntakeWithExplanation } from "@claritystructures/domain";
@@ -17,6 +18,7 @@ import { decideIntakeWithExplanation } from "@claritystructures/domain";
  * Responsibilities:
  * - Execute decision logic
  * - Persist intake record
+ * - Record consent acceptance (if consent repository provided)
  * - Trigger notifications
  * - Record audit events
  *
@@ -29,6 +31,14 @@ export type SubmitIntakeInput = Omit<
 > & {
   priority?: ContactIntakeInput["priority"];
   route?: ContactIntakeInput["route"];
+};
+
+// Optional consent metadata attached at submission time
+export type ConsentMeta = {
+  consentVersion: string;
+  ipHash?: string;
+  userAgent?: string;
+  locale?: string;
 };
 
 // Type guard for WizardResult if needed, or simple assertion if we trust the API layer sanitization
@@ -48,9 +58,13 @@ export class SubmitIntakeUseCase {
     private readonly repository: IntakeRepository,
     private readonly notifier: Notifier,
     private readonly audit: AuditTrail,
+    private readonly consent?: ConsentRepository,
   ) {}
 
-  async execute(input: SubmitIntakeInput): Promise<{
+  async execute(
+    input: SubmitIntakeInput,
+    consentMeta?: ConsentMeta,
+  ): Promise<{
     record: IntakeRecord;
     decision: ReturnType<typeof decideIntakeWithExplanation>;
   }> {
@@ -85,7 +99,22 @@ export class SubmitIntakeUseCase {
       route: decision.decision.route,
     });
 
-    // 3. Trigger notification (infrastructure)
+    // 3. Record consent acceptance (if consent repository is available)
+    if (this.consent && consentMeta) {
+      try {
+        await this.consent.recordAcceptance({
+          intakeId: record.id,
+          consentVersion: consentMeta.consentVersion,
+          ipHash: consentMeta.ipHash,
+          userAgent: consentMeta.userAgent,
+          locale: consentMeta.locale,
+        });
+      } catch (error) {
+        console.error("[SubmitIntakeUseCase] Consent recording failed:", error);
+      }
+    }
+
+    // 4. Trigger notification (infrastructure)
     // Wrapped in try/catch to ensure failure here doesn't block the main flow
     try {
       await this.notifier.notifyIntakeReceived(record);
@@ -94,7 +123,7 @@ export class SubmitIntakeUseCase {
       // We do not rethrow; the intake is saved, which is the primary goal.
     }
 
-    // 4. Record audit event (infrastructure)
+    // 5. Record audit event (infrastructure)
     try {
       await this.audit.record({
         action: "intake_submitted",
@@ -103,6 +132,7 @@ export class SubmitIntakeUseCase {
           priority: decision.decision.priority,
           route: decision.decision.route,
           modelVersion: decision.decision.decisionModelVersion,
+          consentVersion: consentMeta?.consentVersion,
         },
         occurredAt: new Date(),
       });
