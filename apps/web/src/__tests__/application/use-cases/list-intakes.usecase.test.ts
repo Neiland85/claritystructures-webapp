@@ -35,6 +35,8 @@ function createMockRepository(
     findById: vi.fn(),
     findAll: vi.fn(async () => records),
     updateStatus: vi.fn(),
+    findByEmail: vi.fn(),
+    deleteByEmail: vi.fn(),
   };
 }
 

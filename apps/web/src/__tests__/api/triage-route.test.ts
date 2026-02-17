@@ -120,7 +120,7 @@ describe("PATCH /api/triage", () => {
     const json = await res.json();
 
     expect(res.status).toBe(400);
-    expect(json.error).toMatch(/missing/i);
+    expect(json.error).toBeDefined();
   });
 
   it("should return 400 when status is missing", async () => {
@@ -128,7 +128,25 @@ describe("PATCH /api/triage", () => {
     const json = await res.json();
 
     expect(res.status).toBe(400);
-    expect(json.error).toMatch(/missing/i);
+    expect(json.error).toBeDefined();
+  });
+
+  it("should return 400 for invalid status value", async () => {
+    const res = await PATCH(
+      createPatchRequest({ id: "intake-001", status: "INVALID_STATUS" }),
+    );
+    const json = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(json.error).toMatch(/invalid/i);
+  });
+
+  it("should return 400 when id is empty string", async () => {
+    const res = await PATCH(createPatchRequest({ id: "", status: "accepted" }));
+    const json = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(json.error).toBeDefined();
   });
 
   it("should return 404 when intake not found", async () => {

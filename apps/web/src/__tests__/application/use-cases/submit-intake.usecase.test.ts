@@ -22,6 +22,8 @@ function createMockRepository(): IntakeRepository {
     findById: vi.fn(),
     findAll: vi.fn(),
     updateStatus: vi.fn(),
+    findByEmail: vi.fn(),
+    deleteByEmail: vi.fn(),
   };
 }
 
