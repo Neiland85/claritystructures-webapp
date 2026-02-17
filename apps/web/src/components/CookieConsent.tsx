@@ -1,43 +1,40 @@
 "use client";
 
 import { useState, useEffect } from "react";
-
-type ConsentSettings = {
-  necessary: boolean;
-  analytical: boolean;
-  marketing: boolean;
-};
+import Link from "next/link";
+import {
+  getConsent,
+  setConsent,
+  DEFAULT_CONSENT,
+  type ConsentSettings,
+} from "@/lib/consent";
 
 export default function CookieConsent() {
   const [show, setShow] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
-  const [settings, setSettings] = useState<ConsentSettings>({
-    necessary: true,
-    analytical: false,
-    marketing: false,
-  });
+  const [settings, setSettings] = useState<ConsentSettings>(DEFAULT_CONSENT);
 
   useEffect(() => {
-    const consent = localStorage.getItem("clarity_cookie_consent");
-    if (!consent) {
+    const stored = getConsent();
+    if (!stored) {
       setShow(true);
+    } else {
+      setSettings(stored);
     }
   }, []);
 
-  const saveConsent = (newSettings: ConsentSettings) => {
-    localStorage.setItem("clarity_cookie_consent", JSON.stringify(newSettings));
+  const savePreferences = (newSettings: ConsentSettings) => {
+    setConsent(newSettings); // Persists + dispatches custom event
+    setSettings(newSettings);
     setShow(false);
-    // Here you would trigger the actual loading of scripts (GTM, etc.) based on settings
   };
 
   const handleAcceptAll = () => {
-    const allIn = { necessary: true, analytical: true, marketing: true };
-    saveConsent(allIn);
+    savePreferences({ necessary: true, analytical: true, marketing: true });
   };
 
   const handleRejectAll = () => {
-    const min = { necessary: true, analytical: false, marketing: false };
-    saveConsent(min);
+    savePreferences({ necessary: true, analytical: false, marketing: false });
   };
 
   if (!show) return null;
@@ -55,7 +52,13 @@ export default function CookieConsent() {
                 Utilizamos cookies propias y de terceros para asegurar el
                 funcionamiento de la plataforma forense, analizar el tráfico y
                 mejorar tu experiencia según la normativa AEPD. Puedes aceptar
-                todas, rechazarlas o configurar tus preferencias.
+                todas, rechazarlas o configurar tus preferencias.{" "}
+                <Link
+                  href="/privacy"
+                  className="underline text-white/70 hover:text-white transition-colors"
+                >
+                  Política de Privacidad
+                </Link>
               </p>
             </div>
             <div className="flex flex-wrap gap-3 shrink-0">
@@ -165,7 +168,7 @@ export default function CookieConsent() {
                 Volver
               </button>
               <button
-                onClick={() => saveConsent(settings)}
+                onClick={() => savePreferences(settings)}
                 className="flex-2 py-3 rounded-xl bg-white text-black font-bold"
               >
                 Guardar preferencias

@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { z } from "zod";
 import {
   createListIntakesUseCase,
   createUpdateIntakeStatusUseCase,
 } from "@/application/di-container";
 import { apiGuard } from "@/lib/api-guard";
-import { IntakeStatus } from "@claritystructures/domain";
+import { INTAKE_STATUSES } from "@claritystructures/domain";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -39,22 +40,30 @@ export async function GET(req: NextRequest) {
  * PATCH /api/triage
  * Update intake status (requires bearer auth + CSRF)
  */
+const PatchBodySchema = z.object({
+  id: z.string().min(1, "id is required"),
+  status: z.enum(INTAKE_STATUSES, {
+    message: `Invalid status. Must be one of: ${INTAKE_STATUSES.join(", ")}`,
+  }),
+});
+
 export async function PATCH(req: NextRequest) {
   return apiGuard(
     req,
     async () => {
       try {
-        const { id, status } = await req.json();
+        const body = await req.json();
+        const parsed = PatchBodySchema.safeParse(body);
 
-        if (!id || !status) {
-          return NextResponse.json(
-            { error: "Missing id or status" },
-            { status: 400 },
-          );
+        if (!parsed.success) {
+          const firstError = parsed.error.issues[0]?.message ?? "Invalid input";
+          return NextResponse.json({ error: firstError }, { status: 400 });
         }
 
+        const { id, status } = parsed.data;
+
         const useCase = createUpdateIntakeStatusUseCase();
-        const updated = await useCase.execute(id, status as IntakeStatus);
+        const updated = await useCase.execute(id, status);
 
         if (!updated) {
           return NextResponse.json(
