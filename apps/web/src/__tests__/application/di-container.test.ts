@@ -8,6 +8,13 @@ vi.mock("@claritystructures/infra-persistence", () => ({
     findById: vi.fn(),
     updateStatus: vi.fn(),
   })),
+  PrismaAuditTrail: vi.fn().mockImplementation(() => ({
+    record: vi.fn(),
+  })),
+  PrismaConsentRepository: vi.fn().mockImplementation(() => ({
+    recordAcceptance: vi.fn(),
+    findActiveVersion: vi.fn(),
+  })),
   prisma: {
     $disconnect: vi.fn().mockResolvedValue(undefined),
   },
@@ -20,6 +27,10 @@ vi.mock("@claritystructures/infra-notifications", () => ({
   ConsoleAuditTrail: vi.fn().mockImplementation(() => ({
     log: vi.fn(),
   })),
+}));
+
+vi.mock("@/application/event-subscriptions", () => ({
+  registerEventSubscriptions: vi.fn(),
 }));
 
 describe("DI Container", () => {

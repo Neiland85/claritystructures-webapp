@@ -42,6 +42,7 @@ model ContactIntake {
   meta      Json?
 
   consentAcceptances ConsentAcceptance[]
+  slaTimers          SlaTimer[]
 
   // Performance indexes
   @@index([status])
@@ -49,6 +50,36 @@ model ContactIntake {
   @@index([createdAt(sort: Desc)])
   @@index([status, priority])
   @@index([email])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  action     String
+  intakeId   String?
+  metadata   Json?
+  occurredAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  @@index([action])
+  @@index([intakeId])
+  @@index([occurredAt(sort: Desc)])
+}
+
+model SlaTimer {
+  id          String    @id @default(uuid())
+  intakeId    String
+  milestone   String
+  deadlineAt  DateTime
+  completedAt DateTime?
+  status      String    @default("pending")
+  createdAt   DateTime  @default(now())
+
+  intake ContactIntake @relation(fields: [intakeId], references: [id])
+
+  @@unique([intakeId, milestone])
+  @@index([status])
+  @@index([deadlineAt])
+  @@index([intakeId])
 }
 
 model ConsentVersion {

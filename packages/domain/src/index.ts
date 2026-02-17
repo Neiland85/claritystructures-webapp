@@ -79,3 +79,13 @@ export * from "./events";
 
 // Specifications
 export * from "./specifications";
+
+// SLA
+export {
+  SLA_MILESTONES,
+  SLA_THRESHOLDS,
+  SLA_STATUSES,
+  computeDeadline,
+  resolveSlaStatus,
+} from "./sla";
+export type { SlaMilestone, SlaStatus, SlaTimerRecord } from "./sla";

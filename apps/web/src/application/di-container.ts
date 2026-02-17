@@ -12,12 +12,15 @@
 
 import {
   PrismaIntakeRepository,
+  PrismaAuditTrail,
+  PrismaConsentRepository,
   prisma,
 } from "@claritystructures/infra-persistence";
 import {
   MailNotifier,
   ConsoleAuditTrail,
 } from "@claritystructures/infra-notifications";
+import type { AuditTrail, AuditEvent } from "@claritystructures/domain";
 import {
   SubmitIntakeUseCase,
   ListIntakesUseCase,
@@ -25,20 +28,40 @@ import {
   GetUserDataUseCase,
   DeleteUserDataUseCase,
 } from "./use-cases";
+import { registerEventSubscriptions } from "./event-subscriptions";
 
 /**
- * Factory for SubmitIntakeUseCase with all dependencies injected
+ * Composite audit trail: writes to both DB (persistent) and console (observability).
+ * Uses Promise.allSettled so a failure in one trail never blocks the other.
  */
+class CompositeAuditTrail implements AuditTrail {
+  constructor(private readonly trails: AuditTrail[]) {}
+  async record(event: AuditEvent): Promise<void> {
+    await Promise.allSettled(this.trails.map((t) => t.record(event)));
+  }
+}
+
 // Singleton instances for stateless services
 const mailNotifier = new MailNotifier();
+const prismaAudit = new PrismaAuditTrail(prisma);
 const consoleAudit = new ConsoleAuditTrail();
+const compositeAudit = new CompositeAuditTrail([prismaAudit, consoleAudit]);
+
+// Wire domain event handlers on first load
+registerEventSubscriptions(compositeAudit);
 
 /**
  * Factory for SubmitIntakeUseCase with all dependencies injected
  */
 export function createSubmitIntakeUseCase(): SubmitIntakeUseCase {
   const repository = new PrismaIntakeRepository(prisma);
-  return new SubmitIntakeUseCase(repository, mailNotifier, consoleAudit);
+  const consentRepo = new PrismaConsentRepository(prisma);
+  return new SubmitIntakeUseCase(
+    repository,
+    mailNotifier,
+    compositeAudit,
+    consentRepo,
+  );
 }
 
 /**
@@ -54,7 +77,7 @@ export function createListIntakesUseCase(): ListIntakesUseCase {
  */
 export function createUpdateIntakeStatusUseCase(): UpdateIntakeStatusUseCase {
   const repository = new PrismaIntakeRepository(prisma);
-  return new UpdateIntakeStatusUseCase(repository, consoleAudit);
+  return new UpdateIntakeStatusUseCase(repository, compositeAudit);
 }
 
 /**
@@ -62,7 +85,7 @@ export function createUpdateIntakeStatusUseCase(): UpdateIntakeStatusUseCase {
  */
 export function createGetUserDataUseCase(): GetUserDataUseCase {
   const repository = new PrismaIntakeRepository(prisma);
-  return new GetUserDataUseCase(repository, consoleAudit);
+  return new GetUserDataUseCase(repository, compositeAudit);
 }
 
 /**
@@ -70,7 +93,7 @@ export function createGetUserDataUseCase(): GetUserDataUseCase {
  */
 export function createDeleteUserDataUseCase(): DeleteUserDataUseCase {
   const repository = new PrismaIntakeRepository(prisma);
-  return new DeleteUserDataUseCase(repository, consoleAudit);
+  return new DeleteUserDataUseCase(repository, compositeAudit);
 }
 
 /**
