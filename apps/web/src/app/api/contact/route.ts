@@ -3,14 +3,24 @@ import type { NextRequest } from "next/server";
 import { createSubmitIntakeUseCase } from "@/application/di-container";
 import type { WizardResult } from "@claritystructures/domain";
 import { apiGuard } from "@/lib/api-guard";
+import { sanitizeHtml, isBot } from "@/lib/api/validate-request";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// No requireCsrf/requireAuth — public form protected by CORS + honeypot.
+// CSRF tokens are reserved for authenticated endpoints (triage).
 export async function POST(req: NextRequest) {
   return apiGuard(req, async () => {
     try {
       const body = await req.json();
+
+      // Honeypot: if the hidden "website" field is filled, it's a bot
+      if (isBot(body)) {
+        // Return 200 to avoid leaking detection to the bot
+        return NextResponse.json({ success: true, decision: "accepted" });
+      }
+
       const {
         email: rawEmail,
         phone: rawPhone,
@@ -19,10 +29,10 @@ export async function POST(req: NextRequest) {
         wizardResult,
       } = body;
 
-      // Sanitization
+      // Sanitization — strip HTML/XSS from user inputs
       const email = rawEmail?.toLowerCase().trim();
-      const phone = rawPhone?.trim();
-      const message = rawMessage?.trim();
+      const phone = rawPhone ? sanitizeHtml(rawPhone.trim()) : undefined;
+      const message = rawMessage ? sanitizeHtml(rawMessage.trim()) : undefined;
       const tone = rawTone || "basic";
 
       // Validation

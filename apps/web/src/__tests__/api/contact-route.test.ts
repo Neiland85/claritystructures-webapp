@@ -13,6 +13,18 @@ vi.mock("@/application/di-container", () => ({
 
 // Mock api-guard to pass through (we test it separately)
 vi.mock("@/lib/api-guard", () => ({
+  apiGuard: (
+    _req: NextRequest,
+    handler: () => Promise<Response>,
+    _opts?: unknown,
+  ) => handler(),
+}));
+
+// Mock validate-request (DOMPurify needs JSDOM but we test sanitization logic)
+vi.mock("@/lib/api/validate-request", () => ({
+  sanitizeHtml: (dirty: string) => dirty.replace(/<[^>]*>/g, ""),
+  isBot: (data: { website?: string }) =>
+    !!data.website && data.website.length > 0,
   apiGuard: (_req: NextRequest, handler: () => Promise<Response>) => handler(),
 }));
 
@@ -151,5 +163,41 @@ describe("POST /api/contact", () => {
     const arg = mockExecute.mock.calls[0][0];
     expect(arg.meta).toBeDefined();
     expect(arg.meta.objective).toBe("contact");
+  });
+
+  // ── Honeypot (bot detection) ─────────────────────────────────
+  it("should return fake 200 when honeypot 'website' field is filled (bot)", async () => {
+    const body = { ...VALID_BODY, website: "http://spam.bot" };
+    const res = await POST(createRequest(body));
+    const json = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(json.success).toBe(true);
+    // Use case should NOT be called for bots
+    expect(mockExecute).not.toHaveBeenCalled();
+  });
+
+  // ── XSS sanitization ────────────────────────────────────────
+  it("should strip HTML tags from message via sanitizeHtml", async () => {
+    const body = {
+      ...VALID_BODY,
+      message: '<script>alert("xss")</script>Hello world',
+    };
+    await POST(createRequest(body));
+
+    const arg = mockExecute.mock.calls[0][0];
+    expect(arg.message).toBe('alert("xss")Hello world');
+    expect(arg.message).not.toContain("<script>");
+  });
+
+  it("should strip HTML tags from phone via sanitizeHtml", async () => {
+    const body = {
+      ...VALID_BODY,
+      phone: '<img onerror="hack()">123456',
+    };
+    await POST(createRequest(body));
+
+    const arg = mockExecute.mock.calls[0][0];
+    expect(arg.phone).not.toContain("<img");
   });
 });

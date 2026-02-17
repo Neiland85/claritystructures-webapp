@@ -1,6 +1,6 @@
 import React from "react";
 import AnimatedLogo from "@/components/AnimatedLogo";
-import TriageTable from "@/components/TriageTable";
+import TriageGate from "@/components/TriageGate";
 
 export const metadata = {
   title: "Triage Dashboard | Clarity Structures",
@@ -41,7 +41,7 @@ export default function TriagePage() {
         </div>
       </div>
 
-      <TriageTable />
+      <TriageGate />
     </main>
   );
 }

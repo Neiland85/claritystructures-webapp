@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import type { IntakeRecord, IntakeStatus } from "@claritystructures/domain";
+import { getCsrfToken } from "@/lib/csrf/get-csrf-token";
 
 const STATUS_COLORS: Record<IntakeStatus, string> = {
   pending: "bg-amber-500/20 text-amber-400 border-amber-500/30",
@@ -16,7 +17,12 @@ const PRIORITY_COLORS: Record<string, string> = {
   critical: "text-red-500 font-bold animate-pulse",
 };
 
-export default function TriageTable() {
+interface TriageTableProps {
+  /** Bearer token for authenticated API calls */
+  token: string;
+}
+
+export default function TriageTable({ token }: TriageTableProps) {
   const [intakes, setIntakes] = useState<IntakeRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,6 +30,21 @@ export default function TriageTable() {
     null,
   );
   const [searchQuery, setSearchQuery] = useState("");
+
+  /** Build headers with bearer auth + optional CSRF token */
+  const authHeaders = (
+    extra: Record<string, string> = {},
+  ): Record<string, string> => {
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${token}`,
+      ...extra,
+    };
+    const csrf = getCsrfToken();
+    if (csrf) {
+      headers["x-csrf-token"] = csrf;
+    }
+    return headers;
+  };
 
   useEffect(() => {
     fetchIntakes();
@@ -41,14 +62,20 @@ export default function TriageTable() {
   const fetchIntakes = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/triage");
+      const res = await fetch("/api/triage", {
+        headers: authHeaders(),
+      });
+      if (res.status === 401) {
+        setError("Unauthorized — invalid token");
+        return;
+      }
       const data = await res.json();
       if (data.intakes) {
         setIntakes(data.intakes);
       } else {
         setError(data.error || "Failed to load");
       }
-    } catch (err) {
+    } catch {
       setError("Network error");
     } finally {
       setLoading(false);
@@ -60,7 +87,7 @@ export default function TriageTable() {
       const res = await fetch("/api/triage", {
         method: "PATCH",
         body: JSON.stringify({ id, status }),
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders({ "Content-Type": "application/json" }),
       });
       if (res.ok) {
         setIntakes((prev) =>
@@ -232,7 +259,7 @@ export default function TriageTable() {
                     Message
                   </label>
                   <div className="p-3 bg-white/5 rounded-lg text-sm text-slate-300 italic">
-                    "{selectedIntake.message}"
+                    &quot;{selectedIntake.message}&quot;
                   </div>
                 </div>
 
