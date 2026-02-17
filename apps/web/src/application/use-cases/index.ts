@@ -8,3 +8,5 @@
 export { SubmitIntakeUseCase } from "./submit-intake.usecase";
 export { ListIntakesUseCase } from "./list-intakes.usecase";
 export { UpdateIntakeStatusUseCase } from "./update-intake-status.usecase";
+export { GetUserDataUseCase } from "./get-user-data.usecase";
+export { DeleteUserDataUseCase } from "./delete-user-data.usecase";

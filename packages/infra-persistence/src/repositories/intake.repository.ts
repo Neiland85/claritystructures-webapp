@@ -29,7 +29,12 @@ function toIntakeRecord(row: ContactIntakeModel): IntakeRecord {
 }
 
 export class PrismaIntakeRepository implements IntakeRepository {
-  constructor(private readonly prisma: Pick<PrismaClient, "contactIntake">) {}
+  constructor(
+    private readonly prisma: Pick<
+      PrismaClient,
+      "contactIntake" | "consentAcceptance"
+    >,
+  ) {}
 
   async create(input: ContactIntakeInput): Promise<IntakeRecord> {
     const created = await this.prisma.contactIntake.create({
@@ -85,5 +90,36 @@ export class PrismaIntakeRepository implements IntakeRepository {
     });
 
     return toIntakeRecord(updated);
+  }
+
+  async findByEmail(email: string): Promise<IntakeRecord[]> {
+    const records = await this.prisma.contactIntake.findMany({
+      where: { email },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return records.map(toIntakeRecord);
+  }
+
+  async deleteByEmail(email: string): Promise<number> {
+    // Cascade: delete consent acceptances first, then intakes
+    const intakes = await this.prisma.contactIntake.findMany({
+      where: { email },
+      select: { id: true },
+    });
+
+    if (intakes.length === 0) return 0;
+
+    const intakeIds = intakes.map((i) => i.id);
+
+    await this.prisma.consentAcceptance.deleteMany({
+      where: { intakeId: { in: intakeIds } },
+    });
+
+    const deleted = await this.prisma.contactIntake.deleteMany({
+      where: { email },
+    });
+
+    return deleted.count;
   }
 }

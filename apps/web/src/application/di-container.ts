@@ -22,6 +22,8 @@ import {
   SubmitIntakeUseCase,
   ListIntakesUseCase,
   UpdateIntakeStatusUseCase,
+  GetUserDataUseCase,
+  DeleteUserDataUseCase,
 } from "./use-cases";
 
 /**
@@ -53,6 +55,22 @@ export function createListIntakesUseCase(): ListIntakesUseCase {
 export function createUpdateIntakeStatusUseCase(): UpdateIntakeStatusUseCase {
   const repository = new PrismaIntakeRepository(prisma);
   return new UpdateIntakeStatusUseCase(repository, consoleAudit);
+}
+
+/**
+ * Factory for GetUserDataUseCase (ARCO-POL: Acceso)
+ */
+export function createGetUserDataUseCase(): GetUserDataUseCase {
+  const repository = new PrismaIntakeRepository(prisma);
+  return new GetUserDataUseCase(repository, consoleAudit);
+}
+
+/**
+ * Factory for DeleteUserDataUseCase (ARCO-POL: Supresión)
+ */
+export function createDeleteUserDataUseCase(): DeleteUserDataUseCase {
+  const repository = new PrismaIntakeRepository(prisma);
+  return new DeleteUserDataUseCase(repository, consoleAudit);
 }
 
 /**

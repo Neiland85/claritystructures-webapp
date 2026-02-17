@@ -10,6 +10,8 @@ export interface IntakeRepository {
   findById(id: string): Promise<IntakeRecord | null>;
   updateStatus(id: string, status: IntakeStatus): Promise<IntakeRecord | null>;
   findAll(): Promise<IntakeRecord[]>;
+  findByEmail(email: string): Promise<IntakeRecord[]>;
+  deleteByEmail(email: string): Promise<number>;
 }
 
 export interface Notifier {

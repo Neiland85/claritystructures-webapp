@@ -35,6 +35,8 @@ function createMockRepository(): IntakeRepository {
         return null;
       },
     ),
+    findByEmail: vi.fn(),
+    deleteByEmail: vi.fn(),
   };
 }
 
