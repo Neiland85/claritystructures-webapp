@@ -15,6 +15,18 @@ vi.mock("@claritystructures/infra-persistence", () => ({
     recordAcceptance: vi.fn(),
     findActiveVersion: vi.fn(),
   })),
+  PrismaLegalDerivationRepository: vi.fn().mockImplementation(() => ({
+    recordConsent: vi.fn(),
+    findByIntakeId: vi.fn(),
+    revokeConsent: vi.fn(),
+  })),
+  PrismaTransferLogRepository: vi.fn().mockImplementation(() => ({
+    recordTransfer: vi.fn(),
+    findByIntakeId: vi.fn(),
+  })),
+  PrismaSlaRepository: vi.fn().mockImplementation(() => ({
+    findByIntakeId: vi.fn(),
+  })),
   prisma: {
     $disconnect: vi.fn().mockResolvedValue(undefined),
   },
@@ -88,6 +100,48 @@ describe("DI Container", () => {
     it("should inject PrismaIntakeRepository", () => {
       diContainer.createUpdateIntakeStatusUseCase();
       expect(persistence.PrismaIntakeRepository).toHaveBeenCalledWith(
+        persistence.prisma,
+      );
+    });
+  });
+
+  describe("createRequestLegalDerivationUseCase", () => {
+    it("should create a RequestLegalDerivationUseCase instance", () => {
+      const useCase = diContainer.createRequestLegalDerivationUseCase();
+      expect(useCase).toBeDefined();
+      expect(useCase).toHaveProperty("execute");
+    });
+
+    it("should inject PrismaIntakeRepository and PrismaLegalDerivationRepository", () => {
+      diContainer.createRequestLegalDerivationUseCase();
+      expect(persistence.PrismaIntakeRepository).toHaveBeenCalledWith(
+        persistence.prisma,
+      );
+      expect(persistence.PrismaLegalDerivationRepository).toHaveBeenCalledWith(
+        persistence.prisma,
+      );
+    });
+  });
+
+  describe("createGenerateTransferPacketUseCase", () => {
+    it("should create a GenerateTransferPacketUseCase instance", () => {
+      const useCase = diContainer.createGenerateTransferPacketUseCase();
+      expect(useCase).toBeDefined();
+      expect(useCase).toHaveProperty("execute");
+    });
+
+    it("should inject all required repositories", () => {
+      diContainer.createGenerateTransferPacketUseCase();
+      expect(persistence.PrismaIntakeRepository).toHaveBeenCalledWith(
+        persistence.prisma,
+      );
+      expect(persistence.PrismaLegalDerivationRepository).toHaveBeenCalledWith(
+        persistence.prisma,
+      );
+      expect(persistence.PrismaTransferLogRepository).toHaveBeenCalledWith(
+        persistence.prisma,
+      );
+      expect(persistence.PrismaSlaRepository).toHaveBeenCalledWith(
         persistence.prisma,
       );
     });

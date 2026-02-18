@@ -11,6 +11,10 @@ import {
   IntakePriorityAssessedEvent,
   IntakeAssignedEvent,
   IntakeClosedEvent,
+  LegalDerivationRequestedEvent,
+  TransferPacketGeneratedEvent,
+  LegalHoldPlacedEvent,
+  IntakePurgedEvent,
 } from "@claritystructures/domain";
 import type { AuditTrail } from "@claritystructures/domain";
 
@@ -65,6 +69,60 @@ export function registerEventSubscriptions(audit: AuditTrail): void {
     async (event) => {
       await audit.record({
         action: "domain_event:IntakeClosed",
+        intakeId: event.intakeId,
+        metadata: { reason: event.reason },
+        occurredAt: event.occurredAt,
+      });
+    },
+  );
+
+  eventDispatcher.subscribe<LegalDerivationRequestedEvent>(
+    "LegalDerivationRequested",
+    async (event) => {
+      await audit.record({
+        action: "domain_event:LegalDerivationRequested",
+        intakeId: event.intakeId,
+        metadata: {
+          recipientEntity: event.recipientEntity,
+          consentId: event.consentId,
+        },
+        occurredAt: event.occurredAt,
+      });
+    },
+  );
+
+  eventDispatcher.subscribe<TransferPacketGeneratedEvent>(
+    "TransferPacketGenerated",
+    async (event) => {
+      await audit.record({
+        action: "domain_event:TransferPacketGenerated",
+        intakeId: event.intakeId,
+        metadata: {
+          manifestHash: event.manifestHash,
+          recipientEntity: event.recipientEntity,
+        },
+        occurredAt: event.occurredAt,
+      });
+    },
+  );
+
+  eventDispatcher.subscribe<LegalHoldPlacedEvent>(
+    "LegalHoldPlaced",
+    async (event) => {
+      await audit.record({
+        action: "domain_event:LegalHoldPlaced",
+        intakeId: event.intakeId,
+        metadata: { reason: event.reason, placedBy: event.placedBy },
+        occurredAt: event.occurredAt,
+      });
+    },
+  );
+
+  eventDispatcher.subscribe<IntakePurgedEvent>(
+    "IntakePurged",
+    async (event) => {
+      await audit.record({
+        action: "domain_event:IntakePurged",
         intakeId: event.intakeId,
         metadata: { reason: event.reason },
         occurredAt: event.occurredAt,

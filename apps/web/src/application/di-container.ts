@@ -14,6 +14,9 @@ import {
   PrismaIntakeRepository,
   PrismaAuditTrail,
   PrismaConsentRepository,
+  PrismaLegalDerivationRepository,
+  PrismaTransferLogRepository,
+  PrismaSlaRepository,
   prisma,
 } from "@claritystructures/infra-persistence";
 import {
@@ -27,6 +30,8 @@ import {
   UpdateIntakeStatusUseCase,
   GetUserDataUseCase,
   DeleteUserDataUseCase,
+  RequestLegalDerivationUseCase,
+  GenerateTransferPacketUseCase,
 } from "./use-cases";
 import { registerEventSubscriptions } from "./event-subscriptions";
 
@@ -94,6 +99,36 @@ export function createGetUserDataUseCase(): GetUserDataUseCase {
 export function createDeleteUserDataUseCase(): DeleteUserDataUseCase {
   const repository = new PrismaIntakeRepository(prisma);
   return new DeleteUserDataUseCase(repository, compositeAudit);
+}
+
+/**
+ * Factory for RequestLegalDerivationUseCase
+ */
+export function createRequestLegalDerivationUseCase(): RequestLegalDerivationUseCase {
+  const repository = new PrismaIntakeRepository(prisma);
+  const derivation = new PrismaLegalDerivationRepository(prisma);
+  return new RequestLegalDerivationUseCase(
+    repository,
+    derivation,
+    compositeAudit,
+  );
+}
+
+/**
+ * Factory for GenerateTransferPacketUseCase
+ */
+export function createGenerateTransferPacketUseCase(): GenerateTransferPacketUseCase {
+  const repository = new PrismaIntakeRepository(prisma);
+  const derivation = new PrismaLegalDerivationRepository(prisma);
+  const transferLog = new PrismaTransferLogRepository(prisma);
+  const sla = new PrismaSlaRepository(prisma);
+  return new GenerateTransferPacketUseCase(
+    repository,
+    derivation,
+    transferLog,
+    sla,
+    compositeAudit,
+  );
 }
 
 /**
