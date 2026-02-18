@@ -122,4 +122,18 @@ export class PrismaIntakeRepository implements IntakeRepository {
 
     return deleted.count;
   }
+
+  async findExpiredBefore(cutoff: Date): Promise<IntakeRecord[]> {
+    const records = await this.prisma.contactIntake.findMany({
+      where: { createdAt: { lt: cutoff } },
+      orderBy: { createdAt: "asc" },
+    });
+    return records.map(toIntakeRecord);
+  }
+
+  async deleteById(id: string): Promise<void> {
+    // Cascade: delete all related records before the intake itself
+    await this.prisma.consentAcceptance.deleteMany({ where: { intakeId: id } });
+    await this.prisma.contactIntake.delete({ where: { id } });
+  }
 }

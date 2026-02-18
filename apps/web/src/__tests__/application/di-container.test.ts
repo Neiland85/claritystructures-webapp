@@ -26,6 +26,17 @@ vi.mock("@claritystructures/infra-persistence", () => ({
   })),
   PrismaSlaRepository: vi.fn().mockImplementation(() => ({
     findByIntakeId: vi.fn(),
+    findBreached: vi.fn(),
+  })),
+  PrismaLegalHoldRepository: vi.fn().mockImplementation(() => ({
+    place: vi.fn(),
+    lift: vi.fn(),
+    findActiveByIntakeId: vi.fn(),
+    findAllActive: vi.fn(),
+  })),
+  PrismaDeletionLogRepository: vi.fn().mockImplementation(() => ({
+    record: vi.fn(),
+    findByIntakeId: vi.fn(),
   })),
   prisma: {
     $disconnect: vi.fn().mockResolvedValue(undefined),
@@ -141,6 +152,42 @@ describe("DI Container", () => {
       expect(persistence.PrismaTransferLogRepository).toHaveBeenCalledWith(
         persistence.prisma,
       );
+      expect(persistence.PrismaSlaRepository).toHaveBeenCalledWith(
+        persistence.prisma,
+      );
+    });
+  });
+
+  describe("createPurgeExpiredIntakesUseCase", () => {
+    it("should create a PurgeExpiredIntakesUseCase instance", () => {
+      const useCase = diContainer.createPurgeExpiredIntakesUseCase();
+      expect(useCase).toBeDefined();
+      expect(useCase).toHaveProperty("execute");
+    });
+
+    it("should inject all required repositories", () => {
+      diContainer.createPurgeExpiredIntakesUseCase();
+      expect(persistence.PrismaIntakeRepository).toHaveBeenCalledWith(
+        persistence.prisma,
+      );
+      expect(persistence.PrismaLegalHoldRepository).toHaveBeenCalledWith(
+        persistence.prisma,
+      );
+      expect(persistence.PrismaDeletionLogRepository).toHaveBeenCalledWith(
+        persistence.prisma,
+      );
+    });
+  });
+
+  describe("createCheckSlaBreachesUseCase", () => {
+    it("should create a CheckSlaBreachesUseCase instance", () => {
+      const useCase = diContainer.createCheckSlaBreachesUseCase();
+      expect(useCase).toBeDefined();
+      expect(useCase).toHaveProperty("execute");
+    });
+
+    it("should inject PrismaSlaRepository", () => {
+      diContainer.createCheckSlaBreachesUseCase();
       expect(persistence.PrismaSlaRepository).toHaveBeenCalledWith(
         persistence.prisma,
       );

@@ -16,6 +16,8 @@ import {
   PrismaConsentRepository,
   PrismaLegalDerivationRepository,
   PrismaTransferLogRepository,
+  PrismaLegalHoldRepository,
+  PrismaDeletionLogRepository,
   PrismaSlaRepository,
   prisma,
 } from "@claritystructures/infra-persistence";
@@ -32,6 +34,8 @@ import {
   DeleteUserDataUseCase,
   RequestLegalDerivationUseCase,
   GenerateTransferPacketUseCase,
+  PurgeExpiredIntakesUseCase,
+  CheckSlaBreachesUseCase,
 } from "./use-cases";
 import { registerEventSubscriptions } from "./event-subscriptions";
 
@@ -129,6 +133,29 @@ export function createGenerateTransferPacketUseCase(): GenerateTransferPacketUse
     sla,
     compositeAudit,
   );
+}
+
+/**
+ * Factory for PurgeExpiredIntakesUseCase (Retention Enforcement)
+ */
+export function createPurgeExpiredIntakesUseCase(): PurgeExpiredIntakesUseCase {
+  const repository = new PrismaIntakeRepository(prisma);
+  const legalHolds = new PrismaLegalHoldRepository(prisma);
+  const deletionLog = new PrismaDeletionLogRepository(prisma);
+  return new PurgeExpiredIntakesUseCase(
+    repository,
+    legalHolds,
+    deletionLog,
+    compositeAudit,
+  );
+}
+
+/**
+ * Factory for CheckSlaBreachesUseCase (SLA Monitoring)
+ */
+export function createCheckSlaBreachesUseCase(): CheckSlaBreachesUseCase {
+  const sla = new PrismaSlaRepository(prisma);
+  return new CheckSlaBreachesUseCase(sla, compositeAudit);
 }
 
 /**
