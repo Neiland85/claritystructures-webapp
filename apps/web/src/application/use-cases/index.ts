@@ -10,3 +10,5 @@ export { ListIntakesUseCase } from "./list-intakes.usecase";
 export { UpdateIntakeStatusUseCase } from "./update-intake-status.usecase";
 export { GetUserDataUseCase } from "./get-user-data.usecase";
 export { DeleteUserDataUseCase } from "./delete-user-data.usecase";
+export { RequestLegalDerivationUseCase } from "./request-legal-derivation.usecase";
+export { GenerateTransferPacketUseCase } from "./generate-transfer-packet.usecase";

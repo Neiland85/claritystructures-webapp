@@ -41,8 +41,12 @@ model ContactIntake {
   spamScore Float?
   meta      Json?
 
-  consentAcceptances ConsentAcceptance[]
-  slaTimers          SlaTimer[]
+  consentAcceptances     ConsentAcceptance[]
+  slaTimers              SlaTimer[]
+  derivationConsents     DerivationConsent[]
+  transferPackets        TransferPacket[]
+  legalHolds             LegalHold[]
+  deletionLogs           DeletionLog[]
 
   // Performance indexes
   @@index([status])
@@ -107,4 +111,68 @@ model ConsentAcceptance {
 
   @@index([consentVersionId])
   @@index([intakeId])
+}
+
+// ── Legal Derivation ──────────────────────────────────────────
+
+model DerivationConsent {
+  id              String    @id @default(uuid())
+  intakeId        String
+  recipientEntity String
+  consentedAt     DateTime  @default(now())
+  revokedAt       DateTime?
+  ipHash          String?
+  userAgent       String?
+
+  intake ContactIntake @relation(fields: [intakeId], references: [id])
+
+  @@index([intakeId])
+  @@index([recipientEntity])
+}
+
+model TransferPacket {
+  id               String    @id @default(uuid())
+  intakeId         String
+  recipientEntity  String
+  manifestHash     String
+  payloadSizeBytes Int
+  legalBasis       String
+  transferredAt    DateTime  @default(now())
+  acknowledgedAt   DateTime?
+
+  intake ContactIntake @relation(fields: [intakeId], references: [id])
+
+  @@index([intakeId])
+  @@index([manifestHash])
+  @@index([transferredAt(sort: Desc)])
+}
+
+// ── Retention & Legal Hold ────────────────────────────────────
+
+model LegalHold {
+  id        String    @id @default(uuid())
+  intakeId  String
+  reason    String
+  placedBy  String
+  createdAt DateTime  @default(now())
+  liftedAt  DateTime?
+
+  intake ContactIntake @relation(fields: [intakeId], references: [id])
+
+  @@index([intakeId])
+  @@index([liftedAt])
+}
+
+model DeletionLog {
+  id        String   @id @default(uuid())
+  intakeId  String
+  reason    String
+  trigger   String
+  deletedAt DateTime @default(now())
+
+  intake ContactIntake @relation(fields: [intakeId], references: [id])
+
+  @@index([intakeId])
+  @@index([deletedAt(sort: Desc)])
+  @@index([trigger])
 }
