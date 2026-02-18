@@ -89,3 +89,25 @@ export {
   resolveSlaStatus,
 } from "./sla";
 export type { SlaMilestone, SlaStatus, SlaTimerRecord } from "./sla";
+
+// Transfer Packet (Legal Derivation)
+export {
+  assembleTransferPacket,
+  computeManifestHash,
+  verifyManifestHash,
+} from "./transfer-packet";
+export type {
+  TransferPacketPayload,
+  TransferableIntake,
+  TransferableDecision,
+  SlaSnapshotEntry,
+  ChronologyEntry,
+} from "./transfer-packet";
+
+// Retention Policy
+export {
+  RETENTION_POLICY,
+  computeRetentionCutoff,
+  isEligibleForPurge,
+} from "./retention";
+export type { RetentionCategory } from "./retention";

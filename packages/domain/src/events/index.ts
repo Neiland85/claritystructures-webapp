@@ -6,3 +6,9 @@ export {
   IntakeAssignedEvent,
   IntakeClosedEvent,
 } from "./IntakeEvents";
+export {
+  LegalDerivationRequestedEvent,
+  TransferPacketGeneratedEvent,
+  LegalHoldPlacedEvent,
+  IntakePurgedEvent,
+} from "./LegalDerivationEvents";

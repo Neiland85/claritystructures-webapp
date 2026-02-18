@@ -57,3 +57,93 @@ export type SlaTimerSummary = {
   completedAt: Date | null;
   status: string;
 };
+
+// ── Legal Derivation ──────────────────────────────────────────
+
+export type DerivationConsentRecord = {
+  intakeId: string;
+  recipientEntity: string;
+  ipHash?: string;
+  userAgent?: string;
+};
+
+export type DerivationConsentSummary = {
+  id: string;
+  intakeId: string;
+  recipientEntity: string;
+  consentedAt: Date;
+  revokedAt: Date | null;
+};
+
+export interface LegalDerivationRepository {
+  recordConsent(record: DerivationConsentRecord): Promise<string>;
+  revokeConsent(consentId: string): Promise<void>;
+  findByIntakeId(intakeId: string): Promise<DerivationConsentSummary | null>;
+}
+
+export type TransferLogEntry = {
+  intakeId: string;
+  recipientEntity: string;
+  manifestHash: string;
+  payloadSizeBytes: number;
+  legalBasis: string;
+};
+
+export type TransferLogSummary = {
+  id: string;
+  intakeId: string;
+  recipientEntity: string;
+  manifestHash: string;
+  legalBasis: string;
+  transferredAt: Date;
+  acknowledgedAt: Date | null;
+};
+
+export interface TransferLogRepository {
+  recordTransfer(entry: TransferLogEntry): Promise<string>;
+  recordAcknowledgment(transferId: string): Promise<void>;
+  findByIntakeId(intakeId: string): Promise<TransferLogSummary[]>;
+}
+
+// ── Retention & Legal Hold ────────────────────────────────────
+
+export type LegalHoldRecord = {
+  intakeId: string;
+  reason: string;
+  placedBy: string;
+};
+
+export type LegalHoldSummary = {
+  id: string;
+  intakeId: string;
+  reason: string;
+  placedBy: string;
+  createdAt: Date;
+  liftedAt: Date | null;
+};
+
+export interface LegalHoldRepository {
+  place(record: LegalHoldRecord): Promise<string>;
+  lift(holdId: string): Promise<void>;
+  findActiveByIntakeId(intakeId: string): Promise<LegalHoldSummary | null>;
+  findAllActive(): Promise<LegalHoldSummary[]>;
+}
+
+export type DeletionLogEntry = {
+  intakeId: string;
+  reason: string;
+  trigger: "retention_policy" | "user_request" | "manual";
+};
+
+export type DeletionLogSummary = {
+  id: string;
+  intakeId: string;
+  reason: string;
+  trigger: string;
+  deletedAt: Date;
+};
+
+export interface DeletionLogRepository {
+  record(entry: DeletionLogEntry): Promise<void>;
+  findByIntakeId(intakeId: string): Promise<DeletionLogSummary[]>;
+}
