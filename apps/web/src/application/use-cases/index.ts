@@ -12,3 +12,5 @@ export { GetUserDataUseCase } from "./get-user-data.usecase";
 export { DeleteUserDataUseCase } from "./delete-user-data.usecase";
 export { RequestLegalDerivationUseCase } from "./request-legal-derivation.usecase";
 export { GenerateTransferPacketUseCase } from "./generate-transfer-packet.usecase";
+export { PurgeExpiredIntakesUseCase } from "./purge-expired-intakes.usecase";
+export { CheckSlaBreachesUseCase } from "./check-sla-breaches.usecase";

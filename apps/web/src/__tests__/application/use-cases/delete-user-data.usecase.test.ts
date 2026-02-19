@@ -10,6 +10,8 @@ describe("DeleteUserDataUseCase", () => {
     findAll: vi.fn(),
     findByEmail: vi.fn(),
     deleteByEmail: vi.fn(),
+    findExpiredBefore: vi.fn(),
+    deleteById: vi.fn(),
   };
 
   const mockAudit: AuditTrail = {

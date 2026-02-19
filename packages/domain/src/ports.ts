@@ -12,6 +12,8 @@ export interface IntakeRepository {
   findAll(): Promise<IntakeRecord[]>;
   findByEmail(email: string): Promise<IntakeRecord[]>;
   deleteByEmail(email: string): Promise<number>;
+  findExpiredBefore(cutoff: Date): Promise<IntakeRecord[]>;
+  deleteById(id: string): Promise<void>;
 }
 
 export interface Notifier {
