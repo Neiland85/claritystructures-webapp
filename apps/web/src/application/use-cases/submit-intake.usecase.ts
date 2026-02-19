@@ -41,16 +41,11 @@ export type ConsentMeta = {
   locale?: string;
 };
 
-// Type guard for WizardResult if needed, or simple assertion if we trust the API layer sanitization
+/** Type guard to verify meta is a valid WizardResult structure */
 function isWizardResult(meta: unknown): meta is WizardResult {
-  // Basic structural check - in a real app, use Zod or similar
-  const m = meta as any;
-  return (
-    m &&
-    typeof m === "object" &&
-    typeof m.objective === "string" &&
-    typeof m.incident === "string"
-  );
+  if (!meta || typeof meta !== "object") return false;
+  const m = meta as Record<string, unknown>;
+  return typeof m.objective === "string" && typeof m.incident === "string";
 }
 
 export class SubmitIntakeUseCase {
