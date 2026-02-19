@@ -14,6 +14,7 @@ export const env = createEnv({
     ADMIN_API_TOKEN: z.string().min(32).optional(),
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
     UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+    CRON_SECRET: z.string().min(32).optional(),
     SENTRY_DSN: z.string().url().optional(),
     NODE_ENV: z
       .enum(["development", "production", "test"])
@@ -36,6 +37,7 @@ export const env = createEnv({
     ADMIN_API_TOKEN: process.env.ADMIN_API_TOKEN,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    CRON_SECRET: process.env.CRON_SECRET,
     SENTRY_DSN: process.env.SENTRY_DSN,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
