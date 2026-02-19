@@ -45,36 +45,58 @@ export default function ContactFormBasic({ context }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
+    <form
+      onSubmit={handleSubmit}
+      aria-label="Formulario de consulta básica"
+      className="space-y-4 max-w-xl"
+    >
       <p className="text-sm text-neutral-400">
         Consulta informativa / preventiva.
       </p>
 
-      <input
-        type="email"
-        required
-        placeholder="Correo electrónico"
-        value={email}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-          setEmail(e.target.value)
-        }
-        className="w-full border p-3 bg-black"
-      />
+      <div>
+        <label htmlFor="basic-email" className="sr-only">
+          Correo electrónico
+        </label>
+        <input
+          id="basic-email"
+          type="email"
+          required
+          placeholder="Correo electrónico"
+          value={email}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setEmail(e.target.value)
+          }
+          className="w-full border p-3 bg-black"
+        />
+      </div>
 
-      <textarea
-        required
-        rows={4}
-        placeholder="Cuéntanos brevemente lo que está ocurriendo"
-        value={message}
-        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-          setMessage(e.target.value)
-        }
-        className="w-full border p-3 bg-black"
-      />
+      <div>
+        <label htmlFor="basic-message" className="sr-only">
+          Mensaje
+        </label>
+        <textarea
+          id="basic-message"
+          required
+          rows={4}
+          placeholder="Cuéntanos brevemente lo que está ocurriendo"
+          value={message}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+            setMessage(e.target.value)
+          }
+          className="w-full border p-3 bg-black"
+        />
+      </div>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-400">
+          {error}
+        </p>
+      )}
 
-      <button className="px-6 py-3 bg-white text-black">Enviar consulta</button>
+      <button type="submit" className="px-6 py-3 bg-white text-black">
+        Enviar consulta
+      </button>
     </form>
   );
 }

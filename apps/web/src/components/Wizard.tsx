@@ -121,6 +121,9 @@ export default function Wizard({ onComplete }: Props) {
     });
   }
 
+  const phaseIndex = phase === "TRIAGE" ? 0 : phase === "COGNITIVE" ? 1 : 2;
+  const phaseLabels = ["Triage", "Evaluación", "Trazado"];
+
   return (
     <div className="relative min-h-[700px] w-full max-w-4xl mx-auto dark pt-20">
       {/* Absolute Logo Area (Top Right) */}
@@ -128,7 +131,30 @@ export default function Wizard({ onComplete }: Props) {
         <AnimatedLogo />
       </div>
 
-      <div className="glass p-6 md:p-12 rounded-3xl shadow-2xl animate-in backdrop-blur-3xl max-w-2xl mx-auto">
+      {/* Step progress indicator (screen-reader + visual) */}
+      <nav aria-label="Progreso del formulario" className="sr-only">
+        <ol>
+          {phaseLabels.map((label, i) => (
+            <li
+              key={label}
+              aria-current={i === phaseIndex ? "step" : undefined}
+            >
+              {label}{" "}
+              {i < phaseIndex
+                ? "(completado)"
+                : i === phaseIndex
+                  ? "(actual)"
+                  : ""}
+            </li>
+          ))}
+        </ol>
+      </nav>
+
+      <div
+        className="glass p-6 md:p-12 rounded-3xl shadow-2xl animate-in backdrop-blur-3xl max-w-2xl mx-auto"
+        role="form"
+        aria-label={`Paso ${phaseIndex + 1} de ${phaseLabels.length}: ${phaseLabels[phaseIndex]}`}
+      >
         {phase === "TRIAGE" && (
           <div className="space-y-6 md:space-y-10">
             <header className="space-y-1">
@@ -140,14 +166,26 @@ export default function Wizard({ onComplete }: Props) {
               </p>
             </header>
 
-            <section className="space-y-4">
-              <h2 className="text-xs uppercase tracking-widest text-white/30 font-semibold">
+            <section
+              aria-labelledby="client-profile-heading"
+              className="space-y-4"
+            >
+              <h2
+                id="client-profile-heading"
+                className="text-xs uppercase tracking-widest text-white/30 font-semibold"
+              >
                 Situación Actual
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {clientProfiles.map((opt: any) => (
+              <div
+                role="radiogroup"
+                aria-labelledby="client-profile-heading"
+                className="grid grid-cols-1 md:grid-cols-2 gap-3"
+              >
+                {clientProfiles.map((opt) => (
                   <button
                     key={opt.value}
+                    role="radio"
+                    aria-checked={clientProfile === opt.value}
                     onClick={() => setClientProfile(opt.value)}
                     className={`text-left p-4 rounded-xl border transition-all ${
                       clientProfile === opt.value
@@ -163,14 +201,23 @@ export default function Wizard({ onComplete }: Props) {
               </div>
             </section>
 
-            <section className="space-y-4">
-              <h2 className="text-xs uppercase tracking-widest text-white/30 font-semibold">
+            <section aria-labelledby="urgency-heading" className="space-y-4">
+              <h2
+                id="urgency-heading"
+                className="text-xs uppercase tracking-widest text-white/30 font-semibold"
+              >
                 Nivel de Urgencia
               </h2>
-              <div className="flex flex-wrap gap-2">
-                {urgencyLevels.map((opt: any) => (
+              <div
+                role="radiogroup"
+                aria-labelledby="urgency-heading"
+                className="flex flex-wrap gap-2"
+              >
+                {urgencyLevels.map((opt) => (
                   <button
                     key={opt.value}
+                    role="radio"
+                    aria-checked={urgency === opt.value}
                     onClick={() => setUrgency(opt.value)}
                     className={`px-4 py-2 rounded-lg text-sm border transition-all ${
                       urgency === opt.value
@@ -184,50 +231,70 @@ export default function Wizard({ onComplete }: Props) {
               </div>
             </section>
 
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
-              <div className="space-y-3">
-                <label className="text-xs text-white/40 text-center block">
+            <section
+              aria-label="Evaluación de riesgos"
+              className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5"
+            >
+              <fieldset className="space-y-3">
+                <legend className="text-xs text-white/40 text-center block">
                   Integridad Física
-                </label>
-                <div className="flex gap-2">
+                </legend>
+                <div
+                  role="radiogroup"
+                  aria-label="Integridad Física"
+                  className="flex gap-2"
+                >
                   <button
+                    role="radio"
+                    aria-checked={physicalSafetyRisk === true}
                     onClick={() => setPhysicalSafetyRisk(true)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
                     AMENAZA REAL
                   </button>
                   <button
+                    role="radio"
+                    aria-checked={physicalSafetyRisk === false}
                     onClick={() => setPhysicalSafetyRisk(false)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
                     ZONA SEGURA
                   </button>
                 </div>
-              </div>
-              <div className="space-y-3">
-                <label className="text-xs text-white/40 text-center block">
+              </fieldset>
+              <fieldset className="space-y-3">
+                <legend className="text-xs text-white/40 text-center block">
                   Activos Financieros
-                </label>
-                <div className="flex gap-2">
+                </legend>
+                <div
+                  role="radiogroup"
+                  aria-label="Activos Financieros"
+                  className="flex gap-2"
+                >
                   <button
+                    role="radio"
+                    aria-checked={financialAssetRisk === true}
                     onClick={() => setFinancialAssetRisk(true)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === true ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
                     EN RIESGO
                   </button>
                   <button
+                    role="radio"
+                    aria-checked={financialAssetRisk === false}
                     onClick={() => setFinancialAssetRisk(false)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
                     PROTEGIDOS
                   </button>
                 </div>
-              </div>
+              </fieldset>
             </section>
 
             <button
               onClick={() => setPhase("COGNITIVE")}
               disabled={!isStep1Complete}
+              aria-disabled={!isStep1Complete}
               className={`w-full py-4 rounded-xl font-semibold transition-all ${
                 isStep1Complete
                   ? "bg-white text-black hover:bg-neutral-200"
@@ -252,19 +319,30 @@ export default function Wizard({ onComplete }: Props) {
             </header>
 
             <div className="space-y-8">
-              <section className="space-y-3">
-                <h2 className="text-sm text-white/70">
+              <section
+                aria-labelledby="omnipotence-heading"
+                className="space-y-3"
+              >
+                <h2 id="omnipotence-heading" className="text-sm text-white/70">
                   ¿Sientes que el atacante tiene capacidades omnipresentes (te
                   vigila en todo momento)?
                 </h2>
-                <div className="grid grid-cols-2 gap-3">
+                <div
+                  role="radiogroup"
+                  aria-labelledby="omnipotence-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
                   <button
+                    role="radio"
+                    aria-checked={perceivedOmnipotence === true}
                     onClick={() => setPerceivedOmnipotence(true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${perceivedOmnipotence === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     VIGILANCIA TOTAL
                   </button>
                   <button
+                    role="radio"
+                    aria-checked={perceivedOmnipotence === false}
                     onClick={() => setPerceivedOmnipotence(false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${perceivedOmnipotence === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
@@ -273,19 +351,30 @@ export default function Wizard({ onComplete }: Props) {
                 </div>
               </section>
 
-              <section className="space-y-3">
-                <h2 className="text-sm text-white/70">
+              <section
+                aria-labelledby="verifiable-heading"
+                className="space-y-3"
+              >
+                <h2 id="verifiable-heading" className="text-sm text-white/70">
                   ¿Los eventos reportados pueden ser contrastados con pruebas
                   físicas (logs, fotos)?
                 </h2>
-                <div className="grid grid-cols-2 gap-3">
+                <div
+                  role="radiogroup"
+                  aria-labelledby="verifiable-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
                   <button
+                    role="radio"
+                    aria-checked={isVerifiable === true}
                     onClick={() => setIsVerifiable(true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${isVerifiable === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     PRUEBAS MATERIALES
                   </button>
                   <button
+                    role="radio"
+                    aria-checked={isVerifiable === false}
                     onClick={() => setIsVerifiable(false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${isVerifiable === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
@@ -294,19 +383,30 @@ export default function Wizard({ onComplete }: Props) {
                 </div>
               </section>
 
-              <section className="space-y-3">
-                <h2 className="text-sm text-white/70">
+              <section
+                aria-labelledby="distortion-heading"
+                className="space-y-3"
+              >
+                <h2 id="distortion-heading" className="text-sm text-white/70">
                   ¿Te sientes capaz de narrar los hechos cronológicamente de
                   forma clara?
                 </h2>
-                <div className="grid grid-cols-2 gap-3">
+                <div
+                  role="radiogroup"
+                  aria-labelledby="distortion-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
                   <button
+                    role="radio"
+                    aria-checked={distortionIndicator === false}
                     onClick={() => setDistortionIndicator(false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${distortionIndicator === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     NARREACIÓN CLARA
                   </button>
                   <button
+                    role="radio"
+                    aria-checked={distortionIndicator === true}
                     onClick={() => setDistortionIndicator(true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${distortionIndicator === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
@@ -346,19 +446,30 @@ export default function Wizard({ onComplete }: Props) {
             </header>
 
             <div className="space-y-8">
-              <section className="space-y-3">
-                <h2 className="text-sm text-white/70 font-light">
+              <section aria-labelledby="whatsapp-heading" className="space-y-3">
+                <h2
+                  id="whatsapp-heading"
+                  className="text-sm text-white/70 font-light"
+                >
                   ¿Sientes que has perdido o estás perdiendo el control de tus
                   comunicaciones (WhatsApp, Telegram, etc.)?
                 </h2>
-                <div className="grid grid-cols-2 gap-3">
+                <div
+                  role="radiogroup"
+                  aria-labelledby="whatsapp-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
                   <button
+                    role="radio"
+                    aria-checked={whatsappControl === true}
                     onClick={() => setWhatsappControl(true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${whatsappControl === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     IDENTIFICADO
                   </button>
                   <button
+                    role="radio"
+                    aria-checked={whatsappControl === false}
                     onClick={() => setWhatsappControl(false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${whatsappControl === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
@@ -367,19 +478,30 @@ export default function Wizard({ onComplete }: Props) {
                 </div>
               </section>
 
-              <section className="space-y-3">
-                <h2 className="text-sm text-white/70 font-light">
+              <section aria-labelledby="family-heading" className="space-y-3">
+                <h2
+                  id="family-heading"
+                  className="text-sm text-white/70 font-light"
+                >
                   ¿Sospechas que detrás de estas anomalías podrían encontrarse
                   familiares directos o personas de tu entorno cercano?
                 </h2>
-                <div className="grid grid-cols-2 gap-3">
+                <div
+                  role="radiogroup"
+                  aria-labelledby="family-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
                   <button
+                    role="radio"
+                    aria-checked={familySuspect === true}
                     onClick={() => setFamilySuspect(true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${familySuspect === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     SOSPECHA CERCANA
                   </button>
                   <button
+                    role="radio"
+                    aria-checked={familySuspect === false}
                     onClick={() => setFamilySuspect(false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${familySuspect === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
@@ -388,19 +510,33 @@ export default function Wizard({ onComplete }: Props) {
                 </div>
               </section>
 
-              <section className="space-y-3">
-                <h2 className="text-sm text-white/70 font-light">
+              <section
+                aria-labelledby="surveillance-heading"
+                className="space-y-3"
+              >
+                <h2
+                  id="surveillance-heading"
+                  className="text-sm text-white/70 font-light"
+                >
                   ¿Te sientes bajo una vigilancia constante que excede lo
                   puramente digital (persecución, ruidos, eventos físicos)?
                 </h2>
-                <div className="grid grid-cols-2 gap-3">
+                <div
+                  role="radiogroup"
+                  aria-labelledby="surveillance-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
                   <button
+                    role="radio"
+                    aria-checked={constantSurveillance === true}
                     onClick={() => setConstantSurveillance(true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${constantSurveillance === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     PERCEPCIÓN FÍSICA
                   </button>
                   <button
+                    role="radio"
+                    aria-checked={constantSurveillance === false}
                     onClick={() => setConstantSurveillance(false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${constantSurveillance === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >

@@ -137,14 +137,15 @@ export default function TriageTable({ token }: TriageTableProps) {
             />
           </svg>
           <input
-            type="text"
+            type="search"
+            aria-label="Buscar intakes por nombre, email o mensaje"
             placeholder="Search by name, email or message..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
           />
         </div>
-        <div className="text-xs text-slate-500 font-medium">
+        <div aria-live="polite" className="text-xs text-slate-500 font-medium">
           Showing {filteredIntakes.length} of {intakes.length} intakes
         </div>
       </div>
@@ -235,6 +236,7 @@ export default function TriageTable({ token }: TriageTableProps) {
                 </div>
                 <button
                   onClick={() => setSelectedIntake(null)}
+                  aria-label="Cerrar panel de detalle"
                   className="p-1 text-slate-500 hover:text-white transition-colors"
                 >
                   <svg
@@ -305,6 +307,8 @@ export default function TriageTable({ token }: TriageTableProps) {
                         key={s}
                         onClick={() => updateStatus(selectedIntake.id, s)}
                         disabled={selectedIntake.status === s}
+                        aria-pressed={selectedIntake.status === s}
+                        aria-label={`Cambiar estado a ${s}`}
                         className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
                           selectedIntake.status === s
                             ? STATUS_COLORS[s] +
