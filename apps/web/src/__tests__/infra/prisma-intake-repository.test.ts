@@ -26,6 +26,7 @@ function createMockPrisma() {
       findMany: vi.fn(async () => [SAMPLE_ROW]),
       update: vi.fn(async () => ({ ...SAMPLE_ROW, status: "accepted" })),
       deleteMany: vi.fn(async () => ({ count: 1 })),
+      delete: vi.fn(async () => SAMPLE_ROW),
     },
     consentAcceptance: {
       deleteMany: vi.fn(async () => ({ count: 0 })),
@@ -156,6 +157,41 @@ describe("PrismaIntakeRepository", () => {
 
       expect(count).toBe(0);
       expect(mockPrisma.consentAcceptance.deleteMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("findExpiredBefore", () => {
+    it("should query intakes created before cutoff date", async () => {
+      const cutoff = new Date("2025-01-01");
+
+      await repo.findExpiredBefore(cutoff);
+
+      expect(mockPrisma.contactIntake.findMany).toHaveBeenCalledWith({
+        where: { createdAt: { lt: cutoff } },
+        orderBy: { createdAt: "asc" },
+      });
+    });
+
+    it("should return mapped records", async () => {
+      const cutoff = new Date("2027-01-01");
+      const results = await repo.findExpiredBefore(cutoff);
+
+      expect(results).toHaveLength(1);
+      expect(results[0]?.id).toBe("intake-001");
+      expect(results[0]?.name).toBeUndefined();
+    });
+  });
+
+  describe("deleteById", () => {
+    it("should cascade delete consent acceptances then the intake", async () => {
+      await repo.deleteById("intake-001");
+
+      expect(mockPrisma.consentAcceptance.deleteMany).toHaveBeenCalledWith({
+        where: { intakeId: "intake-001" },
+      });
+      expect(mockPrisma.contactIntake.delete).toHaveBeenCalledWith({
+        where: { id: "intake-001" },
+      });
     });
   });
 });
