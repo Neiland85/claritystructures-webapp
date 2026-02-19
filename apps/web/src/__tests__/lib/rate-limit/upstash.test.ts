@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+// Set env vars BEFORE module loads so Redis client is created
+vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://fake-redis.upstash.io");
+vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "fake-token");
+
 // Mock @upstash/redis
 const mockPipeline = {
   zremrangebyscore: vi.fn(),
@@ -21,6 +25,7 @@ describe("upstash rate limiter", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    vi.resetModules();
     const mod = await import("@/lib/rate-limit/upstash");
     checkRateLimit = mod.checkRateLimit;
     getIdentifier = mod.getIdentifier;
