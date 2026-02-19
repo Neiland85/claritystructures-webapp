@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname, "../.."),
   },
 
+  // Docker: generate standalone output for minimal production image
+  output: "standalone",
+
   // Production optimizations
   reactStrictMode: true,
   productionBrowserSourceMaps: false,
@@ -38,6 +41,14 @@ const nextConfig: NextConfig = {
     "@claritystructures/config",
     "@claritystructures/infra-notifications",
     "@claritystructures/infra-persistence",
+  ],
+
+  // Mark packages as external for server-side bundling
+  serverExternalPackages: [
+    "pg",
+    "@prisma/adapter-pg",
+    "nodemailer",
+    "nodemailer/lib/mailer",
   ],
 
   // Security headers (CSP is handled dynamically in proxy.ts with nonce)

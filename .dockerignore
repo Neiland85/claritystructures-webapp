@@ -1,16 +1,55 @@
-node_modules
-.next
+# Version control
 .git
+.gitignore
+.gitattributes
+
+# CI/CD
 .github
+.gitlab-ci.yml
+.circleci
+
+# Dependencies (handled by pnpm install)
+node_modules
+
+# Build artifacts
+.next
+dist
+build
 coverage
-*.md
-!README.md
-.env*
 .turbo
+
+# Development
 .vscode
 .claude
-tests
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Documentation (not needed in image)
+*.md
+!README.md
 docs
-scripts/demo-*
+
+# Testing
+tests
+vitest.config.ts
+
+# Scripts and demos
+scripts
+demo-*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Prisma
 generated
 packages/infra-persistence/generated
+
+# Other
+.vercel
+.husky
+dist
