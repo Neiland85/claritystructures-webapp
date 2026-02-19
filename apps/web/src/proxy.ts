@@ -42,6 +42,9 @@ export async function proxy(request: NextRequest) {
     "camera=(), microphone=(), geolocation=()",
   );
   response.headers.set("X-DNS-Prefetch-Control", "on");
+  response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  response.headers.set("Cross-Origin-Embedder-Policy", "credentialless");
+  response.headers.set("X-Permitted-Cross-Domain-Policies", "none");
 
   // HSTS in production
   if (process.env.NODE_ENV === "production") {
