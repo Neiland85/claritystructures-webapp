@@ -51,7 +51,8 @@ const nextConfig: NextConfig = {
     "nodemailer/lib/mailer",
   ],
 
-  // Security headers (CSP is handled dynamically in proxy.ts with nonce)
+  // Security headers — fallback for static assets not processed by proxy.ts
+  // Values MUST match proxy.ts (the canonical source for dynamic routes)
   async headers() {
     return [
       {
@@ -71,7 +72,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "X-Frame-Options",
-            value: "SAMEORIGIN",
+            value: "DENY",
           },
           {
             key: "X-Content-Type-Options",
@@ -79,7 +80,11 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Referrer-Policy",
-            value: "origin-when-cross-origin",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            key: "X-Permitted-Cross-Domain-Policies",
+            value: "none",
           },
         ],
       },
