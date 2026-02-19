@@ -5,6 +5,10 @@ import {
   IntakePriorityAssessedEvent,
   IntakeAssignedEvent,
   IntakeClosedEvent,
+  LegalDerivationRequestedEvent,
+  TransferPacketGeneratedEvent,
+  LegalHoldPlacedEvent,
+  IntakePurgedEvent,
 } from "@claritystructures/domain";
 import type { AuditTrail } from "@claritystructures/domain";
 import {
@@ -95,6 +99,86 @@ describe("Event Subscriptions", () => {
     });
   });
 
+  it("should record audit on LegalDerivationRequested event", async () => {
+    const event = new LegalDerivationRequestedEvent(
+      "intake-010",
+      "Legal Corp SLU",
+      "consent-001",
+    );
+
+    await eventDispatcher.dispatch(event);
+
+    expect(audit.record).toHaveBeenCalledOnce();
+    expect(audit.record).toHaveBeenCalledWith({
+      action: "domain_event:LegalDerivationRequested",
+      intakeId: "intake-010",
+      metadata: {
+        recipientEntity: "Legal Corp SLU",
+        consentId: "consent-001",
+      },
+      occurredAt: event.occurredAt,
+    });
+  });
+
+  it("should record audit on TransferPacketGenerated event", async () => {
+    const event = new TransferPacketGeneratedEvent(
+      "intake-011",
+      "abc123hash",
+      "Legal Corp SLU",
+    );
+
+    await eventDispatcher.dispatch(event);
+
+    expect(audit.record).toHaveBeenCalledOnce();
+    expect(audit.record).toHaveBeenCalledWith({
+      action: "domain_event:TransferPacketGenerated",
+      intakeId: "intake-011",
+      metadata: {
+        manifestHash: "abc123hash",
+        recipientEntity: "Legal Corp SLU",
+      },
+      occurredAt: event.occurredAt,
+    });
+  });
+
+  it("should record audit on LegalHoldPlaced event", async () => {
+    const event = new LegalHoldPlacedEvent(
+      "intake-012",
+      "Court order #12345",
+      "admin@clarity.com",
+    );
+
+    await eventDispatcher.dispatch(event);
+
+    expect(audit.record).toHaveBeenCalledOnce();
+    expect(audit.record).toHaveBeenCalledWith({
+      action: "domain_event:LegalHoldPlaced",
+      intakeId: "intake-012",
+      metadata: {
+        reason: "Court order #12345",
+        placedBy: "admin@clarity.com",
+      },
+      occurredAt: event.occurredAt,
+    });
+  });
+
+  it("should record audit on IntakePurged event", async () => {
+    const event = new IntakePurgedEvent(
+      "intake-013",
+      "retention_policy:intake_data",
+    );
+
+    await eventDispatcher.dispatch(event);
+
+    expect(audit.record).toHaveBeenCalledOnce();
+    expect(audit.record).toHaveBeenCalledWith({
+      action: "domain_event:IntakePurged",
+      intakeId: "intake-013",
+      metadata: { reason: "retention_policy:intake_data" },
+      occurredAt: event.occurredAt,
+    });
+  });
+
   it("should be idempotent — calling register twice only subscribes once", async () => {
     // registerEventSubscriptions was already called in beforeEach
     registerEventSubscriptions(audit);
@@ -106,10 +190,14 @@ describe("Event Subscriptions", () => {
     expect(audit.record).toHaveBeenCalledTimes(1);
   });
 
-  it("should subscribe all four event types", () => {
+  it("should subscribe all eight event types", () => {
     expect(eventDispatcher.getHandlerCount("IntakeReceived")).toBe(1);
     expect(eventDispatcher.getHandlerCount("IntakePriorityAssessed")).toBe(1);
     expect(eventDispatcher.getHandlerCount("IntakeAssigned")).toBe(1);
     expect(eventDispatcher.getHandlerCount("IntakeClosed")).toBe(1);
+    expect(eventDispatcher.getHandlerCount("LegalDerivationRequested")).toBe(1);
+    expect(eventDispatcher.getHandlerCount("TransferPacketGenerated")).toBe(1);
+    expect(eventDispatcher.getHandlerCount("LegalHoldPlaced")).toBe(1);
+    expect(eventDispatcher.getHandlerCount("IntakePurged")).toBe(1);
   });
 });
