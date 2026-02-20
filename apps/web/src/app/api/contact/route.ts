@@ -5,6 +5,9 @@ import { createSubmitIntakeUseCase } from "@/application/di-container";
 import type { WizardResult } from "@claritystructures/domain";
 import { apiGuard } from "@/lib/api-guard";
 import { sanitizeHtml, isBot } from "@/lib/api/validate-request";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("api/contact");
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -89,7 +92,7 @@ export async function POST(req: NextRequest) {
         decision: decision.decision,
       });
     } catch (error) {
-      console.error("[POST /api/contact]", error);
+      logger.error("Failed to process contact submission", error);
       return NextResponse.json({ error: "Failed to send" }, { status: 500 });
     }
   });

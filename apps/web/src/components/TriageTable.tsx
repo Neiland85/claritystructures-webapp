@@ -3,6 +3,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import type { IntakeRecord, IntakeStatus } from "@claritystructures/domain";
 import { getCsrfToken } from "@/lib/csrf/get-csrf-token";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("TriageTable");
 
 const STATUS_COLORS: Record<IntakeStatus, string> = {
   pending: "bg-amber-500/20 text-amber-400 border-amber-500/30",
@@ -102,7 +105,7 @@ export default function TriageTable({ token }: TriageTableProps) {
           );
         }
       } catch (err) {
-        console.error("Update failed", err);
+        logger.error("Failed to update intake status", err);
       }
     },
     [authHeaders],

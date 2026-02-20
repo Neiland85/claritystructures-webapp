@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("GlobalError");
 
 export default function GlobalError({
   error,
@@ -10,7 +13,7 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[GlobalError]", error);
+    logger.error("Unhandled error caught by error boundary", error);
   }, [error]);
 
   return (

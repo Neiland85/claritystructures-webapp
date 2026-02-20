@@ -7,6 +7,9 @@ import {
 } from "@/application/di-container";
 import { apiGuard } from "@/lib/api-guard";
 import { INTAKE_STATUSES } from "@claritystructures/domain";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("api/triage");
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,7 +28,7 @@ export async function GET(req: NextRequest) {
 
         return NextResponse.json({ intakes });
       } catch (error) {
-        console.error("Error fetching intakes:", error);
+        logger.error("Failed to fetch intakes", error);
         return NextResponse.json(
           { error: "Failed to fetch intakes" },
           { status: 500 },
@@ -74,7 +77,7 @@ export async function PATCH(req: NextRequest) {
 
         return NextResponse.json({ intake: updated });
       } catch (error) {
-        console.error("Error updating intake:", error);
+        logger.error("Failed to update intake status", error);
         return NextResponse.json(
           { error: "Failed to update intake" },
           { status: 500 },
