@@ -22,9 +22,10 @@ export async function proxy(request: NextRequest) {
   const cspHeader = [
     `default-src 'self'`,
     `script-src 'self' 'nonce-${nonce}' https://eu-assets.i.posthog.com`,
-    `style-src 'self' 'unsafe-inline'`,
+    `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
     `img-src 'self' blob: data: https://eu-assets.i.posthog.com`,
-    `font-src 'self'`,
+    `connect-src 'self' https://eu.i.posthog.com https://eu-assets.i.posthog.com`,
+    `font-src 'self' https://fonts.gstatic.com`,
     `object-src 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,
@@ -42,12 +43,15 @@ export async function proxy(request: NextRequest) {
     "camera=(), microphone=(), geolocation=()",
   );
   response.headers.set("X-DNS-Prefetch-Control", "on");
+  response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
+  response.headers.set("Cross-Origin-Embedder-Policy", "credentialless");
+  response.headers.set("X-Permitted-Cross-Domain-Policies", "none");
 
   // HSTS in production
   if (process.env.NODE_ENV === "production") {
     response.headers.set(
       "Strict-Transport-Security",
-      "max-age=31536000; includeSubDomains",
+      "max-age=63072000; includeSubDomains; preload",
     );
   }
 

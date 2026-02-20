@@ -6,6 +6,9 @@ import {
   createDeleteUserDataUseCase,
 } from "@/application/di-container";
 import { apiGuard } from "@/lib/api-guard";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("api/user-data");
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -48,7 +51,7 @@ export async function POST(req: NextRequest) {
           })),
         });
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        logger.error("Failed to fetch user data", error);
         return NextResponse.json(
           { error: "Failed to fetch user data" },
           { status: 500 },
@@ -89,7 +92,7 @@ export async function DELETE(req: NextRequest) {
               : `No records found for ${parsed.data.email}`,
         });
       } catch (error) {
-        console.error("Error deleting user data:", error);
+        logger.error("Failed to delete user data", error);
         return NextResponse.json(
           { error: "Failed to delete user data" },
           { status: 500 },

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createPurgeExpiredIntakesUseCase } from "@/application/di-container";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("cron/purge-expired");
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -42,6 +45,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, summary });
   } catch (error) {
     console.error("[CRON purge-expired]", error);
+    logger.error("Purge job failed", error);
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Internal server error",

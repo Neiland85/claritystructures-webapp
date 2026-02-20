@@ -334,7 +334,11 @@ export function decideIntake(result: WizardResult): IntakeDecision {
   }
 
   if (result.urgency === "time_sensitive") score += 2;
-  if (result.urgency === "legal_risk") score += 4;
+  if (result.urgency === "legal_risk") {
+    score += 4;
+    flags.push("legal_risk");
+  }
+
   if (result.urgency === "critical") score += 6;
 
   if (result.hasEmotionalDistress) {
@@ -344,22 +348,22 @@ export function decideIntake(result: WizardResult): IntakeDecision {
 
   if (result.physicalSafetyRisk) {
     score += 5;
-    flags.push("physical_risk" as any);
+    flags.push("physical_risk");
   }
 
   if (result.financialAssetRisk) {
     score += 3;
-    flags.push("financial_risk" as any);
+    flags.push("financial_risk");
   }
 
   if (result.attackerHasPasswords) {
     score += 4;
-    flags.push("access_compromised" as any);
+    flags.push("access_compromised");
   }
 
   if (result.evidenceIsAutoDeleted) {
     score += 3;
-    flags.push("evidence_volatility" as any);
+    flags.push("evidence_volatility");
   }
 
   if (score >= 8) {
