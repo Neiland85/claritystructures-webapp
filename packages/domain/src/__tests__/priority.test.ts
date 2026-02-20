@@ -6,21 +6,7 @@ import {
 } from "../priority";
 import type { WizardResult } from "../wizard-result";
 import { DECISION_MODEL_VERSION_V2 } from "../decision";
-
-/** Helper: full wizard result */
-function baseWizard(overrides: Partial<WizardResult> = {}): WizardResult {
-  return {
-    urgency: "informational",
-    clientProfile: "private_individual",
-    hasEmotionalDistress: false,
-    incident: "test incident",
-    devices: 0,
-    actionsTaken: [],
-    evidenceSources: [],
-    objective: "test objective",
-    ...overrides,
-  };
-}
+import { baseWizard } from "./test-utils";
 
 describe("assessIntake (V1 wrapper)", () => {
   it("should return priority, flags, and actionCode", () => {

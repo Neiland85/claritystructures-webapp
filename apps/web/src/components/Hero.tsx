@@ -13,8 +13,11 @@ export default function Hero() {
 
   function handleComplete(result: WizardResult) {
     const decision = decideIntake(result);
-    const encodedData = encodeURIComponent(JSON.stringify(result));
-    router.push(`/${lang}${decision.route}?data=${encodedData}`);
+    // DT-01: Move sensitive data out of URL to sessionStorage
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("wizard_result", JSON.stringify(result));
+    }
+    router.push(`/${lang}${decision.route}`);
   }
 
   return (

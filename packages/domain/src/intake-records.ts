@@ -24,4 +24,5 @@ export type IntakeFlag =
   | "physical_risk"
   | "financial_risk"
   | "access_compromised"
-  | "evidence_volatility";
+  | "evidence_volatility"
+  | "legal_risk";

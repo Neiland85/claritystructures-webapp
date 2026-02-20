@@ -12,6 +12,7 @@ export default defineConfig({
       "**/node_modules/**",
       "**/dist/**",
       "**/.next/**",
+      "**/.claude/**",
       "tests/decision.spec.ts",
       "tests/decision.snapshot.spec.ts",
       "tests/intake-funnel.integration.spec.ts",
@@ -22,6 +23,7 @@ export default defineConfig({
       exclude: [
         "node_modules/",
         "tests/",
+        "**/.claude/",
         "**/*.d.ts",
         "**/*.config.*",
         "**/dist/",

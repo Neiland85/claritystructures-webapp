@@ -23,9 +23,11 @@ vi.mock("@/components/forms/ContactFormLegal", () => ({
 const defaultContext = {
   clientProfile: "private_individual",
   urgency: "time_sensitive",
-  hasLegalIssue: false,
-  emotionalState: "calm",
-  hasPriorLegalExperience: false,
+  incident: "unspecified",
+  devices: 0,
+  actionsTaken: [],
+  evidenceSources: [],
+  objective: "contact",
 };
 
 describe("ContactForm", () => {

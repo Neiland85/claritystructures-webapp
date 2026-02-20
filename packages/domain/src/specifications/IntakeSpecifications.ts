@@ -1,5 +1,6 @@
 import { Specification } from "./Specification";
 import type { IntakeDecision } from "../decision";
+import type { IntakeFlag } from "../intake-records";
 
 /**
  * HighPrioritySpecification
@@ -26,12 +27,12 @@ export class CriticalPrioritySpecification extends Specification<IntakeDecision>
  * Checks if intake has specific flag
  */
 export class HasFlagSpecification extends Specification<IntakeDecision> {
-  constructor(private flag: string) {
+  constructor(private flag: IntakeFlag) {
     super();
   }
 
   isSatisfiedBy(intake: IntakeDecision): boolean {
-    return (intake.flags as ReadonlyArray<string>).includes(this.flag);
+    return intake.flags.includes(this.flag);
   }
 }
 

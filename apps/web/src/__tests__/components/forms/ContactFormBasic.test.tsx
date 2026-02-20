@@ -2,6 +2,38 @@ import { describe, it, expect, vi, beforeEach, afterAll } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ContactFormBasic from "@/components/forms/ContactFormBasic";
 
+// Mock dependencies
+vi.mock("@/lib/analytics", () => ({
+  trackEvent: vi.fn(),
+}));
+
+vi.mock("@/components/ConsentBlock", () => ({
+  default: ({
+    checked,
+    onChange,
+  }: {
+    tone: string;
+    checked: boolean;
+    onChange: (v: boolean) => void;
+  }) => (
+    <label data-testid="consent-block">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        data-testid="consent-checkbox"
+      />
+      Consent
+    </label>
+  ),
+}));
+
+vi.mock("@/components/ContactConfirmation", () => ({
+  default: ({ tone }: { tone: string }) => (
+    <div data-testid="confirmation">Consulta recibida ({tone})</div>
+  ),
+}));
+
 const originalFetch = global.fetch;
 const mockFetch = vi.fn();
 
@@ -24,8 +56,19 @@ const mockContext = {
   objective: "contact",
 };
 
+function fillValidForm() {
+  fireEvent.change(screen.getByPlaceholderText("Correo electrónico"), {
+    target: { value: "user@example.com" },
+  });
+  fireEvent.change(
+    screen.getByPlaceholderText("Cuéntanos brevemente lo que está ocurriendo"),
+    { target: { value: "Test message with enough characters" } },
+  );
+  fireEvent.click(screen.getByTestId("consent-checkbox"));
+}
+
 describe("ContactFormBasic", () => {
-  it("should render email input, message textarea, and submit button", () => {
+  it("should render email input, message textarea, consent, and submit button", () => {
     render(<ContactFormBasic context={mockContext} />);
 
     expect(
@@ -36,8 +79,9 @@ describe("ContactFormBasic", () => {
         "Cuéntanos brevemente lo que está ocurriendo",
       ),
     ).toBeInTheDocument();
+    expect(screen.getByTestId("consent-block")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Enviar consulta" }),
+      screen.getByRole("button", { name: /enviar consulta/i }),
     ).toBeInTheDocument();
   });
 
@@ -56,47 +100,14 @@ describe("ContactFormBasic", () => {
     expect(screen.getByLabelText("Mensaje")).toBeInTheDocument();
   });
 
-  it("should submit with correct payload including context spread", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ success: true }),
-    });
-
+  it("should disable submit button when consent is not checked", () => {
     render(<ContactFormBasic context={mockContext} />);
 
-    fireEvent.change(screen.getByPlaceholderText("Correo electrónico"), {
-      target: { value: "user@example.com" },
-    });
-    fireEvent.change(
-      screen.getByPlaceholderText(
-        "Cuéntanos brevemente lo que está ocurriendo",
-      ),
-      { target: { value: "Test message" } },
-    );
-    fireEvent.click(screen.getByRole("button", { name: "Enviar consulta" }));
-
-    await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...mockContext,
-          email: "user@example.com",
-          message: "Test message",
-          tone: "basic",
-          consent: true,
-          consentVersion: "v1",
-        }),
-      });
-    });
+    const button = screen.getByRole("button", { name: /enviar consulta/i });
+    expect(button).toBeDisabled();
   });
 
-  it("should show success message after successful submission", async () => {
-    mockFetch.mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ success: true }),
-    });
-
+  it("should not call fetch when client-side validation fails (short message)", () => {
     render(<ContactFormBasic context={mockContext} />);
 
     fireEvent.change(screen.getByPlaceholderText("Correo electrónico"), {
@@ -106,44 +117,109 @@ describe("ContactFormBasic", () => {
       screen.getByPlaceholderText(
         "Cuéntanos brevemente lo que está ocurriendo",
       ),
-      { target: { value: "Test message" } },
+      { target: { value: "short" } },
     );
-    fireEvent.click(screen.getByRole("button", { name: "Enviar consulta" }));
+    fireEvent.click(screen.getByTestId("consent-checkbox"));
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
+
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("should not call fetch when client-side validation fails (invalid email)", () => {
+    render(<ContactFormBasic context={mockContext} />);
+
+    fireEvent.change(screen.getByPlaceholderText("Correo electrónico"), {
+      target: { value: "not-an-email" },
+    });
+    fireEvent.change(
+      screen.getByPlaceholderText(
+        "Cuéntanos brevemente lo que está ocurriendo",
+      ),
+      { target: { value: "Valid message with enough characters" } },
+    );
+    fireEvent.click(screen.getByTestId("consent-checkbox"));
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
+
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("should submit validated payload on successful validation", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+
+    render(<ContactFormBasic context={mockContext} />);
+
+    fillValidForm();
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Hemos recibido tu solicitud."),
-      ).toBeInTheDocument();
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/contact",
+        expect.objectContaining({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    });
+
+    // Verify the payload contains expected fields
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(callBody.email).toBe("user@example.com");
+    expect(callBody.consent).toBe(true);
+    expect(callBody.tone).toBe("basic");
+    expect(callBody.wizardResult).toBeDefined();
+  });
+
+  it("should show ContactConfirmation after successful submission", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true }),
+    });
+
+    render(<ContactFormBasic context={mockContext} />);
+
+    fillValidForm();
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("confirmation")).toBeInTheDocument();
     });
   });
 
   it("should show error on non-ok response", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
-      status: 400,
+      json: async () => ({ error: "Validation failed" }),
     });
 
     render(<ContactFormBasic context={mockContext} />);
 
-    fireEvent.change(screen.getByPlaceholderText("Correo electrónico"), {
-      target: { value: "user@example.com" },
-    });
-    fireEvent.change(
-      screen.getByPlaceholderText(
-        "Cuéntanos brevemente lo que está ocurriendo",
-      ),
-      { target: { value: "Test message" } },
-    );
-    fireEvent.click(screen.getByRole("button", { name: "Enviar consulta" }));
+    fillValidForm();
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("No se pudo enviar. Inténtalo de nuevo."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Validation failed")).toBeInTheDocument();
     });
 
-    // Verify error uses role="alert"
     expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("should show fallback error on non-ok response without error field", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({}),
+    });
+
+    render(<ContactFormBasic context={mockContext} />);
+
+    fillValidForm();
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Error al enviar")).toBeInTheDocument();
+    });
   });
 
   it("should show error on network failure", async () => {
@@ -151,59 +227,61 @@ describe("ContactFormBasic", () => {
 
     render(<ContactFormBasic context={mockContext} />);
 
-    fireEvent.change(screen.getByPlaceholderText("Correo electrónico"), {
-      target: { value: "user@example.com" },
-    });
-    fireEvent.change(
-      screen.getByPlaceholderText(
-        "Cuéntanos brevemente lo que está ocurriendo",
-      ),
-      { target: { value: "Test message" } },
-    );
-    fireEvent.click(screen.getByRole("button", { name: "Enviar consulta" }));
+    fillValidForm();
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("No se pudo enviar. Inténtalo de nuevo."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Network error")).toBeInTheDocument();
     });
   });
 
-  it("should clear error on successful retry", async () => {
-    // First attempt fails
-    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 });
+  it("should show loading state during submission", async () => {
+    let resolvePromise: (value: unknown) => void;
+    const pendingPromise = new Promise((resolve) => {
+      resolvePromise = resolve;
+    });
+    mockFetch.mockReturnValueOnce(pendingPromise);
 
     render(<ContactFormBasic context={mockContext} />);
 
-    fireEvent.change(screen.getByPlaceholderText("Correo electrónico"), {
-      target: { value: "user@example.com" },
-    });
-    fireEvent.change(
-      screen.getByPlaceholderText(
-        "Cuéntanos brevemente lo que está ocurriendo",
-      ),
-      { target: { value: "Test message" } },
-    );
-    fireEvent.click(screen.getByRole("button", { name: "Enviar consulta" }));
+    fillValidForm();
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("No se pudo enviar. Inténtalo de nuevo."),
-      ).toBeInTheDocument();
+      expect(screen.getByText("Enviando...")).toBeInTheDocument();
     });
 
-    // Retry succeeds
+    const button = screen.getByRole("button", { name: "Enviando..." });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("aria-busy", "true");
+
+    resolvePromise!({ ok: true, json: async () => ({ success: true }) });
+  });
+
+  it("should clear error on successful retry", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      json: async () => ({ error: "Server error" }),
+    });
+
+    render(<ContactFormBasic context={mockContext} />);
+
+    fillValidForm();
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Server error")).toBeInTheDocument();
+    });
+
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ success: true }),
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Enviar consulta" }));
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Hemos recibido tu solicitud."),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("confirmation")).toBeInTheDocument();
     });
   });
 });

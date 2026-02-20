@@ -10,3 +10,4 @@ export * from "./intake";
 export * from "./consent";
 export * from "./lang";
 export * from "./analytics";
+export * from "./validations";

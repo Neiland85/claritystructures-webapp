@@ -334,7 +334,11 @@ export function decideIntake(result: WizardResult): IntakeDecision {
   }
 
   if (result.urgency === "time_sensitive") score += 2;
-  if (result.urgency === "legal_risk") score += 4;
+  if (result.urgency === "legal_risk") {
+    score += 4;
+    flags.push("legal_risk");
+  }
+
   if (result.urgency === "critical") score += 6;
 
   if (result.hasEmotionalDistress) {
