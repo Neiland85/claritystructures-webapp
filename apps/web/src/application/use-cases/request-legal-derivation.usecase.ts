@@ -7,6 +7,9 @@ import {
   eventDispatcher,
   LegalDerivationRequestedEvent,
 } from "@claritystructures/domain";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("RequestLegalDerivationUseCase");
 
 export type RequestDerivationInput = {
   intakeId: string;
@@ -62,9 +65,7 @@ export class RequestLegalDerivationUseCase {
         },
       });
     } catch {
-      console.error(
-        "[RequestLegalDerivationUseCase] Audit failed — non-blocking",
-      );
+      logger.error("Audit trail recording failed — non-blocking");
     }
 
     return { consentId };

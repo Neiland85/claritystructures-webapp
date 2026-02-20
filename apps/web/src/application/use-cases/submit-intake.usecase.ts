@@ -8,6 +8,9 @@ import type {
   WizardResult,
 } from "@claritystructures/domain";
 import { decideIntakeWithExplanation } from "@claritystructures/domain";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("SubmitIntakeUseCase");
 
 /**
  * Submit Intake Use Case
@@ -105,7 +108,7 @@ export class SubmitIntakeUseCase {
           locale: consentMeta.locale,
         });
       } catch (error) {
-        console.error("[SubmitIntakeUseCase] Consent recording failed:", error);
+        logger.error("Consent recording failed", error);
       }
     }
 
@@ -114,7 +117,7 @@ export class SubmitIntakeUseCase {
     try {
       await this.notifier.notifyIntakeReceived(record);
     } catch (error) {
-      console.error("[SubmitIntakeUseCase] Notification failed:", error);
+      logger.error("Notification failed", error);
       // We do not rethrow; the intake is saved, which is the primary goal.
     }
 
@@ -132,7 +135,7 @@ export class SubmitIntakeUseCase {
         occurredAt: new Date(),
       });
     } catch (error) {
-      console.error("[SubmitIntakeUseCase] Audit failed:", error);
+      logger.error("Audit trail recording failed", error);
     }
 
     return { record, decision };

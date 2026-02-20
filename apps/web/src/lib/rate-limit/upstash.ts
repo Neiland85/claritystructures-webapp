@@ -1,11 +1,14 @@
 import { Redis } from "@upstash/redis";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("rate-limit");
 
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 if (!UPSTASH_URL || !UPSTASH_TOKEN) {
-  console.warn(
-    "[rate-limit] UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN not set — rate limiting is disabled",
+  logger.warn(
+    "UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN not set — rate limiting is disabled",
   );
 }
 
@@ -44,7 +47,7 @@ export async function checkRateLimit(
       remaining: Math.max(0, limit - count),
     };
   } catch (error) {
-    console.error("Rate limit check failed:", error);
+    logger.error("Rate limit check failed, failing open", error);
     // Fail open - allow request if Redis is down
     return { success: true, remaining: limit };
   }

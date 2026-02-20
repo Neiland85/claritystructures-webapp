@@ -6,6 +6,9 @@ import {
   createGenerateTransferPacketUseCase,
 } from "@/application/di-container";
 import { apiGuard } from "@/lib/api-guard";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("api/derivation");
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -99,7 +102,7 @@ export async function POST(req: NextRequest) {
           : message.includes("No active derivation consent")
             ? 409
             : 500;
-        console.error("[POST /api/derivation]", error);
+        logger.error("Failed to process derivation", error);
         return NextResponse.json({ error: message }, { status });
       }
     },
