@@ -3,6 +3,7 @@ export const FUNNEL_EVENTS = [
   "wizard.step_view",
   "wizard.step_submit",
   "wizard.risk_classified",
+  "wizard.completed",
   "contact.open",
   "contact.submit_attempt",
   "contact.submit_success",

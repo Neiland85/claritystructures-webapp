@@ -15,8 +15,7 @@ describe("Contact Intake Schema", () => {
       urgency: "informational",
       clientProfile: "private_individual",
       hasEmotionalDistress: false,
-      consentToContact: true,
-      consentToPrivacy: true,
+      consent: true,
     };
 
     it("should validate correct input", () => {
@@ -80,21 +79,14 @@ describe("Contact Intake Schema", () => {
       expect(result.success).toBe(false);
     });
 
-    it("should reject without consent to contact", () => {
-      const input = { ...validInput, consentToContact: false };
+    it("should reject without consent", () => {
+      const input = { ...validInput, consent: false };
       const result = ContactIntakeSchema.safeParse(input);
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toContain("must consent");
+        expect(result.error.issues[0].message).toContain("must accept");
       }
-    });
-
-    it("should reject without privacy consent", () => {
-      const input = { ...validInput, consentToPrivacy: false };
-      const result = ContactIntakeSchema.safeParse(input);
-
-      expect(result.success).toBe(false);
     });
 
     it("should detect bot via honeypot", () => {

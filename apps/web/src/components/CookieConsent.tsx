@@ -40,8 +40,8 @@ export default function CookieConsent() {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-6 left-6 right-6 z-10000 animate-in">
-      <div className="glass max-w-4xl mx-auto p-6 md:p-8 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/10">
+    <div className="fixed bottom-6 left-6 right-6 z-100 animate-in pointer-events-none">
+      <div className="glass max-w-4xl mx-auto p-6 md:p-8 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-white/10 pointer-events-auto">
         {!showConfig ? (
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
             <div className="flex-1 space-y-2">

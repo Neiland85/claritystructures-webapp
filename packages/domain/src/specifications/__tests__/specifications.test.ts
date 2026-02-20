@@ -13,9 +13,9 @@ describe("Specifications", () => {
   ): IntakeDecision => ({
     priority: "low",
     flags: [],
-    tone: "neutral",
     route: "/contact/basic",
-    actionCode: "respond_24h",
+    actionCode: "DEFERRED_INFORMATIONAL_RESPONSE",
+    decisionModelVersion: "decision-model/v1",
     ...overrides,
   });
 
@@ -60,14 +60,16 @@ describe("Specifications", () => {
   describe("HasFlagSpecification", () => {
     it("should match when flag is present", () => {
       const spec = new HasFlagSpecification("legal_risk");
-      const intake = createIntake({ flags: ["legal_risk", "high_emotion"] });
+      const intake = createIntake({
+        flags: ["legal_risk", "emotional_distress"],
+      });
 
       expect(spec.isSatisfiedBy(intake)).toBe(true);
     });
 
     it("should not match when flag is absent", () => {
       const spec = new HasFlagSpecification("legal_risk");
-      const intake = createIntake({ flags: ["high_emotion"] });
+      const intake = createIntake({ flags: ["emotional_distress"] });
 
       expect(spec.isSatisfiedBy(intake)).toBe(false);
     });

@@ -9,21 +9,7 @@ import {
   INTAKE_ROUTE_BY_TONE,
 } from "../decision";
 import type { WizardResult } from "../wizard-result";
-
-/** Helper: minimal wizard result */
-function baseWizard(overrides: Partial<WizardResult> = {}): WizardResult {
-  return {
-    urgency: "informational",
-    clientProfile: "private_individual",
-    hasEmotionalDistress: false,
-    incident: "test incident",
-    devices: 0,
-    actionsTaken: [],
-    evidenceSources: [],
-    objective: "test",
-    ...overrides,
-  };
-}
+import { baseWizard } from "./test-utils";
 
 describe("Decision Engine — V1 (decideIntake)", () => {
   it("should return low priority for minimal informational case", () => {
