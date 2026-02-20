@@ -137,6 +137,7 @@ export default function TriageTable({ token }: TriageTableProps) {
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -184,6 +185,15 @@ export default function TriageTable({ token }: TriageTableProps) {
                 <tr
                   key={intake.id}
                   onClick={() => setSelectedIntake(intake)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedIntake(intake);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Ver detalle de intake de ${intake.name || "Anonymous"}`}
                   className={`group cursor-pointer transition-colors hover:bg-white/5 ${
                     selectedIntake?.id === intake.id ? "bg-white/10" : ""
                   } ${
@@ -253,6 +263,7 @@ export default function TriageTable({ token }: TriageTableProps) {
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
+                    aria-hidden="true"
                   >
                     <path
                       strokeLinecap="round"
@@ -339,6 +350,7 @@ export default function TriageTable({ token }: TriageTableProps) {
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
