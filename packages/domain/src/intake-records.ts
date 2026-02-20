@@ -20,4 +20,8 @@ export type IntakeFlag =
   | "family_conflict"
   | "active_procedure"
   | "legal_professional"
-  | "emotional_distress";
+  | "emotional_distress"
+  | "physical_risk"
+  | "financial_risk"
+  | "access_compromised"
+  | "evidence_volatility";
