@@ -31,7 +31,7 @@ export class HasFlagSpecification extends Specification<IntakeDecision> {
   }
 
   isSatisfiedBy(intake: IntakeDecision): boolean {
-    return intake.flags.includes(this.flag as any);
+    return (intake.flags as ReadonlyArray<string>).includes(this.flag);
   }
 }
 

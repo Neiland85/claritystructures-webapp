@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import type { IntakeRecord, IntakeStatus } from "@claritystructures/domain";
 import { getCsrfToken } from "@/lib/csrf/get-csrf-token";
 
@@ -32,34 +32,22 @@ export default function TriageTable({ token }: TriageTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   /** Build headers with bearer auth + optional CSRF token */
-  const authHeaders = (
-    extra: Record<string, string> = {},
-  ): Record<string, string> => {
-    const headers: Record<string, string> = {
-      Authorization: `Bearer ${token}`,
-      ...extra,
-    };
-    const csrf = getCsrfToken();
-    if (csrf) {
-      headers["x-csrf-token"] = csrf;
-    }
-    return headers;
-  };
+  const authHeaders = useCallback(
+    (extra: Record<string, string> = {}): Record<string, string> => {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${token}`,
+        ...extra,
+      };
+      const csrf = getCsrfToken();
+      if (csrf) {
+        headers["x-csrf-token"] = csrf;
+      }
+      return headers;
+    },
+    [token],
+  );
 
-  useEffect(() => {
-    fetchIntakes();
-  }, []);
-
-  const filteredIntakes = intakes.filter((i) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      (i.name?.toLowerCase() || "").includes(query) ||
-      i.email.toLowerCase().includes(query) ||
-      i.message.toLowerCase().includes(query)
-    );
-  });
-
-  const fetchIntakes = async () => {
+  const fetchIntakes = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch("/api/triage", {
@@ -80,27 +68,45 @@ export default function TriageTable({ token }: TriageTableProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authHeaders]);
 
-  const updateStatus = async (id: string, status: IntakeStatus) => {
-    try {
-      const res = await fetch("/api/triage", {
-        method: "PATCH",
-        body: JSON.stringify({ id, status }),
-        headers: authHeaders({ "Content-Type": "application/json" }),
-      });
-      if (res.ok) {
-        setIntakes((prev) =>
-          prev.map((i) => (i.id === id ? { ...i, status } : i)),
-        );
-        if (selectedIntake?.id === id) {
-          setSelectedIntake({ ...selectedIntake, status });
+  useEffect(() => {
+    fetchIntakes();
+  }, [fetchIntakes]);
+
+  const filteredIntakes = useMemo(() => {
+    return intakes.filter((i) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        (i.name?.toLowerCase() || "").includes(query) ||
+        i.email.toLowerCase().includes(query) ||
+        i.message.toLowerCase().includes(query)
+      );
+    });
+  }, [intakes, searchQuery]);
+
+  const updateStatus = useCallback(
+    async (id: string, status: IntakeStatus) => {
+      try {
+        const res = await fetch("/api/triage", {
+          method: "PATCH",
+          body: JSON.stringify({ id, status }),
+          headers: authHeaders({ "Content-Type": "application/json" }),
+        });
+        if (res.ok) {
+          setIntakes((prev) =>
+            prev.map((i) => (i.id === id ? { ...i, status } : i)),
+          );
+          setSelectedIntake((prev) =>
+            prev?.id === id ? { ...prev, status } : prev,
+          );
         }
+      } catch (err) {
+        console.error("Update failed", err);
       }
-    } catch (err) {
-      console.error("Update failed", err);
-    }
-  };
+    },
+    [authHeaders],
+  );
 
   if (loading) {
     return (

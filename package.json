@@ -46,8 +46,8 @@
   "pnpm": {
     "overrides": {
       "lodash": ">=4.17.23",
-      "hono": ">=4.11.7",
-      "minimatch@>=10": ">=10.2.1"
+      "hono": ">=4.11.10",
+      "minimatch": ">=10.2.1"
     }
   },
   "dependencies": {

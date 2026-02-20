@@ -26,7 +26,7 @@ export class Status {
   }
 
   static isValid(value: string): boolean {
-    return Status.VALID_STATUSES.includes(value as any);
+    return (Status.VALID_STATUSES as ReadonlyArray<string>).includes(value);
   }
 
   static pending(): Status {

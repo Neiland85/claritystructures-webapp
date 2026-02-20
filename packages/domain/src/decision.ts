@@ -344,22 +344,22 @@ export function decideIntake(result: WizardResult): IntakeDecision {
 
   if (result.physicalSafetyRisk) {
     score += 5;
-    flags.push("physical_risk" as any);
+    flags.push("physical_risk");
   }
 
   if (result.financialAssetRisk) {
     score += 3;
-    flags.push("financial_risk" as any);
+    flags.push("financial_risk");
   }
 
   if (result.attackerHasPasswords) {
     score += 4;
-    flags.push("access_compromised" as any);
+    flags.push("access_compromised");
   }
 
   if (result.evidenceIsAutoDeleted) {
     score += 3;
-    flags.push("evidence_volatility" as any);
+    flags.push("evidence_volatility");
   }
 
   if (score >= 8) {
