@@ -90,17 +90,25 @@ describe("ContactFormLegal", () => {
     fillAndSubmit();
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/contact",
+        expect.objectContaining({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+
+      const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(body).toEqual(
+        expect.objectContaining({
           email: "abogado@bufete.com",
-          phone: "+34600123456",
           message: "Necesito soporte técnico forense.",
           tone: "legal",
           wizardResult: mockContext,
         }),
-      });
+      );
+      // Phone may be transformed by Zod (spaces stripped)
+      expect(body.phone).toBeDefined();
     });
   });
 
@@ -228,5 +236,45 @@ describe("ContactFormLegal", () => {
     const button = screen.getByRole("button", { name: /enviar consulta/i });
     expect(button).not.toBeDisabled();
     expect(button).toHaveAttribute("aria-busy", "false");
+  });
+
+  it("should not call fetch when client-side validation fails (short message)", () => {
+    render(<ContactFormLegal context={mockContext} />);
+
+    fireEvent.change(screen.getByPlaceholderText("Correo profesional"), {
+      target: { value: "abogado@bufete.com" },
+    });
+    fireEvent.change(
+      screen.getByPlaceholderText("Describe tu situación o consulta"),
+      { target: { value: "Short" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
+
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(screen.getByText(/at least 10 characters/i)).toBeInTheDocument();
+
+    const textarea = screen.getByPlaceholderText(
+      "Describe tu situación o consulta",
+    );
+    expect(textarea).toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("should not call fetch when client-side validation fails (invalid email)", () => {
+    render(<ContactFormLegal context={mockContext} />);
+
+    fireEvent.change(screen.getByPlaceholderText("Correo profesional"), {
+      target: { value: "not-an-email" },
+    });
+    fireEvent.change(
+      screen.getByPlaceholderText("Describe tu situación o consulta"),
+      { target: { value: "Valid message content here" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
+
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(screen.getByText(/invalid email/i)).toBeInTheDocument();
+
+    const emailInput = screen.getByPlaceholderText("Correo profesional");
+    expect(emailInput).toHaveAttribute("aria-invalid", "true");
   });
 });

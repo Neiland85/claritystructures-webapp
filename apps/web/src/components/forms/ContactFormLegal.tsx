@@ -1,6 +1,13 @@
 "use client";
 import { useState, type FormEvent, type ChangeEvent } from "react";
 import type { WizardResult } from "@claritystructures/domain";
+import { ContactIntakeSchema } from "@claritystructures/types/validations/contact-intake.schema";
+
+const LegalFieldsSchema = ContactIntakeSchema.pick({
+  email: true,
+  phone: true,
+  message: true,
+});
 
 type Props = {
   context: WizardResult;
@@ -13,20 +20,43 @@ export default function ContactFormLegal({ context }: Props) {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  function validateLocally() {
+    const payload: Record<string, unknown> = { email, message };
+    if (phone) payload.phone = phone;
+
+    const result = LegalFieldsSchema.safeParse(payload);
+
+    if (!result.success) {
+      const flat = result.error.flatten().fieldErrors;
+      const mapped: Record<string, string> = {};
+      for (const [key, msgs] of Object.entries(flat)) {
+        if (msgs && msgs.length > 0) mapped[key] = msgs[0];
+      }
+      setFieldErrors(mapped);
+      return null;
+    }
+
+    setFieldErrors({});
+    return result.data;
+  }
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+
+    const validated = validateLocally();
+    if (!validated) return;
+
+    setLoading(true);
 
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
-          phone,
-          message,
+          ...validated,
           tone: "legal",
           wizardResult: context,
         }),
@@ -65,6 +95,7 @@ export default function ContactFormLegal({ context }: Props) {
   return (
     <form
       onSubmit={submit}
+      noValidate
       aria-label="Formulario de consulta legal"
       className="space-y-4 max-w-xl"
     >
@@ -86,15 +117,25 @@ export default function ContactFormLegal({ context }: Props) {
         <input
           id="legal-email"
           type="email"
-          required
           placeholder="Correo profesional"
           value={email}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setEmail(e.target.value)
-          }
+          aria-invalid={!!fieldErrors.email}
+          aria-describedby={fieldErrors.email ? "legal-email-error" : undefined}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            setEmail(e.target.value);
+            setFieldErrors((prev) => {
+              const { email: _, ...rest } = prev;
+              return rest;
+            });
+          }}
           className="w-full border border-gray-600 p-3 bg-black text-white rounded"
           disabled={loading}
         />
+        {fieldErrors.email && (
+          <p id="legal-email-error" className="text-sm text-red-400 mt-1">
+            {fieldErrors.email}
+          </p>
+        )}
       </div>
 
       <div>
@@ -106,12 +147,23 @@ export default function ContactFormLegal({ context }: Props) {
           type="tel"
           placeholder="Teléfono (opcional)"
           value={phone}
-          onChange={(e: ChangeEvent<HTMLInputElement>) =>
-            setPhone(e.target.value)
-          }
+          aria-invalid={!!fieldErrors.phone}
+          aria-describedby={fieldErrors.phone ? "legal-phone-error" : undefined}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            setPhone(e.target.value);
+            setFieldErrors((prev) => {
+              const { phone: _, ...rest } = prev;
+              return rest;
+            });
+          }}
           className="w-full border border-gray-600 p-3 bg-black text-white rounded"
           disabled={loading}
         />
+        {fieldErrors.phone && (
+          <p id="legal-phone-error" className="text-sm text-red-400 mt-1">
+            {fieldErrors.phone}
+          </p>
+        )}
       </div>
 
       <div>
@@ -123,13 +175,23 @@ export default function ContactFormLegal({ context }: Props) {
           rows={4}
           placeholder="Describe tu situación o consulta"
           value={message}
-          required
-          onChange={(e: ChangeEvent<HTMLTextAreaElement>) =>
-            setMessage(e.target.value)
-          }
+          aria-invalid={!!fieldErrors.message}
+          aria-describedby={fieldErrors.message ? "legal-message-error" : undefined}
+          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
+            setMessage(e.target.value);
+            setFieldErrors((prev) => {
+              const { message: _, ...rest } = prev;
+              return rest;
+            });
+          }}
           className="w-full border border-gray-600 p-3 bg-black text-white rounded"
           disabled={loading}
         />
+        {fieldErrors.message && (
+          <p id="legal-message-error" className="text-sm text-red-400 mt-1">
+            {fieldErrors.message}
+          </p>
+        )}
       </div>
 
       <button
