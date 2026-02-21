@@ -46,8 +46,14 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@claritystructures/domain": path.resolve(__dirname, "./packages/domain/src"),
-      "@claritystructures/types": path.resolve(__dirname, "./packages/types/src"),
+      "@claritystructures/domain": path.resolve(
+        __dirname,
+        "./packages/domain/src",
+      ),
+      "@claritystructures/types": path.resolve(
+        __dirname,
+        "./packages/types/src",
+      ),
       "@clarity/domain": path.resolve(__dirname, "./packages/domain/src"),
       "@clarity/types": path.resolve(__dirname, "./packages/types/src"),
       "@clarity/config": path.resolve(__dirname, "./packages/config/src"),
