@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import type { WizardResult } from "@claritystructures/domain";
+import { ContactIntakeSchema } from "@claritystructures/types/validations/contact-intake.schema";
+
+const BasicFieldsSchema = ContactIntakeSchema.pick({ email: true, message: true });
 import { ContactIntakeSchema } from "@claritystructures/types";
 import ConsentBlock from "../ConsentBlock";
 import ContactConfirmation from "../ContactConfirmation";
@@ -22,6 +25,9 @@ export default function ContactFormBasic({ context, tone = "basic" }: Props) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   function validateLocally() {
+    const payload = { email, message };
+    const result = BasicFieldsSchema.safeParse(payload);
+
     const payload = {
       email,
       message,
@@ -65,6 +71,13 @@ export default function ContactFormBasic({ context, tone = "basic" }: Props) {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...context,
+          ...validated,
+          tone: "basic",
+          consent: true,
+          consentVersion: "v1",
+        }),
         body: JSON.stringify(validated),
       });
 
@@ -105,6 +118,7 @@ export default function ContactFormBasic({ context, tone = "basic" }: Props) {
   return (
     <form
       onSubmit={handleSubmit}
+      noValidate
       aria-label="Formulario de consulta básica"
       className="space-y-4 max-w-xl"
       noValidate
@@ -128,9 +142,16 @@ export default function ContactFormBasic({ context, tone = "basic" }: Props) {
         <input
           id="basic-email"
           type="email"
-          required
           placeholder="Correo electrónico"
           value={email}
+          aria-invalid={!!fieldErrors.email}
+          aria-describedby={fieldErrors.email ? "basic-email-error" : undefined}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            setEmail(e.target.value);
+            setFieldErrors((prev) => {
+              const { email: _, ...rest } = prev;
+              return rest;
+            });
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setEmail(e.target.value);
             if (fieldErrors.email) setFieldErrors((p) => ({ ...p, email: "" }));
@@ -141,6 +162,7 @@ export default function ContactFormBasic({ context, tone = "basic" }: Props) {
           aria-describedby={fieldErrors.email ? "basic-email-error" : undefined}
         />
         {fieldErrors.email && (
+          <p id="basic-email-error" className="text-sm text-red-400 mt-1">
           <p id="basic-email-error" className="text-xs text-red-400 mt-1">
             {fieldErrors.email}
           </p>
@@ -153,10 +175,17 @@ export default function ContactFormBasic({ context, tone = "basic" }: Props) {
         </label>
         <textarea
           id="basic-message"
-          required
           rows={4}
           placeholder="Cuéntanos brevemente lo que está ocurriendo"
           value={message}
+          aria-invalid={!!fieldErrors.message}
+          aria-describedby={fieldErrors.message ? "basic-message-error" : undefined}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+            setMessage(e.target.value);
+            setFieldErrors((prev) => {
+              const { message: _, ...rest } = prev;
+              return rest;
+            });
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
             setMessage(e.target.value);
             if (fieldErrors.message)
@@ -170,6 +199,7 @@ export default function ContactFormBasic({ context, tone = "basic" }: Props) {
           }
         />
         {fieldErrors.message && (
+          <p id="basic-message-error" className="text-sm text-red-400 mt-1">
           <p id="basic-message-error" className="text-xs text-red-400 mt-1">
             {fieldErrors.message}
           </p>

@@ -117,6 +117,7 @@ describe("ContactFormBasic", () => {
       screen.getByPlaceholderText(
         "Cuéntanos brevemente lo que está ocurriendo",
       ),
+      { target: { value: "Test message body" } },
       { target: { value: "short" } },
     );
     fireEvent.click(screen.getByTestId("consent-checkbox"));
@@ -162,6 +163,19 @@ describe("ContactFormBasic", () => {
           headers: { "Content-Type": "application/json" },
         }),
       );
+
+      const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+      expect(body).toEqual(
+        expect.objectContaining({
+          email: "user@example.com",
+          message: "Test message body",
+          tone: "basic",
+          consent: true,
+          consentVersion: "v1",
+          clientProfile: "private_individual",
+          urgency: "time_sensitive",
+        }),
+      );
     });
 
     // Verify the payload contains expected fields
@@ -180,6 +194,16 @@ describe("ContactFormBasic", () => {
 
     render(<ContactFormBasic context={mockContext} />);
 
+    fireEvent.change(screen.getByPlaceholderText("Correo electrónico"), {
+      target: { value: "user@example.com" },
+    });
+    fireEvent.change(
+      screen.getByPlaceholderText(
+        "Cuéntanos brevemente lo que está ocurriendo",
+      ),
+      { target: { value: "Test message body" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Enviar consulta" }));
     fillValidForm();
     fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
 
@@ -196,6 +220,16 @@ describe("ContactFormBasic", () => {
 
     render(<ContactFormBasic context={mockContext} />);
 
+    fireEvent.change(screen.getByPlaceholderText("Correo electrónico"), {
+      target: { value: "user@example.com" },
+    });
+    fireEvent.change(
+      screen.getByPlaceholderText(
+        "Cuéntanos brevemente lo que está ocurriendo",
+      ),
+      { target: { value: "Test message body" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Enviar consulta" }));
     fillValidForm();
     fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
 
@@ -233,6 +267,13 @@ describe("ContactFormBasic", () => {
     await waitFor(() => {
       expect(screen.getByText("Network error")).toBeInTheDocument();
     });
+    fireEvent.change(
+      screen.getByPlaceholderText(
+        "Cuéntanos brevemente lo que está ocurriendo",
+      ),
+      { target: { value: "Test message body" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Enviar consulta" }));
   });
 
   it("should show loading state during submission", async () => {
@@ -266,6 +307,16 @@ describe("ContactFormBasic", () => {
 
     render(<ContactFormBasic context={mockContext} />);
 
+    fireEvent.change(screen.getByPlaceholderText("Correo electrónico"), {
+      target: { value: "user@example.com" },
+    });
+    fireEvent.change(
+      screen.getByPlaceholderText(
+        "Cuéntanos brevemente lo que está ocurriendo",
+      ),
+      { target: { value: "Test message body" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Enviar consulta" }));
     fillValidForm();
     fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
 
@@ -283,5 +334,49 @@ describe("ContactFormBasic", () => {
     await waitFor(() => {
       expect(screen.getByTestId("confirmation")).toBeInTheDocument();
     });
+  });
+
+  it("should not call fetch when client-side validation fails (short message)", () => {
+    render(<ContactFormBasic context={mockContext} />);
+
+    fireEvent.change(screen.getByPlaceholderText("Correo electrónico"), {
+      target: { value: "user@example.com" },
+    });
+    fireEvent.change(
+      screen.getByPlaceholderText(
+        "Cuéntanos brevemente lo que está ocurriendo",
+      ),
+      { target: { value: "Short" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Enviar consulta" }));
+
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(screen.getByText(/at least 10 characters/i)).toBeInTheDocument();
+
+    const textarea = screen.getByPlaceholderText(
+      "Cuéntanos brevemente lo que está ocurriendo",
+    );
+    expect(textarea).toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("should not call fetch when client-side validation fails (invalid email)", () => {
+    render(<ContactFormBasic context={mockContext} />);
+
+    fireEvent.change(screen.getByPlaceholderText("Correo electrónico"), {
+      target: { value: "not-an-email" },
+    });
+    fireEvent.change(
+      screen.getByPlaceholderText(
+        "Cuéntanos brevemente lo que está ocurriendo",
+      ),
+      { target: { value: "Valid message here" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Enviar consulta" }));
+
+    expect(mockFetch).not.toHaveBeenCalled();
+    expect(screen.getByText(/invalid email/i)).toBeInTheDocument();
+
+    const emailInput = screen.getByPlaceholderText("Correo electrónico");
+    expect(emailInput).toHaveAttribute("aria-invalid", "true");
   });
 });

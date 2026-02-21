@@ -1,6 +1,13 @@
 "use client";
 import { useState, type FormEvent, type ChangeEvent } from "react";
 import type { WizardResult } from "@claritystructures/domain";
+import { ContactIntakeSchema } from "@claritystructures/types/validations/contact-intake.schema";
+
+const LegalFieldsSchema = ContactIntakeSchema.pick({
+  email: true,
+  phone: true,
+  message: true,
+});
 import { ContactIntakeSchema } from "@claritystructures/types";
 import ConsentBlock from "../ConsentBlock";
 import ContactConfirmation from "../ContactConfirmation";
@@ -29,6 +36,11 @@ export default function ContactFormLegal({ context, tone = "legal" }: Props) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   function validateLocally() {
+    const payload: Record<string, unknown> = { email, message };
+    if (phone) payload.phone = phone;
+
+    const result = LegalFieldsSchema.safeParse(payload);
+
     const payload = {
       email,
       phone: phone || undefined,
@@ -73,6 +85,11 @@ export default function ContactFormLegal({ context, tone = "legal" }: Props) {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...validated,
+          tone: "legal",
+          wizardResult: context,
+        }),
         body: JSON.stringify(validated),
       });
 
@@ -113,6 +130,8 @@ export default function ContactFormLegal({ context, tone = "legal" }: Props) {
   return (
     <form
       onSubmit={submit}
+      noValidate
+      aria-label="Formulario de consulta legal"
       aria-label={
         tone === "critical"
           ? "Formulario de situación crítica"
@@ -136,9 +155,16 @@ export default function ContactFormLegal({ context, tone = "legal" }: Props) {
         <input
           id="legal-email"
           type="email"
-          required
           placeholder="Correo profesional"
           value={email}
+          aria-invalid={!!fieldErrors.email}
+          aria-describedby={fieldErrors.email ? "legal-email-error" : undefined}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            setEmail(e.target.value);
+            setFieldErrors((prev) => {
+              const { email: _, ...rest } = prev;
+              return rest;
+            });
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
             setEmail(e.target.value);
             if (fieldErrors.email) setFieldErrors((p) => ({ ...p, email: "" }));
@@ -149,6 +175,7 @@ export default function ContactFormLegal({ context, tone = "legal" }: Props) {
           aria-describedby={fieldErrors.email ? "legal-email-error" : undefined}
         />
         {fieldErrors.email && (
+          <p id="legal-email-error" className="text-sm text-red-400 mt-1">
           <p id="legal-email-error" className="text-xs text-red-400 mt-1">
             {fieldErrors.email}
           </p>
@@ -164,6 +191,14 @@ export default function ContactFormLegal({ context, tone = "legal" }: Props) {
           type="tel"
           placeholder="Teléfono (opcional)"
           value={phone}
+          aria-invalid={!!fieldErrors.phone}
+          aria-describedby={fieldErrors.phone ? "legal-phone-error" : undefined}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            setPhone(e.target.value);
+            setFieldErrors((prev) => {
+              const { phone: _, ...rest } = prev;
+              return rest;
+            });
           onChange={(e: ChangeEvent<HTMLInputElement>) => {
             setPhone(e.target.value);
             if (fieldErrors.phone) setFieldErrors((p) => ({ ...p, phone: "" }));
@@ -174,6 +209,7 @@ export default function ContactFormLegal({ context, tone = "legal" }: Props) {
           aria-describedby={fieldErrors.phone ? "legal-phone-error" : undefined}
         />
         {fieldErrors.phone && (
+          <p id="legal-phone-error" className="text-sm text-red-400 mt-1">
           <p id="legal-phone-error" className="text-xs text-red-400 mt-1">
             {fieldErrors.phone}
           </p>
@@ -193,6 +229,14 @@ export default function ContactFormLegal({ context, tone = "legal" }: Props) {
               : "Describe tu situación o consulta"
           }
           value={message}
+          aria-invalid={!!fieldErrors.message}
+          aria-describedby={fieldErrors.message ? "legal-message-error" : undefined}
+          onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
+            setMessage(e.target.value);
+            setFieldErrors((prev) => {
+              const { message: _, ...rest } = prev;
+              return rest;
+            });
           required
           onChange={(e: ChangeEvent<HTMLTextAreaElement>) => {
             setMessage(e.target.value);
@@ -207,6 +251,7 @@ export default function ContactFormLegal({ context, tone = "legal" }: Props) {
           }
         />
         {fieldErrors.message && (
+          <p id="legal-message-error" className="text-sm text-red-400 mt-1">
           <p id="legal-message-error" className="text-xs text-red-400 mt-1">
             {fieldErrors.message}
           </p>
