@@ -2,6 +2,38 @@ import { describe, it, expect, vi, beforeEach, afterAll } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ContactFormLegal from "@/components/forms/ContactFormLegal";
 
+// Mock dependencies
+vi.mock("@/lib/analytics", () => ({
+  trackEvent: vi.fn(),
+}));
+
+vi.mock("@/components/ConsentBlock", () => ({
+  default: ({
+    checked,
+    onChange,
+  }: {
+    tone: string;
+    checked: boolean;
+    onChange: (v: boolean) => void;
+  }) => (
+    <label data-testid="consent-block">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        data-testid="consent-checkbox"
+      />
+      Consent
+    </label>
+  ),
+}));
+
+vi.mock("@/components/ContactConfirmation", () => ({
+  default: ({ tone }: { tone: string }) => (
+    <div data-testid="confirmation">Confirmación ({tone})</div>
+  ),
+}));
+
 const originalFetch = global.fetch;
 const mockFetch = vi.fn();
 
@@ -24,10 +56,14 @@ const mockContext = {
   objective: "legal_action",
 };
 
+function checkConsent() {
+  fireEvent.click(screen.getByTestId("consent-checkbox"));
+}
+
 function fillAndSubmit(
   email = "abogado@bufete.com",
   phone = "+34600123456",
-  message = "Necesito soporte técnico forense.",
+  message = "Necesito soporte técnico forense urgente.",
 ) {
   fireEvent.change(screen.getByPlaceholderText("Correo profesional"), {
     target: { value: email },
@@ -41,11 +77,12 @@ function fillAndSubmit(
     screen.getByPlaceholderText("Describe tu situación o consulta"),
     { target: { value: message } },
   );
+  checkConsent();
   fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
 }
 
 describe("ContactFormLegal", () => {
-  it("should render email, phone, textarea, and submit button", () => {
+  it("should render email, phone, textarea, consent, and submit button", () => {
     render(<ContactFormLegal context={mockContext} />);
 
     expect(
@@ -57,6 +94,7 @@ describe("ContactFormLegal", () => {
     expect(
       screen.getByPlaceholderText("Describe tu situación o consulta"),
     ).toBeInTheDocument();
+    expect(screen.getByTestId("consent-block")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /enviar consulta/i }),
     ).toBeInTheDocument();
@@ -70,6 +108,14 @@ describe("ContactFormLegal", () => {
     ).toBeInTheDocument();
   });
 
+  it("should show critical aria-label when tone is critical", () => {
+    render(<ContactFormLegal context={mockContext} tone="critical" />);
+
+    expect(
+      screen.getByRole("form", { name: "Formulario de situación crítica" }),
+    ).toBeInTheDocument();
+  });
+
   it("should have sr-only labels for accessibility", () => {
     render(<ContactFormLegal context={mockContext} />);
 
@@ -80,7 +126,30 @@ describe("ContactFormLegal", () => {
     ).toBeInTheDocument();
   });
 
-  it("should submit with correct payload including wizardResult", async () => {
+  it("should disable submit button when consent is not checked", () => {
+    render(<ContactFormLegal context={mockContext} />);
+
+    const button = screen.getByRole("button", { name: /enviar consulta/i });
+    expect(button).toBeDisabled();
+  });
+
+  it("should not call fetch when client-side validation fails (short message)", () => {
+    render(<ContactFormLegal context={mockContext} />);
+
+    fireEvent.change(screen.getByPlaceholderText("Correo profesional"), {
+      target: { value: "abogado@bufete.com" },
+    });
+    fireEvent.change(
+      screen.getByPlaceholderText("Describe tu situación o consulta"),
+      { target: { value: "corto" } },
+    );
+    checkConsent();
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
+
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("should submit with correct payload including consent", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ success: true }),
@@ -109,11 +178,18 @@ describe("ContactFormLegal", () => {
       );
       // Phone may be transformed by Zod (spaces stripped)
       expect(body.phone).toBeDefined();
+        }),
+      );
     });
+
+    const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+    expect(callBody.email).toBe("abogado@bufete.com");
+    expect(callBody.consent).toBe(true);
+    expect(callBody.tone).toBe("legal");
+    expect(callBody.wizardResult).toBeDefined();
   });
 
   it("should show loading state during submission", async () => {
-    // Create a promise we can control
     let resolvePromise: (value: unknown) => void;
     const pendingPromise = new Promise((resolve) => {
       resolvePromise = resolve;
@@ -123,7 +199,6 @@ describe("ContactFormLegal", () => {
     render(<ContactFormLegal context={mockContext} />);
     fillAndSubmit();
 
-    // Check loading state
     await waitFor(() => {
       expect(screen.getByText("Enviando...")).toBeInTheDocument();
     });
@@ -132,18 +207,16 @@ describe("ContactFormLegal", () => {
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute("aria-busy", "true");
 
-    // Inputs should be disabled
     expect(screen.getByPlaceholderText("Correo profesional")).toBeDisabled();
     expect(screen.getByPlaceholderText("Teléfono (opcional)")).toBeDisabled();
     expect(
       screen.getByPlaceholderText("Describe tu situación o consulta"),
     ).toBeDisabled();
 
-    // Resolve to clean up
     resolvePromise!({ ok: true, json: async () => ({ success: true }) });
   });
 
-  it("should show success message with email after successful submission", async () => {
+  it("should show ContactConfirmation after successful submission", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: async () => ({ success: true }),
@@ -153,14 +226,7 @@ describe("ContactFormLegal", () => {
     fillAndSubmit("profesional@firma.es");
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/Hemos recibido tu solicitud/),
-      ).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          /Te contactaremos pronto al email: profesional@firma.es/,
-        ),
-      ).toBeInTheDocument();
+      expect(screen.getByTestId("confirmation")).toBeInTheDocument();
     });
   });
 
@@ -222,7 +288,6 @@ describe("ContactFormLegal", () => {
       expect(screen.getByText("Server error")).toBeInTheDocument();
     });
 
-    // Form should be re-enabled
     expect(
       screen.getByPlaceholderText("Correo profesional"),
     ).not.toBeDisabled();

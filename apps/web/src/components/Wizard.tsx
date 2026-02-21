@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useReducer, useEffect } from "react";
 import type {
   WizardResult,
   ClientProfile,
   UrgencyLevel,
 } from "@claritystructures/domain";
+import { decideIntake } from "@claritystructures/domain";
 import { clientProfiles, urgencyLevels } from "@/constants/wizardOptions";
 import AnimatedLogo from "./AnimatedLogo";
 import { trackEvent } from "@/lib/analytics";
@@ -16,48 +17,77 @@ type Props = {
 
 type Phase = "TRIAGE" | "COGNITIVE" | "TRACE";
 
+type WizardState = {
+  phase: Phase;
+  clientProfile: ClientProfile | null;
+  urgency: UrgencyLevel | null;
+  hasEmotionalDistress: boolean | null;
+  physicalSafetyRisk: boolean | null;
+  financialAssetRisk: boolean | null;
+  attackerHasPasswords: boolean | null;
+  evidenceIsAutoDeleted: boolean | null;
+  perceivedOmnipotence: boolean | null;
+  isVerifiable: boolean | null;
+  distortionIndicator: boolean | null;
+  shockLevel: "low" | "medium" | "high";
+  whatsappControl: boolean | null;
+  familySuspect: boolean | null;
+  constantSurveillance: boolean | null;
+};
+
+type WizardAction =
+  | { type: "SET_PHASE"; payload: Phase }
+  | { type: "UPDATE_FIELD"; field: keyof WizardState; value: any };
+
+const initialState: WizardState = {
+  phase: "TRIAGE",
+  clientProfile: null,
+  urgency: null,
+  hasEmotionalDistress: null,
+  physicalSafetyRisk: null,
+  financialAssetRisk: null,
+  attackerHasPasswords: null,
+  evidenceIsAutoDeleted: null,
+  perceivedOmnipotence: null,
+  isVerifiable: null,
+  distortionIndicator: null,
+  shockLevel: "low",
+  whatsappControl: null,
+  familySuspect: null,
+  constantSurveillance: null,
+};
+
+function wizardReducer(state: WizardState, action: WizardAction): WizardState {
+  switch (action.type) {
+    case "SET_PHASE":
+      return { ...state, phase: action.payload };
+    case "UPDATE_FIELD":
+      return { ...state, [action.field]: action.value };
+    default:
+      return state;
+  }
+}
+
 export default function Wizard({ onComplete }: Props) {
-  const [phase, setPhase] = useState<Phase>("TRIAGE");
+  const [state, dispatch] = useReducer(wizardReducer, initialState);
 
-  // Phase 1 State
-  const [clientProfile, setClientProfile] = useState<ClientProfile | null>(
-    null,
-  );
-  const [urgency, setUrgency] = useState<UrgencyLevel | null>(null);
-  const [hasEmotionalDistress, setHasEmotionalDistress] = useState<
-    boolean | null
-  >(null);
-  const [physicalSafetyRisk, setPhysicalSafetyRisk] = useState<boolean | null>(
-    null,
-  );
-  const [financialAssetRisk, setFinancialAssetRisk] = useState<boolean | null>(
-    null,
-  );
-  const [attackerHasPasswords, setAttackerHasPasswords] = useState<
-    boolean | null
-  >(null);
-  const [evidenceIsAutoDeleted, setEvidenceIsAutoDeleted] = useState<
-    boolean | null
-  >(null);
-
-  // Phase 2 State (Cognitive/Psychological)
-  const [perceivedOmnipotence, setPerceivedOmnipotence] = useState<
-    boolean | null
-  >(null);
-  const [isVerifiable, setIsVerifiable] = useState<boolean | null>(null);
-  const [distortionIndicator, setDistortionIndicator] = useState<
-    boolean | null
-  >(null);
-  const [shockLevel, setShockLevel] = useState<"low" | "medium" | "high">(
-    "low",
-  );
-
-  // Phase 3 State (Narrative Tracing)
-  const [whatsappControl, setWhatsappControl] = useState<boolean | null>(null);
-  const [familySuspect, setFamilySuspect] = useState<boolean | null>(null);
-  const [constantSurveillance, setConstantSurveillance] = useState<
-    boolean | null
-  >(null);
+  const {
+    phase,
+    clientProfile,
+    urgency,
+    hasEmotionalDistress,
+    physicalSafetyRisk,
+    financialAssetRisk,
+    attackerHasPasswords,
+    evidenceIsAutoDeleted,
+    perceivedOmnipotence,
+    isVerifiable,
+    distortionIndicator,
+    shockLevel,
+    whatsappControl,
+    familySuspect,
+    constantSurveillance,
+  } = state;
 
   const isStep1Complete = clientProfile && urgency;
 
@@ -68,6 +98,10 @@ export default function Wizard({ onComplete }: Props) {
       payload: { phase },
     });
   }, [phase]);
+
+  function updateField(field: keyof WizardState, value: any) {
+    dispatch({ type: "UPDATE_FIELD", field, value });
+  }
 
   function submit() {
     if (!clientProfile || !urgency) return;
@@ -93,7 +127,8 @@ export default function Wizard({ onComplete }: Props) {
         critical: severityScore >= 70,
       },
     });
-    onComplete({
+
+    const result: WizardResult = {
       clientProfile,
       urgency,
       hasEmotionalDistress: hasEmotionalDistress ?? false,
@@ -118,7 +153,18 @@ export default function Wizard({ onComplete }: Props) {
       actionsTaken: [],
       evidenceSources: [],
       objective: "document",
+    };
+
+    trackEvent({
+      name: "wizard.completed",
+      timestamp: Date.now(),
+      payload: {
+        tone: result.urgency,
+        priority: decideIntake(result).priority,
+      },
     });
+
+    onComplete(result);
   }
 
   const phaseIndex = phase === "TRIAGE" ? 0 : phase === "COGNITIVE" ? 1 : 2;
@@ -126,12 +172,10 @@ export default function Wizard({ onComplete }: Props) {
 
   return (
     <div className="relative min-h-[700px] w-full max-w-4xl mx-auto dark pt-20">
-      {/* Absolute Logo Area (Top Right) */}
       <div className="absolute top-0 right-0 p-8 z-50">
         <AnimatedLogo />
       </div>
 
-      {/* Step progress indicator (screen-reader + visual) */}
       <nav aria-label="Progreso del formulario" className="sr-only">
         <ol>
           {phaseLabels.map((label, i) => (
@@ -186,7 +230,7 @@ export default function Wizard({ onComplete }: Props) {
                     key={opt.value}
                     role="radio"
                     aria-checked={clientProfile === opt.value}
-                    onClick={() => setClientProfile(opt.value)}
+                    onClick={() => updateField("clientProfile", opt.value)}
                     className={`text-left p-4 rounded-xl border transition-all ${
                       clientProfile === opt.value
                         ? "bg-white/10 border-white/40 ring-1 ring-white/20"
@@ -218,7 +262,7 @@ export default function Wizard({ onComplete }: Props) {
                     key={opt.value}
                     role="radio"
                     aria-checked={urgency === opt.value}
-                    onClick={() => setUrgency(opt.value)}
+                    onClick={() => updateField("urgency", opt.value)}
                     className={`px-4 py-2 rounded-lg text-sm border transition-all ${
                       urgency === opt.value
                         ? "bg-white text-black border-white"
@@ -247,7 +291,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={physicalSafetyRisk === true}
-                    onClick={() => setPhysicalSafetyRisk(true)}
+                    onClick={() => updateField("physicalSafetyRisk", true)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
                     AMENAZA REAL
@@ -255,7 +299,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={physicalSafetyRisk === false}
-                    onClick={() => setPhysicalSafetyRisk(false)}
+                    onClick={() => updateField("physicalSafetyRisk", false)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
                     ZONA SEGURA
@@ -274,7 +318,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={financialAssetRisk === true}
-                    onClick={() => setFinancialAssetRisk(true)}
+                    onClick={() => updateField("financialAssetRisk", true)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === true ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
                     EN RIESGO
@@ -282,7 +326,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={financialAssetRisk === false}
-                    onClick={() => setFinancialAssetRisk(false)}
+                    onClick={() => updateField("financialAssetRisk", false)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
                     PROTEGIDOS
@@ -292,7 +336,9 @@ export default function Wizard({ onComplete }: Props) {
             </section>
 
             <button
-              onClick={() => setPhase("COGNITIVE")}
+              onClick={() =>
+                dispatch({ type: "SET_PHASE", payload: "COGNITIVE" })
+              }
               disabled={!isStep1Complete}
               aria-disabled={!isStep1Complete}
               className={`w-full py-4 rounded-xl font-semibold transition-all ${
@@ -335,7 +381,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={perceivedOmnipotence === true}
-                    onClick={() => setPerceivedOmnipotence(true)}
+                    onClick={() => updateField("perceivedOmnipotence", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${perceivedOmnipotence === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     VIGILANCIA TOTAL
@@ -343,7 +389,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={perceivedOmnipotence === false}
-                    onClick={() => setPerceivedOmnipotence(false)}
+                    onClick={() => updateField("perceivedOmnipotence", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${perceivedOmnipotence === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     TECNOLÓGICO RESTRICTO
@@ -367,7 +413,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={isVerifiable === true}
-                    onClick={() => setIsVerifiable(true)}
+                    onClick={() => updateField("isVerifiable", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${isVerifiable === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     PRUEBAS MATERIALES
@@ -375,7 +421,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={isVerifiable === false}
-                    onClick={() => setIsVerifiable(false)}
+                    onClick={() => updateField("isVerifiable", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${isVerifiable === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     SOSPECHAS INDICIARIAS
@@ -399,15 +445,15 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={distortionIndicator === false}
-                    onClick={() => setDistortionIndicator(false)}
+                    onClick={() => updateField("distortionIndicator", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${distortionIndicator === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    NARREACIÓN CLARA
+                    NARRACIÓN CLARA
                   </button>
                   <button
                     role="radio"
                     aria-checked={distortionIndicator === true}
-                    onClick={() => setDistortionIndicator(true)}
+                    onClick={() => updateField("distortionIndicator", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${distortionIndicator === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     CONFUSIÓN / MEMORIA
@@ -417,13 +463,17 @@ export default function Wizard({ onComplete }: Props) {
 
               <div className="pt-4 flex gap-4">
                 <button
-                  onClick={() => setPhase("TRIAGE")}
+                  onClick={() =>
+                    dispatch({ type: "SET_PHASE", payload: "TRIAGE" })
+                  }
                   className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
                 >
                   Volver
                 </button>
                 <button
-                  onClick={() => setPhase("TRACE")}
+                  onClick={() =>
+                    dispatch({ type: "SET_PHASE", payload: "TRACE" })
+                  }
                   className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
                 >
                   Continuar Trazado Forense
@@ -462,7 +512,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={whatsappControl === true}
-                    onClick={() => setWhatsappControl(true)}
+                    onClick={() => updateField("whatsappControl", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${whatsappControl === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     IDENTIFICADO
@@ -470,7 +520,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={whatsappControl === false}
-                    onClick={() => setWhatsappControl(false)}
+                    onClick={() => updateField("whatsappControl", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${whatsappControl === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     CONTROL INTEGRAL
@@ -494,7 +544,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={familySuspect === true}
-                    onClick={() => setFamilySuspect(true)}
+                    onClick={() => updateField("familySuspect", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${familySuspect === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     SOSPECHA CERCANA
@@ -502,7 +552,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={familySuspect === false}
-                    onClick={() => setFamilySuspect(false)}
+                    onClick={() => updateField("familySuspect", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${familySuspect === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     ENTORNO DESCARTADO
@@ -529,7 +579,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={constantSurveillance === true}
-                    onClick={() => setConstantSurveillance(true)}
+                    onClick={() => updateField("constantSurveillance", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${constantSurveillance === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     PERCEPCIÓN FÍSICA
@@ -537,7 +587,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     role="radio"
                     aria-checked={constantSurveillance === false}
-                    onClick={() => setConstantSurveillance(false)}
+                    onClick={() => updateField("constantSurveillance", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${constantSurveillance === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     SOLO DIGITAL
@@ -547,7 +597,9 @@ export default function Wizard({ onComplete }: Props) {
 
               <div className="pt-4 flex gap-4">
                 <button
-                  onClick={() => setPhase("COGNITIVE")}
+                  onClick={() =>
+                    dispatch({ type: "SET_PHASE", payload: "COGNITIVE" })
+                  }
                   className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
                 >
                   Volver
