@@ -1,0 +1,30 @@
+# ============================================
+# Development Dockerfile with hot reload
+# ============================================
+FROM node:20-alpine
+
+RUN corepack enable && corepack prepare pnpm@10.29.3 --activate
+
+WORKDIR /app
+
+# Copy workspace and package files
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+COPY apps/web/package.json ./apps/web/
+COPY packages/*/package.json ./packages/
+
+# Install all dependencies (including dev)
+RUN pnpm install --frozen-lockfile
+
+# Copy entire project
+COPY . .
+
+# Generate Prisma client
+ENV SKIP_ENV_VALIDATION=true
+RUN pnpm db:generate
+
+EXPOSE 3000
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Run Next.js dev server with hot reload
+CMD ["pnpm", "run", "-w", "dev"]

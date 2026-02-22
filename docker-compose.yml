@@ -1,0 +1,24 @@
+services:
+  web:
+    image: neiland/claritystructures:v2
+    container_name: claritystructures-web
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+    env_file:
+      - .env.production.local
+    restart: unless-stopped
+    networks:
+      - app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  app:
+    driver: bridge

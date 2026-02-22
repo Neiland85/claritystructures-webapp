@@ -1,87 +1,139 @@
-# 🚀 ClarityStructures - Production Deployment
+# Docker Deployment Guide
 
-## ✅ Estado Actual
+## Quick Start
 
-**URL de Producción:** https://claritystructures-webapp-maf3rbj8p-neiland85s-projects.vercel.app
+### Development
 
-**Database:** Supabase EU (Ireland)
-**Hosting:** Vercel
-**Status:** ✅ Deployado y funcionando
+```bash
+docker compose -f docker-compose.dev.yml up
+```
 
----
+Accede a http://localhost:3000 con hot reload automático.
 
-## 📊 Métricas del Proyecto
+### Production
 
-- **Código:** 5,116 líneas
-- **Tests:** 78/78 pasando ✅
-- **Coverage:** 35% (dominio 100%)
-- **Build:** 3 segundos
-- **Score:** 5/5 ⭐⭐⭐⭐⭐
+```bash
+docker compose up -d
+```
 
----
+## Image Versions
 
-## 🔧 Configuración Actual
+| Version     | Size   | Status    | Created    |
+| ----------- | ------ | --------- | ---------- |
+| v2 (latest) | 1.43GB | ✅ Active | 2026-02-22 |
+| v1          | 1.63GB | 🔄 Backup | 2026-02-11 |
 
-### Variables de Entorno (Vercel)
+## Safe Deployment
 
-✅ DATABASE*URL
-✅ JWT_SECRET
-✅ SESSION_SECRET
-✅ NEXT_PUBLIC_APP_NAME
-✅ NEXT_PUBLIC_APP_URL
-✅ NEXT_PUBLIC_POSTHOG_KEY
-✅ SMTP*\* (Mailtrap sandbox)
-✅ SKIP_ENV_VALIDATION
-✅ NODE_ENV
+Use el script de deploy con protecciones automáticas:
 
-### Database (Supabase)
+```bash
+# Deploy la última versión
+./scripts/deploy.sh latest
 
-- **Región:** EU West (Ireland)
-- **Tablas:** ContactIntake, ConsentVersion, ConsentAcceptance
-- **Indexes:** 5 índices estratégicos
-- **Connection:** Transaction mode pooler
+# Deploy versión específica
+./scripts/deploy.sh v2
 
----
+# Rollback a versión anterior
+./scripts/deploy.sh v1
+```
 
-## ⚠️ Issues Conocidos
+El script automáticamente:
 
-### 1. Formulario de Contacto - API Error
+- ✅ Verifica que la imagen existe
+- 📦 Crea backup de la versión anterior
+- 🚀 Despliega nueva versión
+- ⏳ Espera health check
+- 🔄 Rollback automático si falla
 
-**Estado:** En progreso
-**Descripción:** El API `/api/contact` requiere campos específicos que el formulario no está enviando correctamente.
+## Monitoreo
 
-**Solución:** Mapear correctamente los campos del formulario al schema del API.
+```bash
+# Ver estado de contenedor
+./scripts/health-check.sh
 
----
+# Ver logs en tiempo real
+docker compose logs -f web
 
-## 🎯 Próximos Pasos (Opcional)
+# Ver métricas de recursos
+docker stats claritystructures-web
+```
 
-1. Arreglar mapeo de campos formulario → API
-2. Configurar Upstash Redis para rate limiting production
-3. Cambiar SMTP a Resend para emails reales
-4. Activar Sentry para monitoring
-5. Configurar dominio personalizado
-6. Habilitar RLS en Supabase
+## Rollback Manual
 
----
+Si algo sale mal:
 
-## 📚 Documentación
+```bash
+# Revertir a v1
+docker tag neiland/claritystructures:v1 neiland/claritystructures:latest
+docker compose up -d --force-recreate
 
-- **Arquitectura:** `docs/architecture/README.md`
-- **ADRs:** `docs/architecture/decisions/`
-- **Tests:** `pnpm test:run`
-- **Build:** `pnpm --filter web build`
+# O usar backup automático
+docker compose down
+docker tag neiland/claritystructures:v1-backup neiland/claritystructures:latest
+docker compose up -d
+```
 
----
+## Construcción Local
 
-## 🏆 Logros Completados
+```bash
+# Build production
+docker build -t neiland/claritystructures:v3 -f Dockerfile .
 
-✅ Seguridad enterprise (5/5)
-✅ Testing completo (78 tests)
-✅ Arquitectura DDD (Value Objects, Events, Specifications)
-✅ Performance optimizado (3s build)
-✅ DevOps + CI/CD
-✅ Database en producción
-✅ Deployment en Vercel
+# Build development
+docker build -t neiland/claritystructures:dev -f Dockerfile.dev .
 
-**Proyecto completado en 13 horas** 🎉
+# Tag como latest después de verificar
+docker tag neiland/claritystructures:v3 neiland/claritystructures:latest
+```
+
+## Checklist Pre-Producción
+
+- [ ] Build local exitoso: `docker build -f Dockerfile .`
+- [ ] Image pasa health check: `docker run --rm ... curl localhost:3000`
+- [ ] docker-compose.yml apunta a versión correcta
+- [ ] .env.production.local existe con variables necesarias
+- [ ] Backup de versión anterior creado
+- [ ] Logs monitoreados post-deploy
+- [ ] Performance metrics dentro de límites normales
+
+## Environment Variables
+
+```bash
+# .env.production.local
+NODE_ENV=production
+NEXT_TELEMETRY_DISABLED=1
+# Añade aquí variables específicas de producción
+```
+
+## Troubleshooting
+
+### Container no inicia
+
+```bash
+docker compose logs web
+docker compose ps
+```
+
+### Health check falla
+
+```bash
+docker compose exec web curl http://localhost:3000
+docker stats claritystructures-web
+```
+
+### Limpieza completa
+
+```bash
+docker compose down --volumes
+docker system prune -a
+docker build -f Dockerfile . --no-cache
+```
+
+## Información de Contacto
+
+Para issues con deployment:
+
+1. Revisar `DOCKER_VERSIONS.md` para historial de cambios
+2. Ejecutar `./scripts/health-check.sh` para diagnóstico
+3. Revisar logs: `docker compose logs --tail 100 web`
