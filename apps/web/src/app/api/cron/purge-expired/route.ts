@@ -44,6 +44,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, summary });
   } catch (error) {
+    console.error("[CRON purge-expired]", error);
     logger.error("Purge job failed", error);
     return NextResponse.json(
       {
