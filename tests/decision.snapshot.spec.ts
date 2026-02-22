@@ -206,3 +206,4 @@ test("decision model versions remain distinct and V1 behavior is snapshot-locked
     assert.deepEqual(decideIntake(scenario.input), expected.v1);
   }
 });
+// pega aquí el JSON actualizado correctamente
