@@ -6,7 +6,7 @@ export const wizardDict = {
     phase_triage: "Triage",
     phase_cognitive: "Evaluación",
     phase_context: "Contexto",
-    phase_trace: "Trazado",
+    phase_details: "Detalles",
     completed: "(completado)",
     current: "(actual)",
     step: "Paso",
@@ -79,33 +79,29 @@ export const wizardDict = {
     context_yes_third_parties: "SÍ, HAY TERCEROS",
     context_no_only_me: "NO, SOLO YO",
     context_back: "Volver",
-    context_next: "Continuar Trazado Forense",
+    context_next: "Siguiente Paso: Detalles",
 
-    // TRACE phase
-    trace_title: "Trazado de Narrativa Forense",
-    trace_subtitle:
-      "Última fase: detección de patrones de intrusión e ingeniería social.",
-    trace_q_whatsapp:
-      "¿Sientes que has perdido o estás perdiendo el control de tus comunicaciones (WhatsApp, Telegram, etc.)?",
-    trace_identified: "IDENTIFICADO",
-    trace_full_control: "CONTROL INTEGRAL",
-    trace_q_family:
-      "¿Sospechas que detrás de estas anomalías podrían encontrarse familiares directos o personas de tu entorno cercano?",
-    trace_close_suspect: "SOSPECHA CERCANA",
-    trace_environment_clear: "ENTORNO DESCARTADO",
-    trace_q_surveillance:
-      "¿Te sientes bajo una vigilancia constante que excede lo puramente digital (persecución, ruidos, eventos físicos)?",
-    trace_physical_perception: "PERCEPCIÓN FÍSICA",
-    trace_digital_only: "SOLO DIGITAL",
-    trace_back: "Volver",
-    trace_submit: "Finalizar Informe Triage",
+    // DETAILS phase
+    details_title: "Detalles del Incidente",
+    details_subtitle:
+      "Información específica para el motor de clasificación forense.",
+    details_q_incident: "¿Qué tipo de incidente describes?",
+    details_q_devices: "¿Cuántos dispositivos están involucrados o afectados?",
+    details_q_evidence_sources:
+      "¿De qué fuentes dispones como evidencia? (selecciona todas las que apliquen)",
+    details_q_actions_taken:
+      "¿Qué acciones has tomado hasta ahora? (selecciona todas las que apliquen)",
+    details_q_objective: "¿Cuál es tu objetivo principal?",
+    details_back: "Volver",
+    details_submit: "Finalizar Informe Triage",
+    details_submitting: "Procesando...",
   },
   en: {
     // Phase labels
     phase_triage: "Triage",
     phase_cognitive: "Assessment",
     phase_context: "Context",
-    phase_trace: "Tracing",
+    phase_details: "Details",
     completed: "(completed)",
     current: "(current)",
     step: "Step",
@@ -176,26 +172,22 @@ export const wizardDict = {
     context_yes_third_parties: "YES, THIRD PARTIES",
     context_no_only_me: "NO, JUST ME",
     context_back: "Back",
-    context_next: "Continue Forensic Tracing",
+    context_next: "Next Step: Details",
 
-    // TRACE phase
-    trace_title: "Forensic Narrative Tracing",
-    trace_subtitle:
-      "Final phase: detection of intrusion patterns and social engineering.",
-    trace_q_whatsapp:
-      "Do you feel you have lost or are losing control of your communications (WhatsApp, Telegram, etc.)?",
-    trace_identified: "IDENTIFIED",
-    trace_full_control: "FULL CONTROL",
-    trace_q_family:
-      "Do you suspect that direct family members or people close to you could be behind these anomalies?",
-    trace_close_suspect: "CLOSE SUSPICION",
-    trace_environment_clear: "ENVIRONMENT CLEARED",
-    trace_q_surveillance:
-      "Do you feel under constant surveillance that goes beyond the purely digital (persecution, noises, physical events)?",
-    trace_physical_perception: "PHYSICAL PERCEPTION",
-    trace_digital_only: "DIGITAL ONLY",
-    trace_back: "Back",
-    trace_submit: "Finalize Triage Report",
+    // DETAILS phase
+    details_title: "Incident Details",
+    details_subtitle:
+      "Specific information for the forensic classification engine.",
+    details_q_incident: "What type of incident are you describing?",
+    details_q_devices: "How many devices are involved or affected?",
+    details_q_evidence_sources:
+      "What evidence sources do you have? (select all that apply)",
+    details_q_actions_taken:
+      "What actions have you taken so far? (select all that apply)",
+    details_q_objective: "What is your primary objective?",
+    details_back: "Back",
+    details_submit: "Finalize Triage Report",
+    details_submitting: "Processing...",
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 
