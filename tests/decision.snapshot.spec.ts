@@ -50,14 +50,14 @@ const expectedDecisionSnapshots: Record<
     v1: {
       route: "/contact/legal",
       priority: "high",
-      flags: ["legal_professional"],
+      flags: ["legal_professional", "legal_risk"],
       actionCode: "PRIORITY_REVIEW_24_48H",
       decisionModelVersion: "decision-model/v1",
     },
     v2: {
       route: "/contact/legal",
       priority: "high",
-      flags: ["legal_professional"],
+      flags: ["legal_professional", "legal_risk"],
       actionCode: "PRIORITY_REVIEW_24_48H",
       decisionModelVersion: "decision-model/v2",
     },
@@ -162,14 +162,14 @@ const expectedDecisionSnapshots: Record<
     v1: {
       route: "/contact/legal",
       priority: "critical",
-      flags: ["active_procedure"],
+      flags: ["active_procedure", "legal_risk"],
       actionCode: "IMMEDIATE_HUMAN_CONTACT",
       decisionModelVersion: "decision-model/v1",
     },
     v2: {
       route: "/contact/legal",
       priority: "critical",
-      flags: ["active_procedure"],
+      flags: ["active_procedure", "legal_risk"],
       actionCode: "IMMEDIATE_HUMAN_CONTACT",
       decisionModelVersion: "decision-model/v2",
     },
@@ -206,3 +206,4 @@ test("decision model versions remain distinct and V1 behavior is snapshot-locked
     assert.deepEqual(decideIntake(scenario.input), expected.v1);
   }
 });
+// pega aquí el JSON actualizado correctamente

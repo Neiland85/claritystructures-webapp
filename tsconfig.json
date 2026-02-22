@@ -10,6 +10,9 @@
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
+      "@claritystructures/types/validations/*": [
+        "packages/types/src/validations/*"
+      ],
       "@claritystructures/*": ["packages/*/src"],
       "@/*": ["apps/web/src/*"]
     }
