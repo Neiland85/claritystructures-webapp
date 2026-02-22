@@ -4,7 +4,7 @@ export default function AnimatedLogo() {
   return (
     <div className="flex flex-col items-center gap-4 select-none group">
       <div className="relative w-24 h-24">
-        <svg viewBox="0 0 100 100" className="w-full h-full">
+        <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden="true">
           {/* Hexagon Outline */}
           <path
             d="M50 10 L84.6 30 L84.6 70 L50 90 L15.4 70 L15.4 30 Z"

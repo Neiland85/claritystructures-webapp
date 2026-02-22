@@ -24,7 +24,7 @@ export class Priority {
   }
 
   static isValid(level: string): boolean {
-    return Priority.VALID_LEVELS.includes(level as any);
+    return (Priority.VALID_LEVELS as ReadonlyArray<string>).includes(level);
   }
 
   static low(): Priority {

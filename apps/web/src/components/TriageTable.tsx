@@ -1,8 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import type { IntakeRecord, IntakeStatus } from "@claritystructures/domain";
 import { getCsrfToken } from "@/lib/csrf/get-csrf-token";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("TriageTable");
 
 const STATUS_COLORS: Record<IntakeStatus, string> = {
   pending: "bg-amber-500/20 text-amber-400 border-amber-500/30",
@@ -32,34 +35,22 @@ export default function TriageTable({ token }: TriageTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   /** Build headers with bearer auth + optional CSRF token */
-  const authHeaders = (
-    extra: Record<string, string> = {},
-  ): Record<string, string> => {
-    const headers: Record<string, string> = {
-      Authorization: `Bearer ${token}`,
-      ...extra,
-    };
-    const csrf = getCsrfToken();
-    if (csrf) {
-      headers["x-csrf-token"] = csrf;
-    }
-    return headers;
-  };
+  const authHeaders = useCallback(
+    (extra: Record<string, string> = {}): Record<string, string> => {
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${token}`,
+        ...extra,
+      };
+      const csrf = getCsrfToken();
+      if (csrf) {
+        headers["x-csrf-token"] = csrf;
+      }
+      return headers;
+    },
+    [token],
+  );
 
-  useEffect(() => {
-    fetchIntakes();
-  }, []);
-
-  const filteredIntakes = intakes.filter((i) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      (i.name?.toLowerCase() || "").includes(query) ||
-      i.email.toLowerCase().includes(query) ||
-      i.message.toLowerCase().includes(query)
-    );
-  });
-
-  const fetchIntakes = async () => {
+  const fetchIntakes = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch("/api/triage", {
@@ -80,27 +71,45 @@ export default function TriageTable({ token }: TriageTableProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authHeaders]);
 
-  const updateStatus = async (id: string, status: IntakeStatus) => {
-    try {
-      const res = await fetch("/api/triage", {
-        method: "PATCH",
-        body: JSON.stringify({ id, status }),
-        headers: authHeaders({ "Content-Type": "application/json" }),
-      });
-      if (res.ok) {
-        setIntakes((prev) =>
-          prev.map((i) => (i.id === id ? { ...i, status } : i)),
-        );
-        if (selectedIntake?.id === id) {
-          setSelectedIntake({ ...selectedIntake, status });
+  useEffect(() => {
+    fetchIntakes();
+  }, [fetchIntakes]);
+
+  const filteredIntakes = useMemo(() => {
+    return intakes.filter((i) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        (i.name?.toLowerCase() || "").includes(query) ||
+        i.email.toLowerCase().includes(query) ||
+        i.message.toLowerCase().includes(query)
+      );
+    });
+  }, [intakes, searchQuery]);
+
+  const updateStatus = useCallback(
+    async (id: string, status: IntakeStatus) => {
+      try {
+        const res = await fetch("/api/triage", {
+          method: "PATCH",
+          body: JSON.stringify({ id, status }),
+          headers: authHeaders({ "Content-Type": "application/json" }),
+        });
+        if (res.ok) {
+          setIntakes((prev) =>
+            prev.map((i) => (i.id === id ? { ...i, status } : i)),
+          );
+          setSelectedIntake((prev) =>
+            prev?.id === id ? { ...prev, status } : prev,
+          );
         }
+      } catch (err) {
+        logger.error("Failed to update intake status", err);
       }
-    } catch (err) {
-      console.error("Update failed", err);
-    }
-  };
+    },
+    [authHeaders],
+  );
 
   if (loading) {
     return (
@@ -128,6 +137,7 @@ export default function TriageTable({ token }: TriageTableProps) {
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -137,14 +147,15 @@ export default function TriageTable({ token }: TriageTableProps) {
             />
           </svg>
           <input
-            type="text"
+            type="search"
+            aria-label="Buscar intakes por nombre, email o mensaje"
             placeholder="Search by name, email or message..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-white/5 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
           />
         </div>
-        <div className="text-xs text-slate-500 font-medium">
+        <div aria-live="polite" className="text-xs text-slate-500 font-medium">
           Showing {filteredIntakes.length} of {intakes.length} intakes
         </div>
       </div>
@@ -174,6 +185,15 @@ export default function TriageTable({ token }: TriageTableProps) {
                 <tr
                   key={intake.id}
                   onClick={() => setSelectedIntake(intake)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedIntake(intake);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Ver detalle de intake de ${intake.name || "Anonymous"}`}
                   className={`group cursor-pointer transition-colors hover:bg-white/5 ${
                     selectedIntake?.id === intake.id ? "bg-white/10" : ""
                   } ${
@@ -235,6 +255,7 @@ export default function TriageTable({ token }: TriageTableProps) {
                 </div>
                 <button
                   onClick={() => setSelectedIntake(null)}
+                  aria-label="Cerrar panel de detalle"
                   className="p-1 text-slate-500 hover:text-white transition-colors"
                 >
                   <svg
@@ -242,6 +263,7 @@ export default function TriageTable({ token }: TriageTableProps) {
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
+                    aria-hidden="true"
                   >
                     <path
                       strokeLinecap="round"
@@ -305,6 +327,8 @@ export default function TriageTable({ token }: TriageTableProps) {
                         key={s}
                         onClick={() => updateStatus(selectedIntake.id, s)}
                         disabled={selectedIntake.status === s}
+                        aria-pressed={selectedIntake.status === s}
+                        aria-label={`Cambiar estado a ${s}`}
                         className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
                           selectedIntake.status === s
                             ? STATUS_COLORS[s] +
@@ -326,6 +350,7 @@ export default function TriageTable({ token }: TriageTableProps) {
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"

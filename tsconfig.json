@@ -3,13 +3,16 @@
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
+      "@claritystructures/types/validations/*": [
+        "packages/types/src/validations/*"
+      ],
       "@claritystructures/*": ["packages/*/src"],
       "@/*": ["apps/web/src/*"]
     }

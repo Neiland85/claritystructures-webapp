@@ -1,5 +1,8 @@
 import type { FunnelEvent } from "@claritystructures/types";
 import { hasAnalyticalConsent } from "@/lib/consent";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("analytics");
 
 declare global {
   interface Window {
@@ -16,7 +19,7 @@ export function trackEvent(event: FunnelEvent) {
   if (!hasAnalyticalConsent()) return;
 
   if (process.env.NODE_ENV !== "production") {
-    console.debug("[ANALYTICS]", event);
+    logger.debug("Analytics event tracked", { eventName: event.name });
   }
 
   if (window.posthog) {

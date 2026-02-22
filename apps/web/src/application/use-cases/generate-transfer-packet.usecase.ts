@@ -16,6 +16,9 @@ import type {
   TransferPacketPayload,
   ChronologyEntry,
 } from "@claritystructures/domain";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("GenerateTransferPacketUseCase");
 
 export type GenerateTransferInput = {
   intakeId: string;
@@ -111,9 +114,7 @@ export class GenerateTransferPacketUseCase {
         },
       });
     } catch {
-      console.error(
-        "[GenerateTransferPacketUseCase] Audit failed — non-blocking",
-      );
+      logger.error("Audit trail recording failed — non-blocking");
     }
 
     return { transferId, manifestHash, packet };

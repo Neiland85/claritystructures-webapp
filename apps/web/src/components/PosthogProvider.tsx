@@ -21,7 +21,7 @@ function initPosthog() {
   });
 
   if (typeof window !== "undefined") {
-    (window as any).posthog = posthog;
+    (window as unknown as Record<string, unknown>).posthog = posthog;
   }
   posthogInitialized = true;
 }

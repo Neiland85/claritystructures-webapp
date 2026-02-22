@@ -3,9 +3,12 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "baseUrl": ".",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "bundler",
     "paths": {
       "@/*": ["src/*"],
+      "@claritystructures/types/validations/*": [
+        "../../packages/types/src/validations/*"
+      ],
       "@claritystructures/*": ["../../packages/*/src"]
     }
   },

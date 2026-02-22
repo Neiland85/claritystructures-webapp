@@ -12,6 +12,7 @@ export default defineConfig({
       "**/node_modules/**",
       "**/dist/**",
       "**/.next/**",
+      "**/.claude/**",
       "tests/decision.spec.ts",
       "tests/decision.snapshot.spec.ts",
       "tests/intake-funnel.integration.spec.ts",
@@ -22,6 +23,7 @@ export default defineConfig({
       exclude: [
         "node_modules/",
         "tests/",
+        "**/.claude/",
         "**/*.d.ts",
         "**/*.config.*",
         "**/dist/",
@@ -44,6 +46,14 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      "@claritystructures/domain": path.resolve(
+        __dirname,
+        "./packages/domain/src",
+      ),
+      "@claritystructures/types": path.resolve(
+        __dirname,
+        "./packages/types/src",
+      ),
       "@clarity/domain": path.resolve(__dirname, "./packages/domain/src"),
       "@clarity/types": path.resolve(__dirname, "./packages/types/src"),
       "@clarity/config": path.resolve(__dirname, "./packages/config/src"),

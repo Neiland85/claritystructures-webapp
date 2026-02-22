@@ -1,18 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { assessIntake } from "../priority";
 import { resolveIntakeRoute } from "../flow";
-import type { WizardResult } from "../wizard-result";
+import { baseWizard } from "./test-utils";
 
 describe("Decision Engine - Priority Assessment", () => {
   describe("assessIntake", () => {
     it("should return an assessment with priority, flags, and actionCode", () => {
-      const wizardResult: WizardResult = {
-        urgency: "informational",
-        clientProfile: "private_individual",
-        hasEmotionalDistress: false,
-      };
-
-      const result = assessIntake(wizardResult);
+      const result = assessIntake(baseWizard());
 
       expect(result).toHaveProperty("priority");
       expect(result).toHaveProperty("flags");
@@ -29,11 +23,7 @@ describe("Decision Engine - Priority Assessment", () => {
       ] as const;
 
       urgencies.forEach((urgency) => {
-        const result = assessIntake({
-          urgency,
-          clientProfile: "private_individual",
-          hasEmotionalDistress: false,
-        });
+        const result = assessIntake(baseWizard({ urgency }));
 
         expect(result.priority).toBeDefined();
         expect(["low", "medium", "high", "critical"]).toContain(
@@ -52,11 +42,7 @@ describe("Decision Engine - Priority Assessment", () => {
       ] as const;
 
       profiles.forEach((clientProfile) => {
-        const result = assessIntake({
-          urgency: "informational",
-          clientProfile,
-          hasEmotionalDistress: false,
-        });
+        const result = assessIntake(baseWizard({ clientProfile }));
 
         expect(result.priority).toBeDefined();
         expect(result.actionCode).toBeDefined();
@@ -64,34 +50,22 @@ describe("Decision Engine - Priority Assessment", () => {
     });
 
     it("should handle emotional distress flag", () => {
-      const withDistress = assessIntake({
-        urgency: "informational",
-        clientProfile: "private_individual",
-        hasEmotionalDistress: true,
-      });
-
-      const withoutDistress = assessIntake({
-        urgency: "informational",
-        clientProfile: "private_individual",
-        hasEmotionalDistress: false,
-      });
+      const withDistress = assessIntake(
+        baseWizard({ hasEmotionalDistress: true }),
+      );
+      const withoutDistress = assessIntake(
+        baseWizard({ hasEmotionalDistress: false }),
+      );
 
       expect(withDistress).toBeDefined();
       expect(withoutDistress).toBeDefined();
     });
 
     it("should prioritize based on urgency", () => {
-      const critical = assessIntake({
-        urgency: "critical",
-        clientProfile: "private_individual",
-        hasEmotionalDistress: false,
-      });
-
-      const informational = assessIntake({
-        urgency: "informational",
-        clientProfile: "private_individual",
-        hasEmotionalDistress: false,
-      });
+      const critical = assessIntake(baseWizard({ urgency: "critical" }));
+      const informational = assessIntake(
+        baseWizard({ urgency: "informational" }),
+      );
 
       expect(critical.priority).toBeDefined();
       expect(informational.priority).toBeDefined();
@@ -100,11 +74,7 @@ describe("Decision Engine - Priority Assessment", () => {
 
   describe("resolveIntakeRoute", () => {
     it("should return a route for given wizard result", () => {
-      const route = resolveIntakeRoute({
-        urgency: "informational",
-        clientProfile: "private_individual",
-        hasEmotionalDistress: false,
-      });
+      const route = resolveIntakeRoute(baseWizard());
 
       expect(route).toBeDefined();
       expect(typeof route).toBe("string");
@@ -112,11 +82,10 @@ describe("Decision Engine - Priority Assessment", () => {
     });
 
     it("should return consistent routes for same input", () => {
-      const input: WizardResult = {
+      const input = baseWizard({
         urgency: "legal_risk",
         clientProfile: "legal_professional",
-        hasEmotionalDistress: false,
-      };
+      });
 
       const route1 = resolveIntakeRoute(input);
       const route2 = resolveIntakeRoute(input);
@@ -133,11 +102,9 @@ describe("Decision Engine - Priority Assessment", () => {
       ] as const;
 
       profiles.forEach((profile) => {
-        const route = resolveIntakeRoute({
-          urgency: "informational",
-          clientProfile: profile,
-          hasEmotionalDistress: false,
-        });
+        const route = resolveIntakeRoute(
+          baseWizard({ clientProfile: profile }),
+        );
 
         expect(route).toBeDefined();
         expect(route).toMatch(/^\/contact\//);
@@ -153,11 +120,7 @@ describe("Decision Engine - Priority Assessment", () => {
       ] as const;
 
       urgencies.forEach((urgency) => {
-        const route = resolveIntakeRoute({
-          urgency,
-          clientProfile: "private_individual",
-          hasEmotionalDistress: false,
-        });
+        const route = resolveIntakeRoute(baseWizard({ urgency }));
 
         expect(route).toBeDefined();
         expect(route).toMatch(/^\/contact\//);

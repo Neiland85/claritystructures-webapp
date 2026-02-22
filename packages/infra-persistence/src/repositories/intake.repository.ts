@@ -1,4 +1,4 @@
-import { PrismaClient } from "../../generated/prisma/index";
+import { PrismaClient, Prisma } from "../../generated/prisma/index";
 
 import type {
   IntakeRecord,
@@ -48,7 +48,9 @@ export class PrismaIntakeRepository implements IntakeRepository {
         phone: input.phone ?? null,
         status: input.status,
         spamScore: input.spamScore ?? null,
-        meta: (input.meta as any) ?? null,
+        meta: input.meta
+          ? (input.meta as unknown as Prisma.InputJsonValue)
+          : Prisma.JsonNull,
       },
     });
 
