@@ -1,5 +1,18 @@
 import { test, expect } from "@playwright/test";
 
+// Dismiss cookie consent banner before each test
+const CONSENT_VALUE = JSON.stringify({
+  necessary: true,
+  analytical: false,
+  marketing: false,
+});
+
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript((value) => {
+    localStorage.setItem("clarity_cookie_consent", value);
+  }, CONSENT_VALUE);
+});
+
 test.describe("Wizard full flow — Spanish", () => {
   test("completes all 4 phases and submits", async ({ page }) => {
     await page.goto("/es");
