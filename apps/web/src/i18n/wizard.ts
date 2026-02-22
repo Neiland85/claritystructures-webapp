@@ -6,6 +6,7 @@ export const wizardDict = {
     phase_triage: "Triage",
     phase_cognitive: "Evaluación",
     phase_context: "Contexto",
+    phase_details: "Detalles",
     completed: "(completado)",
     current: "(actual)",
     step: "Paso",
@@ -78,14 +79,28 @@ export const wizardDict = {
     context_yes_third_parties: "SÍ, HAY TERCEROS",
     context_no_only_me: "NO, SOLO YO",
     context_back: "Volver",
-    context_next: "Siguiente Paso",
-    context_submit: "Finalizar Informe Triage",
+    context_next: "Siguiente Paso: Detalles",
+
+    // DETAILS phase
+    details_title: "Detalles del Incidente",
+    details_subtitle:
+      "Información específica para el motor de clasificación forense.",
+    details_q_incident: "¿Qué tipo de incidente describes?",
+    details_q_devices: "¿Cuántos dispositivos están involucrados o afectados?",
+    details_q_evidence_sources:
+      "¿De qué fuentes dispones como evidencia? (selecciona todas las que apliquen)",
+    details_q_actions_taken:
+      "¿Qué acciones has tomado hasta ahora? (selecciona todas las que apliquen)",
+    details_q_objective: "¿Cuál es tu objetivo principal?",
+    details_back: "Volver",
+    details_submit: "Finalizar Informe Triage",
   },
   en: {
     // Phase labels
     phase_triage: "Triage",
     phase_cognitive: "Assessment",
     phase_context: "Context",
+    phase_details: "Details",
     completed: "(completed)",
     current: "(current)",
     step: "Step",
@@ -156,8 +171,21 @@ export const wizardDict = {
     context_yes_third_parties: "YES, THIRD PARTIES",
     context_no_only_me: "NO, JUST ME",
     context_back: "Back",
-    context_next: "Next Step",
-    context_submit: "Finalize Triage Report",
+    context_next: "Next Step: Details",
+
+    // DETAILS phase
+    details_title: "Incident Details",
+    details_subtitle:
+      "Specific information for the forensic classification engine.",
+    details_q_incident: "What type of incident are you describing?",
+    details_q_devices: "How many devices are involved or affected?",
+    details_q_evidence_sources:
+      "What evidence sources do you have? (select all that apply)",
+    details_q_actions_taken:
+      "What actions have you taken so far? (select all that apply)",
+    details_q_objective: "What is your primary objective?",
+    details_back: "Back",
+    details_submit: "Finalize Triage Report",
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 

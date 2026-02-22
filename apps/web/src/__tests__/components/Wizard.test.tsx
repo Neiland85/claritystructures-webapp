@@ -35,7 +35,10 @@ afterAll(() => {
   console.error = originalError;
 });
 
-function goToPhase(phase: "COGNITIVE" | "CONTEXT", onComplete = vi.fn()) {
+function goToPhase(
+  phase: "COGNITIVE" | "CONTEXT" | "DETAILS",
+  onComplete = vi.fn(),
+) {
   render(<Wizard onComplete={onComplete} />);
 
   // Complete TRIAGE
@@ -47,6 +50,11 @@ function goToPhase(phase: "COGNITIVE" | "CONTEXT", onComplete = vi.fn()) {
 
   // COGNITIVE → CONTEXT
   fireEvent.click(screen.getByText("Siguiente Paso: Contexto"));
+
+  if (phase === "CONTEXT") return onComplete;
+
+  // CONTEXT → DETAILS
+  fireEvent.click(screen.getByText("Siguiente Paso: Detalles"));
 
   return onComplete;
 }
@@ -232,7 +240,7 @@ describe("Wizard", () => {
   );
 
   it(
-    "should show form step progress indicator with 3 steps",
+    "should show form step progress indicator with 4 steps",
     () => {
       render(<Wizard onComplete={onComplete} />);
 
@@ -240,10 +248,11 @@ describe("Wizard", () => {
       expect(nav).toBeInTheDocument();
 
       const items = nav.querySelectorAll("li");
-      expect(items).toHaveLength(3);
+      expect(items).toHaveLength(4);
       expect(items[0].textContent).toContain("Triage");
       expect(items[1].textContent).toContain("Evaluación");
       expect(items[2].textContent).toContain("Contexto");
+      expect(items[3].textContent).toContain("Detalles");
     },
     { timeout: 10000 },
   );
@@ -393,6 +402,159 @@ describe("Wizard", () => {
     { timeout: 10000 },
   );
 
+  // --- CONTEXT → DETAILS navigation ---
+
+  it(
+    "should navigate from CONTEXT to DETAILS phase",
+    () => {
+      goToPhase("DETAILS");
+
+      expect(screen.getByText("Detalles del Incidente")).toBeInTheDocument();
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should navigate back from DETAILS to CONTEXT",
+    () => {
+      goToPhase("DETAILS");
+
+      fireEvent.click(screen.getByText("Volver"));
+
+      expect(screen.getByText("Contexto del Incidente")).toBeInTheDocument();
+    },
+    { timeout: 10000 },
+  );
+
+  // --- DETAILS phase rendering ---
+
+  it(
+    "should render all 5 DETAILS questions",
+    () => {
+      goToPhase("DETAILS");
+
+      expect(
+        screen.getByText("¿Qué tipo de incidente describes?"),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "¿Cuántos dispositivos están involucrados o afectados?",
+        ),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "¿De qué fuentes dispones como evidencia? (selecciona todas las que apliquen)",
+        ),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "¿Qué acciones has tomado hasta ahora? (selecciona todas las que apliquen)",
+        ),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText("¿Cuál es tu objetivo principal?"),
+      ).toBeInTheDocument();
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should select incident type",
+    () => {
+      goToPhase("DETAILS");
+
+      const btn = screen.getByText("Acoso / hostigamiento");
+      fireEvent.click(btn);
+
+      expect(btn.closest("button")).toHaveAttribute("aria-checked", "true");
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should select device count",
+    () => {
+      goToPhase("DETAILS");
+
+      const btn = screen.getByText("2 dispositivos");
+      fireEvent.click(btn);
+
+      expect(btn.closest("button")).toHaveAttribute("aria-checked", "true");
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should toggle evidence sources (multi-select)",
+    () => {
+      goToPhase("DETAILS");
+
+      const phoneBtn = screen.getByText("Teléfono móvil");
+      const emailBtn = screen.getByText("Correos electrónicos");
+
+      // Select both
+      fireEvent.click(phoneBtn);
+      fireEvent.click(emailBtn);
+
+      expect(phoneBtn.closest("button")).toHaveAttribute(
+        "aria-checked",
+        "true",
+      );
+      expect(emailBtn.closest("button")).toHaveAttribute(
+        "aria-checked",
+        "true",
+      );
+
+      // Deselect phone
+      fireEvent.click(phoneBtn);
+      expect(phoneBtn.closest("button")).toHaveAttribute(
+        "aria-checked",
+        "false",
+      );
+      expect(emailBtn.closest("button")).toHaveAttribute(
+        "aria-checked",
+        "true",
+      );
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should toggle actions taken (multi-select)",
+    () => {
+      goToPhase("DETAILS");
+
+      const securedBtn = screen.getByText("Aseguré / bloqueé accesos");
+      const reportBtn = screen.getByText("Denuncié / informé");
+
+      fireEvent.click(securedBtn);
+      fireEvent.click(reportBtn);
+
+      expect(securedBtn.closest("button")).toHaveAttribute(
+        "aria-checked",
+        "true",
+      );
+      expect(reportBtn.closest("button")).toHaveAttribute(
+        "aria-checked",
+        "true",
+      );
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should select objective",
+    () => {
+      goToPhase("DETAILS");
+
+      const btn = screen.getByText("Prevenir daño futuro");
+      fireEvent.click(btn);
+
+      expect(btn.closest("button")).toHaveAttribute("aria-checked", "true");
+    },
+    { timeout: 10000 },
+  );
+
   // --- Full flow submission ---
 
   it(
@@ -422,31 +584,48 @@ describe("Wizard", () => {
       fireEvent.click(screen.getByText("NO TENGO ACCESO"));
       fireEvent.click(screen.getByText("SÍ, HAY TERCEROS"));
 
-      // Submit from CONTEXT
+      // CONTEXT → DETAILS
+      fireEvent.click(screen.getByText("Siguiente Paso: Detalles"));
+
+      // Fill DETAILS fields
+      fireEvent.click(screen.getByText("Stalking / persecución"));
+      fireEvent.click(screen.getByText("2 dispositivos"));
+      fireEvent.click(screen.getByText("Teléfono móvil"));
+      fireEvent.click(screen.getByText("Correos electrónicos"));
+      fireEvent.click(screen.getByText("Aseguré / bloqueé accesos"));
+      fireEvent.click(screen.getByText("Prevenir daño futuro"));
+
+      // Submit from DETAILS
       fireEvent.click(screen.getByText("Finalizar Informe Triage"));
 
       expect(handler).toHaveBeenCalledTimes(1);
       const result = handler.mock.calls[0][0];
       expect(result.clientProfile).toBe("private_individual");
       expect(result.urgency).toBe("informational");
-      // New TRIAGE fields
+      // TRIAGE fields
       expect(result.attackerHasPasswords).toBe(true);
       expect(result.evidenceIsAutoDeleted).toBe(true);
-      // New COGNITIVE fields
+      // COGNITIVE fields
       expect(result.hasEmotionalDistress).toBe(true);
       expect(result.cognitiveProfile.emotionalShockLevel).toBe("high");
-      // V2 CONTEXT fields
+      // CONTEXT fields
       expect(result.isOngoing).toBe(true);
       expect(result.estimatedIncidentStart).toBe("weeks");
       expect(result.dataSensitivityLevel).toBe("high");
       expect(result.hasAccessToDevices).toBe(false);
       expect(result.thirdPartiesInvolved).toBe(true);
+      // DETAILS fields
+      expect(result.incident).toBe("stalking");
+      expect(result.devices).toBe(2);
+      expect(result.evidenceSources).toEqual(["phone device", "email message"]);
+      expect(result.actionsTaken).toEqual(["secured contained blocked"]);
+      expect(result.objective).toBe("prevent");
     },
     { timeout: 10000 },
   );
 
   it(
-    "should omit V2 fields from result when CONTEXT is skipped (no answers)",
+    "should use default values when DETAILS fields are not filled",
     () => {
       const handler = vi.fn();
       render(<Wizard onComplete={handler} />);
@@ -458,21 +637,20 @@ describe("Wizard", () => {
         screen.getByText("Siguiente Paso: Evaluación de Contexto"),
       );
 
-      // COGNITIVE → CONTEXT (skip all) → Submit
+      // COGNITIVE → CONTEXT → DETAILS (skip all)
       fireEvent.click(screen.getByText("Siguiente Paso: Contexto"));
+      fireEvent.click(screen.getByText("Siguiente Paso: Detalles"));
 
-      // Submit directly from CONTEXT
+      // Submit with defaults
       fireEvent.click(screen.getByText("Finalizar Informe Triage"));
 
       expect(handler).toHaveBeenCalledTimes(1);
       const result = handler.mock.calls[0][0];
-      expect(result.clientProfile).toBe("private_individual");
-      expect(result.urgency).toBe("informational");
-      expect(result).not.toHaveProperty("isOngoing");
-      expect(result).not.toHaveProperty("estimatedIncidentStart");
-      expect(result).not.toHaveProperty("dataSensitivityLevel");
-      expect(result).not.toHaveProperty("hasAccessToDevices");
-      expect(result).not.toHaveProperty("thirdPartiesInvolved");
+      expect(result.incident).toBe("unspecified");
+      expect(result.devices).toBe(0);
+      expect(result.actionsTaken).toEqual([]);
+      expect(result.evidenceSources).toEqual([]);
+      expect(result.objective).toBe("document");
     },
     { timeout: 10000 },
   );
@@ -483,7 +661,18 @@ describe("Wizard", () => {
       goToPhase("CONTEXT");
 
       const form = screen.getByRole("form");
-      expect(form).toHaveAttribute("aria-label", "Paso 3 de 3: Contexto");
+      expect(form).toHaveAttribute("aria-label", "Paso 3 de 4: Contexto");
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should show correct step aria-label for DETAILS phase",
+    () => {
+      goToPhase("DETAILS");
+
+      const form = screen.getByRole("form");
+      expect(form).toHaveAttribute("aria-label", "Paso 4 de 4: Detalles");
     },
     { timeout: 10000 },
   );

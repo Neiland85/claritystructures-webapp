@@ -108,10 +108,11 @@ describe("Wizard i18n — English locale", () => {
     expect(nav).toBeInTheDocument();
 
     const items = nav.querySelectorAll("li");
-    expect(items).toHaveLength(3);
+    expect(items).toHaveLength(4);
     expect(items[0].textContent).toContain("Triage");
     expect(items[1].textContent).toContain("Assessment");
     expect(items[2].textContent).toContain("Context");
+    expect(items[3].textContent).toContain("Details");
   });
 
   it("navigates full English flow to COGNITIVE", () => {
@@ -151,7 +152,7 @@ describe("Wizard i18n — English locale", () => {
     expect(screen.getByText("ALREADY RESOLVED")).toBeInTheDocument();
   });
 
-  it("navigates full English flow through all 3 phases and submits", () => {
+  it("navigates full English flow through all 4 phases and submits", () => {
     const handler = vi.fn();
     renderEnglish(handler);
 
@@ -174,7 +175,18 @@ describe("Wizard i18n — English locale", () => {
     fireEvent.click(screen.getByText("NO ACCESS"));
     fireEvent.click(screen.getByText("YES, THIRD PARTIES"));
 
-    // Submit from CONTEXT
+    // CONTEXT → DETAILS
+    fireEvent.click(screen.getByText("Next Step: Details"));
+
+    // DETAILS
+    expect(screen.getByText("Incident Details")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Harassment"));
+    fireEvent.click(screen.getByText("1 device"));
+    fireEvent.click(screen.getByText("Mobile phone"));
+    fireEvent.click(screen.getByText("Secured / blocked access"));
+    fireEvent.click(screen.getByText("Prevent future harm"));
+
+    // Submit
     fireEvent.click(screen.getByText("Finalize Triage Report"));
 
     expect(handler).toHaveBeenCalledTimes(1);
@@ -186,6 +198,12 @@ describe("Wizard i18n — English locale", () => {
     expect(result.dataSensitivityLevel).toBe("high");
     expect(result.hasAccessToDevices).toBe(false);
     expect(result.thirdPartiesInvolved).toBe(true);
+    // DETAILS fields
+    expect(result.incident).toBe("harassment");
+    expect(result.devices).toBe(1);
+    expect(result.evidenceSources).toEqual(["phone device"]);
+    expect(result.actionsTaken).toEqual(["secured contained blocked"]);
+    expect(result.objective).toBe("prevent");
   });
 });
 

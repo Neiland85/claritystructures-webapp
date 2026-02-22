@@ -12,6 +12,11 @@ import {
   getUrgencyLevels,
   getDataSensitivityLevels,
   getEstimatedIncidentStarts,
+  getIncidentTypes,
+  getDeviceCounts,
+  getEvidenceSources,
+  getActionsTaken,
+  getObjectives,
 } from "@/constants/wizardOptions";
 import { useTranslation } from "@/i18n/useTranslation";
 import { wizardDict } from "@/i18n/wizard";
@@ -24,7 +29,7 @@ type Props = {
   onComplete: (data: WizardResult) => void;
 };
 
-type Phase = "TRIAGE" | "COGNITIVE" | "CONTEXT";
+type Phase = "TRIAGE" | "COGNITIVE" | "CONTEXT" | "DETAILS";
 
 type WizardState = {
   phase: Phase;
@@ -45,6 +50,12 @@ type WizardState = {
   dataSensitivityLevel: "low" | "medium" | "high" | null;
   estimatedIncidentStart: "unknown" | "recent" | "weeks" | "months" | null;
   thirdPartiesInvolved: boolean | null;
+  // DETAILS phase fields (fed into decision engine)
+  incident: string | null;
+  devices: number | null;
+  evidenceSources: string[];
+  actionsTaken: string[];
+  objective: string | null;
 };
 
 type WizardAction =
@@ -70,6 +81,12 @@ const initialState: WizardState = {
   dataSensitivityLevel: null,
   estimatedIncidentStart: null,
   thirdPartiesInvolved: null,
+  // DETAILS phase fields
+  incident: null,
+  devices: null,
+  evidenceSources: [],
+  actionsTaken: [],
+  objective: null,
 };
 
 function wizardReducer(state: WizardState, action: WizardAction): WizardState {
@@ -92,6 +109,11 @@ export default function Wizard({ onComplete }: Props) {
   const urgencyLevels = getUrgencyLevels(lang);
   const dataSensitivityLevels = getDataSensitivityLevels(lang);
   const estimatedIncidentStarts = getEstimatedIncidentStarts(lang);
+  const incidentTypes = getIncidentTypes(lang);
+  const deviceCounts = getDeviceCounts(lang);
+  const evidenceSourceOptions = getEvidenceSources(lang);
+  const actionTakenOptions = getActionsTaken(lang);
+  const objectiveOptions = getObjectives(lang);
 
   const {
     phase,
@@ -111,6 +133,11 @@ export default function Wizard({ onComplete }: Props) {
     dataSensitivityLevel,
     estimatedIncidentStart,
     thirdPartiesInvolved,
+    incident,
+    devices,
+    evidenceSources,
+    actionsTaken,
+    objective,
   } = state;
 
   const isStep1Complete = clientProfile && urgency;
@@ -125,6 +152,17 @@ export default function Wizard({ onComplete }: Props) {
 
   function updateField(field: keyof WizardState, value: any) {
     dispatch({ type: "UPDATE_FIELD", field, value });
+  }
+
+  function toggleArrayField(
+    field: "evidenceSources" | "actionsTaken",
+    value: string,
+  ) {
+    const current = state[field] as string[];
+    const next = current.includes(value)
+      ? current.filter((v) => v !== value)
+      : [...current, value];
+    dispatch({ type: "UPDATE_FIELD", field, value: next });
   }
 
   function submit() {
@@ -167,11 +205,11 @@ export default function Wizard({ onComplete }: Props) {
         isInformationVerifiable: isVerifiable ?? true,
         emotionalShockLevel: shockLevel,
       },
-      incident: "unspecified",
-      devices: 0,
-      actionsTaken: [],
-      evidenceSources: [],
-      objective: "document",
+      incident: incident ?? "unspecified",
+      devices: devices ?? 0,
+      actionsTaken: actionsTaken,
+      evidenceSources: evidenceSources,
+      objective: objective ?? "document",
       // V2 context signals (only included when answered)
       ...(isOngoing !== null && { isOngoing }),
       ...(hasAccessToDevices !== null && { hasAccessToDevices }),
@@ -192,11 +230,19 @@ export default function Wizard({ onComplete }: Props) {
     onComplete(result);
   }
 
-  const phaseIndex = phase === "TRIAGE" ? 0 : phase === "COGNITIVE" ? 1 : 2;
+  const phaseIndex =
+    phase === "TRIAGE"
+      ? 0
+      : phase === "COGNITIVE"
+        ? 1
+        : phase === "CONTEXT"
+          ? 2
+          : 3;
   const phaseLabels = [
     t("phase_triage"),
     t("phase_cognitive"),
     t("phase_context"),
+    t("phase_details"),
   ];
 
   return (
@@ -818,10 +864,187 @@ export default function Wizard({ onComplete }: Props) {
                   {t("context_back")}
                 </button>
                 <button
+                  onClick={() =>
+                    dispatch({ type: "SET_PHASE", payload: "DETAILS" })
+                  }
+                  className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
+                >
+                  {t("context_next")}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {phase === "DETAILS" && (
+          <div className="space-y-8 animate-in">
+            <header>
+              <h1 className="text-2xl font-light tracking-tight text-white/90">
+                {t("details_title")}
+              </h1>
+              <p className="text-sm text-white/40 mt-1 font-light leading-relaxed">
+                {t("details_subtitle")}
+              </p>
+            </header>
+
+            <div className="space-y-8">
+              <section
+                aria-labelledby="incident-type-heading"
+                className="space-y-3"
+              >
+                <h2
+                  id="incident-type-heading"
+                  className="text-sm text-white/70"
+                >
+                  {t("details_q_incident")}
+                </h2>
+                <div
+                  role="radiogroup"
+                  aria-labelledby="incident-type-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
+                  {incidentTypes.map((opt) => (
+                    <button
+                      key={opt.value}
+                      role="radio"
+                      aria-checked={incident === opt.value}
+                      onClick={() => updateField("incident", opt.value)}
+                      className={`py-3 rounded-xl border transition-all text-xs ${incident === opt.value ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section
+                aria-labelledby="device-count-heading"
+                className="space-y-3"
+              >
+                <h2 id="device-count-heading" className="text-sm text-white/70">
+                  {t("details_q_devices")}
+                </h2>
+                <div
+                  role="radiogroup"
+                  aria-labelledby="device-count-heading"
+                  className="flex gap-2"
+                >
+                  {deviceCounts.map((opt) => (
+                    <button
+                      key={opt.value}
+                      role="radio"
+                      aria-checked={devices === opt.value}
+                      onClick={() => updateField("devices", opt.value)}
+                      className={`flex-1 py-3 rounded-xl border transition-all text-xs ${devices === opt.value ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section
+                aria-labelledby="evidence-sources-heading"
+                className="space-y-3"
+              >
+                <h2
+                  id="evidence-sources-heading"
+                  className="text-sm text-white/70"
+                >
+                  {t("details_q_evidence_sources")}
+                </h2>
+                <div
+                  role="group"
+                  aria-labelledby="evidence-sources-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
+                  {evidenceSourceOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      role="checkbox"
+                      aria-checked={evidenceSources.includes(opt.value)}
+                      onClick={() =>
+                        toggleArrayField("evidenceSources", opt.value)
+                      }
+                      className={`py-3 rounded-xl border transition-all text-xs ${evidenceSources.includes(opt.value) ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section
+                aria-labelledby="actions-taken-heading"
+                className="space-y-3"
+              >
+                <h2
+                  id="actions-taken-heading"
+                  className="text-sm text-white/70"
+                >
+                  {t("details_q_actions_taken")}
+                </h2>
+                <div
+                  role="group"
+                  aria-labelledby="actions-taken-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
+                  {actionTakenOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      role="checkbox"
+                      aria-checked={actionsTaken.includes(opt.value)}
+                      onClick={() =>
+                        toggleArrayField("actionsTaken", opt.value)
+                      }
+                      className={`py-3 rounded-xl border transition-all text-xs ${actionsTaken.includes(opt.value) ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section
+                aria-labelledby="objective-heading"
+                className="space-y-3"
+              >
+                <h2 id="objective-heading" className="text-sm text-white/70">
+                  {t("details_q_objective")}
+                </h2>
+                <div
+                  role="radiogroup"
+                  aria-labelledby="objective-heading"
+                  className="grid grid-cols-1 gap-3"
+                >
+                  {objectiveOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      role="radio"
+                      aria-checked={objective === opt.value}
+                      onClick={() => updateField("objective", opt.value)}
+                      className={`py-3 rounded-xl border transition-all text-xs ${objective === opt.value ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <div className="pt-4 flex gap-4">
+                <button
+                  onClick={() =>
+                    dispatch({ type: "SET_PHASE", payload: "CONTEXT" })
+                  }
+                  className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
+                >
+                  {t("details_back")}
+                </button>
+                <button
                   onClick={submit}
                   className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
                 >
-                  {t("context_submit")}
+                  {t("details_submit")}
                 </button>
               </div>
             </div>
