@@ -108,11 +108,10 @@ describe("Wizard i18n — English locale", () => {
     expect(nav).toBeInTheDocument();
 
     const items = nav.querySelectorAll("li");
-    expect(items).toHaveLength(4);
+    expect(items).toHaveLength(3);
     expect(items[0].textContent).toContain("Triage");
     expect(items[1].textContent).toContain("Assessment");
     expect(items[2].textContent).toContain("Context");
-    expect(items[3].textContent).toContain("Tracing");
   });
 
   it("navigates full English flow to COGNITIVE", () => {
@@ -152,7 +151,7 @@ describe("Wizard i18n — English locale", () => {
     expect(screen.getByText("ALREADY RESOLVED")).toBeInTheDocument();
   });
 
-  it("navigates full English flow through all 4 phases and submits", () => {
+  it("navigates full English flow through all 3 phases and submits", () => {
     const handler = vi.fn();
     renderEnglish(handler);
 
@@ -175,13 +174,7 @@ describe("Wizard i18n — English locale", () => {
     fireEvent.click(screen.getByText("NO ACCESS"));
     fireEvent.click(screen.getByText("YES, THIRD PARTIES"));
 
-    // CONTEXT → TRACE
-    fireEvent.click(screen.getByText("Continue Forensic Tracing"));
-
-    // TRACE
-    expect(screen.getByText("Forensic Narrative Tracing")).toBeInTheDocument();
-
-    // Submit
+    // Submit from CONTEXT
     fireEvent.click(screen.getByText("Finalize Triage Report"));
 
     expect(handler).toHaveBeenCalledTimes(1);

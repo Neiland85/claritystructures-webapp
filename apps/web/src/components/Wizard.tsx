@@ -24,7 +24,7 @@ type Props = {
   onComplete: (data: WizardResult) => void;
 };
 
-type Phase = "TRIAGE" | "COGNITIVE" | "CONTEXT" | "TRACE";
+type Phase = "TRIAGE" | "COGNITIVE" | "CONTEXT";
 
 type WizardState = {
   phase: Phase;
@@ -39,9 +39,6 @@ type WizardState = {
   isVerifiable: boolean | null;
   distortionIndicator: boolean | null;
   shockLevel: "low" | "medium" | "high";
-  whatsappControl: boolean | null;
-  familySuspect: boolean | null;
-  constantSurveillance: boolean | null;
   // V2 context signals
   isOngoing: boolean | null;
   hasAccessToDevices: boolean | null;
@@ -67,9 +64,6 @@ const initialState: WizardState = {
   isVerifiable: null,
   distortionIndicator: null,
   shockLevel: "low",
-  whatsappControl: null,
-  familySuspect: null,
-  constantSurveillance: null,
   // V2 context signals
   isOngoing: null,
   hasAccessToDevices: null,
@@ -112,9 +106,6 @@ export default function Wizard({ onComplete }: Props) {
     isVerifiable,
     distortionIndicator,
     shockLevel,
-    whatsappControl,
-    familySuspect,
-    constantSurveillance,
     isOngoing,
     hasAccessToDevices,
     dataSensitivityLevel,
@@ -176,11 +167,6 @@ export default function Wizard({ onComplete }: Props) {
         isInformationVerifiable: isVerifiable ?? true,
         emotionalShockLevel: shockLevel,
       },
-      narrativeTracing: {
-        whatsappControlLoss: whatsappControl ?? false,
-        familySuspects: familySuspect ?? false,
-        perceivedSurveillance: constantSurveillance ?? false,
-      },
       incident: "unspecified",
       devices: 0,
       actionsTaken: [],
@@ -206,19 +192,11 @@ export default function Wizard({ onComplete }: Props) {
     onComplete(result);
   }
 
-  const phaseIndex =
-    phase === "TRIAGE"
-      ? 0
-      : phase === "COGNITIVE"
-        ? 1
-        : phase === "CONTEXT"
-          ? 2
-          : 3;
+  const phaseIndex = phase === "TRIAGE" ? 0 : phase === "COGNITIVE" ? 1 : 2;
   const phaseLabels = [
     t("phase_triage"),
     t("phase_cognitive"),
     t("phase_context"),
-    t("phase_trace"),
   ];
 
   return (
@@ -840,140 +818,10 @@ export default function Wizard({ onComplete }: Props) {
                   {t("context_back")}
                 </button>
                 <button
-                  onClick={() =>
-                    dispatch({ type: "SET_PHASE", payload: "TRACE" })
-                  }
-                  className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
-                >
-                  {t("context_next")}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {phase === "TRACE" && (
-          <div className="space-y-8 animate-in">
-            <header>
-              <h1 className="text-2xl font-light tracking-tight text-white/90">
-                {t("trace_title")}
-              </h1>
-              <p className="text-sm text-white/40 mt-1 font-light leading-relaxed">
-                {t("trace_subtitle")}
-              </p>
-            </header>
-
-            <div className="space-y-8">
-              <section aria-labelledby="whatsapp-heading" className="space-y-3">
-                <h2
-                  id="whatsapp-heading"
-                  className="text-sm text-white/70 font-light"
-                >
-                  {t("trace_q_whatsapp")}
-                </h2>
-                <div
-                  role="radiogroup"
-                  aria-labelledby="whatsapp-heading"
-                  className="grid grid-cols-2 gap-3"
-                >
-                  <button
-                    role="radio"
-                    aria-checked={whatsappControl === true}
-                    onClick={() => updateField("whatsappControl", true)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${whatsappControl === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
-                  >
-                    {t("trace_identified")}
-                  </button>
-                  <button
-                    role="radio"
-                    aria-checked={whatsappControl === false}
-                    onClick={() => updateField("whatsappControl", false)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${whatsappControl === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
-                  >
-                    {t("trace_full_control")}
-                  </button>
-                </div>
-              </section>
-
-              <section aria-labelledby="family-heading" className="space-y-3">
-                <h2
-                  id="family-heading"
-                  className="text-sm text-white/70 font-light"
-                >
-                  {t("trace_q_family")}
-                </h2>
-                <div
-                  role="radiogroup"
-                  aria-labelledby="family-heading"
-                  className="grid grid-cols-2 gap-3"
-                >
-                  <button
-                    role="radio"
-                    aria-checked={familySuspect === true}
-                    onClick={() => updateField("familySuspect", true)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${familySuspect === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
-                  >
-                    {t("trace_close_suspect")}
-                  </button>
-                  <button
-                    role="radio"
-                    aria-checked={familySuspect === false}
-                    onClick={() => updateField("familySuspect", false)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${familySuspect === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
-                  >
-                    {t("trace_environment_clear")}
-                  </button>
-                </div>
-              </section>
-
-              <section
-                aria-labelledby="surveillance-heading"
-                className="space-y-3"
-              >
-                <h2
-                  id="surveillance-heading"
-                  className="text-sm text-white/70 font-light"
-                >
-                  {t("trace_q_surveillance")}
-                </h2>
-                <div
-                  role="radiogroup"
-                  aria-labelledby="surveillance-heading"
-                  className="grid grid-cols-2 gap-3"
-                >
-                  <button
-                    role="radio"
-                    aria-checked={constantSurveillance === true}
-                    onClick={() => updateField("constantSurveillance", true)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${constantSurveillance === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
-                  >
-                    {t("trace_physical_perception")}
-                  </button>
-                  <button
-                    role="radio"
-                    aria-checked={constantSurveillance === false}
-                    onClick={() => updateField("constantSurveillance", false)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${constantSurveillance === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
-                  >
-                    {t("trace_digital_only")}
-                  </button>
-                </div>
-              </section>
-
-              <div className="pt-4 flex gap-4">
-                <button
-                  onClick={() =>
-                    dispatch({ type: "SET_PHASE", payload: "CONTEXT" })
-                  }
-                  className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
-                >
-                  {t("trace_back")}
-                </button>
-                <button
                   onClick={submit}
                   className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
                 >
-                  {t("trace_submit")}
+                  {t("context_submit")}
                 </button>
               </div>
             </div>

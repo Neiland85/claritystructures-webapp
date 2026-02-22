@@ -35,10 +35,7 @@ afterAll(() => {
   console.error = originalError;
 });
 
-function goToPhase(
-  phase: "COGNITIVE" | "CONTEXT" | "TRACE",
-  onComplete = vi.fn(),
-) {
+function goToPhase(phase: "COGNITIVE" | "CONTEXT", onComplete = vi.fn()) {
   render(<Wizard onComplete={onComplete} />);
 
   // Complete TRIAGE
@@ -50,11 +47,6 @@ function goToPhase(
 
   // COGNITIVE → CONTEXT
   fireEvent.click(screen.getByText("Siguiente Paso: Contexto"));
-
-  if (phase === "CONTEXT") return onComplete;
-
-  // CONTEXT → TRACE
-  fireEvent.click(screen.getByText("Continuar Trazado Forense"));
 
   return onComplete;
 }
@@ -240,7 +232,7 @@ describe("Wizard", () => {
   );
 
   it(
-    "should show form step progress indicator with 4 steps",
+    "should show form step progress indicator with 3 steps",
     () => {
       render(<Wizard onComplete={onComplete} />);
 
@@ -248,11 +240,10 @@ describe("Wizard", () => {
       expect(nav).toBeInTheDocument();
 
       const items = nav.querySelectorAll("li");
-      expect(items).toHaveLength(4);
+      expect(items).toHaveLength(3);
       expect(items[0].textContent).toContain("Triage");
       expect(items[1].textContent).toContain("Evaluación");
       expect(items[2].textContent).toContain("Contexto");
-      expect(items[3].textContent).toContain("Trazado");
     },
     { timeout: 10000 },
   );
@@ -402,32 +393,6 @@ describe("Wizard", () => {
     { timeout: 10000 },
   );
 
-  // --- CONTEXT → TRACE navigation ---
-
-  it(
-    "should navigate from CONTEXT to TRACE phase",
-    () => {
-      goToPhase("TRACE");
-
-      expect(
-        screen.getByText("Trazado de Narrativa Forense"),
-      ).toBeInTheDocument();
-    },
-    { timeout: 10000 },
-  );
-
-  it(
-    "should navigate back from TRACE to CONTEXT",
-    () => {
-      goToPhase("TRACE");
-
-      fireEvent.click(screen.getByText("Volver"));
-
-      expect(screen.getByText("Contexto del Incidente")).toBeInTheDocument();
-    },
-    { timeout: 10000 },
-  );
-
   // --- Full flow submission ---
 
   it(
@@ -457,10 +422,7 @@ describe("Wizard", () => {
       fireEvent.click(screen.getByText("NO TENGO ACCESO"));
       fireEvent.click(screen.getByText("SÍ, HAY TERCEROS"));
 
-      // CONTEXT → TRACE
-      fireEvent.click(screen.getByText("Continuar Trazado Forense"));
-
-      // Submit
+      // Submit from CONTEXT
       fireEvent.click(screen.getByText("Finalizar Informe Triage"));
 
       expect(handler).toHaveBeenCalledTimes(1);
@@ -496,11 +458,10 @@ describe("Wizard", () => {
         screen.getByText("Siguiente Paso: Evaluación de Contexto"),
       );
 
-      // COGNITIVE → CONTEXT (skip all) → TRACE
+      // COGNITIVE → CONTEXT (skip all) → Submit
       fireEvent.click(screen.getByText("Siguiente Paso: Contexto"));
-      fireEvent.click(screen.getByText("Continuar Trazado Forense"));
 
-      // Submit
+      // Submit directly from CONTEXT
       fireEvent.click(screen.getByText("Finalizar Informe Triage"));
 
       expect(handler).toHaveBeenCalledTimes(1);
@@ -522,7 +483,7 @@ describe("Wizard", () => {
       goToPhase("CONTEXT");
 
       const form = screen.getByRole("form");
-      expect(form).toHaveAttribute("aria-label", "Paso 3 de 4: Contexto");
+      expect(form).toHaveAttribute("aria-label", "Paso 3 de 3: Contexto");
     },
     { timeout: 10000 },
   );

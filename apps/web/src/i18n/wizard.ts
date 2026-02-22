@@ -6,7 +6,6 @@ export const wizardDict = {
     phase_triage: "Triage",
     phase_cognitive: "Evaluación",
     phase_context: "Contexto",
-    phase_trace: "Trazado",
     completed: "(completado)",
     current: "(actual)",
     step: "Paso",
@@ -79,33 +78,14 @@ export const wizardDict = {
     context_yes_third_parties: "SÍ, HAY TERCEROS",
     context_no_only_me: "NO, SOLO YO",
     context_back: "Volver",
-    context_next: "Continuar Trazado Forense",
-
-    // TRACE phase
-    trace_title: "Trazado de Narrativa Forense",
-    trace_subtitle:
-      "Última fase: detección de patrones de intrusión e ingeniería social.",
-    trace_q_whatsapp:
-      "¿Sientes que has perdido o estás perdiendo el control de tus comunicaciones (WhatsApp, Telegram, etc.)?",
-    trace_identified: "IDENTIFICADO",
-    trace_full_control: "CONTROL INTEGRAL",
-    trace_q_family:
-      "¿Sospechas que detrás de estas anomalías podrían encontrarse familiares directos o personas de tu entorno cercano?",
-    trace_close_suspect: "SOSPECHA CERCANA",
-    trace_environment_clear: "ENTORNO DESCARTADO",
-    trace_q_surveillance:
-      "¿Te sientes bajo una vigilancia constante que excede lo puramente digital (persecución, ruidos, eventos físicos)?",
-    trace_physical_perception: "PERCEPCIÓN FÍSICA",
-    trace_digital_only: "SOLO DIGITAL",
-    trace_back: "Volver",
-    trace_submit: "Finalizar Informe Triage",
+    context_next: "Siguiente Paso",
+    context_submit: "Finalizar Informe Triage",
   },
   en: {
     // Phase labels
     phase_triage: "Triage",
     phase_cognitive: "Assessment",
     phase_context: "Context",
-    phase_trace: "Tracing",
     completed: "(completed)",
     current: "(current)",
     step: "Step",
@@ -176,26 +156,8 @@ export const wizardDict = {
     context_yes_third_parties: "YES, THIRD PARTIES",
     context_no_only_me: "NO, JUST ME",
     context_back: "Back",
-    context_next: "Continue Forensic Tracing",
-
-    // TRACE phase
-    trace_title: "Forensic Narrative Tracing",
-    trace_subtitle:
-      "Final phase: detection of intrusion patterns and social engineering.",
-    trace_q_whatsapp:
-      "Do you feel you have lost or are losing control of your communications (WhatsApp, Telegram, etc.)?",
-    trace_identified: "IDENTIFIED",
-    trace_full_control: "FULL CONTROL",
-    trace_q_family:
-      "Do you suspect that direct family members or people close to you could be behind these anomalies?",
-    trace_close_suspect: "CLOSE SUSPICION",
-    trace_environment_clear: "ENVIRONMENT CLEARED",
-    trace_q_surveillance:
-      "Do you feel under constant surveillance that goes beyond the purely digital (persecution, noises, physical events)?",
-    trace_physical_perception: "PHYSICAL PERCEPTION",
-    trace_digital_only: "DIGITAL ONLY",
-    trace_back: "Back",
-    trace_submit: "Finalize Triage Report",
+    context_next: "Next Step",
+    context_submit: "Finalize Triage Report",
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 
