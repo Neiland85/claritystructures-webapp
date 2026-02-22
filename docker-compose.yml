@@ -1,6 +1,6 @@
 services:
   web:
-    image: neiland/claritystructures:v2
+    image: neiland/claritystructures:v3
     container_name: claritystructures-web
     ports:
       - "3000:3000"
