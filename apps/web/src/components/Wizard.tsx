@@ -8,12 +8,16 @@ import type {
 } from "@claritystructures/domain";
 import { decideIntake } from "@claritystructures/domain";
 import {
-  clientProfiles,
-  urgencyLevels,
-  dataSensitivityLevels,
-  estimatedIncidentStarts,
+  getClientProfiles,
+  getUrgencyLevels,
+  getDataSensitivityLevels,
+  getEstimatedIncidentStarts,
 } from "@/constants/wizardOptions";
+import { useTranslation } from "@/i18n/useTranslation";
+import { wizardDict } from "@/i18n/wizard";
+import { useLang } from "@/components/LanguageProvider";
 import AnimatedLogo from "./AnimatedLogo";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { trackEvent } from "@/lib/analytics";
 
 type Props = {
@@ -87,6 +91,13 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
 
 export default function Wizard({ onComplete }: Props) {
   const [state, dispatch] = useReducer(wizardReducer, initialState);
+  const t = useTranslation(wizardDict);
+  const lang = useLang();
+
+  const clientProfiles = getClientProfiles(lang);
+  const urgencyLevels = getUrgencyLevels(lang);
+  const dataSensitivityLevels = getDataSensitivityLevels(lang);
+  const estimatedIncidentStarts = getEstimatedIncidentStarts(lang);
 
   const {
     phase,
@@ -203,15 +214,21 @@ export default function Wizard({ onComplete }: Props) {
         : phase === "CONTEXT"
           ? 2
           : 3;
-  const phaseLabels = ["Triage", "Evaluación", "Contexto", "Trazado"];
+  const phaseLabels = [
+    t("phase_triage"),
+    t("phase_cognitive"),
+    t("phase_context"),
+    t("phase_trace"),
+  ];
 
   return (
     <div className="relative min-h-[700px] w-full max-w-4xl mx-auto dark pt-20">
-      <div className="absolute top-0 right-0 p-8 z-50">
+      <div className="absolute top-0 right-0 p-8 z-50 flex items-center gap-3">
+        <LanguageSwitcher />
         <AnimatedLogo />
       </div>
 
-      <nav aria-label="Progreso del formulario" className="sr-only">
+      <nav aria-label={t("aria_form_progress")} className="sr-only">
         <ol>
           {phaseLabels.map((label, i) => (
             <li
@@ -220,9 +237,9 @@ export default function Wizard({ onComplete }: Props) {
             >
               {label}{" "}
               {i < phaseIndex
-                ? "(completado)"
+                ? t("completed")
                 : i === phaseIndex
-                  ? "(actual)"
+                  ? t("current")
                   : ""}
             </li>
           ))}
@@ -232,16 +249,16 @@ export default function Wizard({ onComplete }: Props) {
       <div
         className="glass p-6 md:p-12 rounded-3xl shadow-2xl animate-in backdrop-blur-3xl max-w-2xl mx-auto"
         role="form"
-        aria-label={`Paso ${phaseIndex + 1} de ${phaseLabels.length}: ${phaseLabels[phaseIndex]}`}
+        aria-label={`${t("step")} ${phaseIndex + 1} ${t("of")} ${phaseLabels.length}: ${phaseLabels[phaseIndex]}`}
       >
         {phase === "TRIAGE" && (
           <div className="space-y-6 md:space-y-10">
             <header className="space-y-1">
               <h1 className="text-xl md:text-3xl font-light tracking-tight text-white/95 leading-tight">
-                Triage de Emergencia Técnica
+                {t("triage_title")}
               </h1>
               <p className="text-xs md:text-sm text-white/40 font-light">
-                Evaluación inicial para clasificación pericial y legal.
+                {t("triage_subtitle")}
               </p>
             </header>
 
@@ -253,7 +270,7 @@ export default function Wizard({ onComplete }: Props) {
                 id="client-profile-heading"
                 className="text-xs uppercase tracking-widest text-white/30 font-semibold"
               >
-                Situación Actual
+                {t("triage_section_profile")}
               </h2>
               <div
                 role="radiogroup"
@@ -285,7 +302,7 @@ export default function Wizard({ onComplete }: Props) {
                 id="urgency-heading"
                 className="text-xs uppercase tracking-widest text-white/30 font-semibold"
               >
-                Nivel de Urgencia
+                {t("triage_section_urgency")}
               </h2>
               <div
                 role="radiogroup"
@@ -311,16 +328,16 @@ export default function Wizard({ onComplete }: Props) {
             </section>
 
             <section
-              aria-label="Evaluación de riesgos"
+              aria-label={t("triage_physical_integrity")}
               className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5"
             >
               <fieldset className="space-y-3">
                 <legend className="text-xs text-white/40 text-center block">
-                  Integridad Física
+                  {t("triage_physical_integrity")}
                 </legend>
                 <div
                   role="radiogroup"
-                  aria-label="Integridad Física"
+                  aria-label={t("triage_physical_integrity")}
                   className="flex gap-2"
                 >
                   <button
@@ -329,7 +346,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("physicalSafetyRisk", true)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
-                    AMENAZA REAL
+                    {t("triage_threat_real")}
                   </button>
                   <button
                     role="radio"
@@ -337,17 +354,17 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("physicalSafetyRisk", false)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
-                    ZONA SEGURA
+                    {t("triage_safe_zone")}
                   </button>
                 </div>
               </fieldset>
               <fieldset className="space-y-3">
                 <legend className="text-xs text-white/40 text-center block">
-                  Activos Financieros
+                  {t("triage_financial_assets")}
                 </legend>
                 <div
                   role="radiogroup"
-                  aria-label="Activos Financieros"
+                  aria-label={t("triage_financial_assets")}
                   className="flex gap-2"
                 >
                   <button
@@ -356,7 +373,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("financialAssetRisk", true)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === true ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
-                    EN RIESGO
+                    {t("triage_at_risk")}
                   </button>
                   <button
                     role="radio"
@@ -364,7 +381,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("financialAssetRisk", false)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
-                    PROTEGIDOS
+                    {t("triage_protected")}
                   </button>
                 </div>
               </fieldset>
@@ -382,7 +399,7 @@ export default function Wizard({ onComplete }: Props) {
                   : "bg-white/5 text-white/20 cursor-not-allowed border border-white/5"
               }`}
             >
-              Siguiente Paso: Evaluación de Contexto
+              {t("triage_next")}
             </button>
           </div>
         )}
@@ -391,11 +408,10 @@ export default function Wizard({ onComplete }: Props) {
           <div className="space-y-8 animate-in">
             <header>
               <h1 className="text-2xl font-light tracking-tight text-white/90">
-                Evaluación de Estabilidad
+                {t("cognitive_title")}
               </h1>
               <p className="text-sm text-white/40 mt-1 font-light leading-relaxed">
-                Necesitamos entender tu percepción sensorial para ajustar el
-                motor de triage.
+                {t("cognitive_subtitle")}
               </p>
             </header>
 
@@ -405,8 +421,7 @@ export default function Wizard({ onComplete }: Props) {
                 className="space-y-3"
               >
                 <h2 id="omnipotence-heading" className="text-sm text-white/70">
-                  ¿Sientes que el atacante tiene capacidades omnipresentes (te
-                  vigila en todo momento)?
+                  {t("cognitive_q_omnipotence")}
                 </h2>
                 <div
                   role="radiogroup"
@@ -419,7 +434,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("perceivedOmnipotence", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${perceivedOmnipotence === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    VIGILANCIA TOTAL
+                    {t("cognitive_total_surveillance")}
                   </button>
                   <button
                     role="radio"
@@ -427,7 +442,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("perceivedOmnipotence", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${perceivedOmnipotence === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    TECNOLÓGICO RESTRICTO
+                    {t("cognitive_restricted_tech")}
                   </button>
                 </div>
               </section>
@@ -437,8 +452,7 @@ export default function Wizard({ onComplete }: Props) {
                 className="space-y-3"
               >
                 <h2 id="verifiable-heading" className="text-sm text-white/70">
-                  ¿Los eventos reportados pueden ser contrastados con pruebas
-                  físicas (logs, fotos)?
+                  {t("cognitive_q_verifiable")}
                 </h2>
                 <div
                   role="radiogroup"
@@ -451,7 +465,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("isVerifiable", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${isVerifiable === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    PRUEBAS MATERIALES
+                    {t("cognitive_material_proof")}
                   </button>
                   <button
                     role="radio"
@@ -459,7 +473,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("isVerifiable", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${isVerifiable === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    SOSPECHAS INDICIARIAS
+                    {t("cognitive_circumstantial")}
                   </button>
                 </div>
               </section>
@@ -469,8 +483,7 @@ export default function Wizard({ onComplete }: Props) {
                 className="space-y-3"
               >
                 <h2 id="distortion-heading" className="text-sm text-white/70">
-                  ¿Te sientes capaz de narrar los hechos cronológicamente de
-                  forma clara?
+                  {t("cognitive_q_distortion")}
                 </h2>
                 <div
                   role="radiogroup"
@@ -483,7 +496,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("distortionIndicator", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${distortionIndicator === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    NARRACIÓN CLARA
+                    {t("cognitive_clear_narrative")}
                   </button>
                   <button
                     role="radio"
@@ -491,7 +504,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("distortionIndicator", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${distortionIndicator === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    CONFUSIÓN / MEMORIA
+                    {t("cognitive_confusion_memory")}
                   </button>
                 </div>
               </section>
@@ -503,7 +516,7 @@ export default function Wizard({ onComplete }: Props) {
                   }
                   className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
                 >
-                  Volver
+                  {t("cognitive_back")}
                 </button>
                 <button
                   onClick={() =>
@@ -511,7 +524,7 @@ export default function Wizard({ onComplete }: Props) {
                   }
                   className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
                 >
-                  Siguiente Paso: Contexto
+                  {t("cognitive_next")}
                 </button>
               </div>
             </div>
@@ -522,17 +535,17 @@ export default function Wizard({ onComplete }: Props) {
           <div className="space-y-8 animate-in">
             <header>
               <h1 className="text-2xl font-light tracking-tight text-white/90">
-                Contexto del Incidente
+                {t("context_title")}
               </h1>
               <p className="text-sm text-white/40 mt-1 font-light leading-relaxed">
-                Información adicional para clasificar la exposición y alcance.
+                {t("context_subtitle")}
               </p>
             </header>
 
             <div className="space-y-8">
               <section aria-labelledby="ongoing-heading" className="space-y-3">
                 <h2 id="ongoing-heading" className="text-sm text-white/70">
-                  ¿El incidente sigue activo en este momento?
+                  {t("context_q_ongoing")}
                 </h2>
                 <div
                   role="radiogroup"
@@ -545,7 +558,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("isOngoing", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${isOngoing === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    ACTIVO AHORA
+                    {t("context_active_now")}
                   </button>
                   <button
                     role="radio"
@@ -553,7 +566,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("isOngoing", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${isOngoing === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    YA FINALIZADO
+                    {t("context_finished")}
                   </button>
                 </div>
               </section>
@@ -566,7 +579,7 @@ export default function Wizard({ onComplete }: Props) {
                   id="incident-start-heading"
                   className="text-sm text-white/70"
                 >
-                  ¿Cuándo comenzó aproximadamente el incidente?
+                  {t("context_q_start")}
                 </h2>
                 <div
                   role="radiogroup"
@@ -594,7 +607,7 @@ export default function Wizard({ onComplete }: Props) {
                 className="space-y-3"
               >
                 <h2 id="sensitivity-heading" className="text-sm text-white/70">
-                  ¿Qué nivel de sensibilidad tienen los datos afectados?
+                  {t("context_q_sensitivity")}
                 </h2>
                 <div
                   role="radiogroup"
@@ -630,7 +643,7 @@ export default function Wizard({ onComplete }: Props) {
                   id="device-access-heading"
                   className="text-sm text-white/70"
                 >
-                  ¿Tienes acceso físico a los dispositivos afectados?
+                  {t("context_q_device_access")}
                 </h2>
                 <div
                   role="radiogroup"
@@ -643,7 +656,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("hasAccessToDevices", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${hasAccessToDevices === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    SÍ, TENGO ACCESO
+                    {t("context_has_access")}
                   </button>
                   <button
                     role="radio"
@@ -651,7 +664,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("hasAccessToDevices", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${hasAccessToDevices === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    NO TENGO ACCESO
+                    {t("context_no_access")}
                   </button>
                 </div>
               </section>
@@ -664,7 +677,7 @@ export default function Wizard({ onComplete }: Props) {
                   id="third-parties-heading"
                   className="text-sm text-white/70"
                 >
-                  ¿Hay terceros involucrados o afectados por el incidente?
+                  {t("context_q_third_parties")}
                 </h2>
                 <div
                   role="radiogroup"
@@ -677,7 +690,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("thirdPartiesInvolved", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${thirdPartiesInvolved === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    SÍ, HAY TERCEROS
+                    {t("context_yes_third_parties")}
                   </button>
                   <button
                     role="radio"
@@ -685,7 +698,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("thirdPartiesInvolved", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${thirdPartiesInvolved === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    NO, SOLO YO
+                    {t("context_no_only_me")}
                   </button>
                 </div>
               </section>
@@ -697,7 +710,7 @@ export default function Wizard({ onComplete }: Props) {
                   }
                   className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
                 >
-                  Volver
+                  {t("context_back")}
                 </button>
                 <button
                   onClick={() =>
@@ -705,7 +718,7 @@ export default function Wizard({ onComplete }: Props) {
                   }
                   className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
                 >
-                  Continuar Trazado Forense
+                  {t("context_next")}
                 </button>
               </div>
             </div>
@@ -716,11 +729,10 @@ export default function Wizard({ onComplete }: Props) {
           <div className="space-y-8 animate-in">
             <header>
               <h1 className="text-2xl font-light tracking-tight text-white/90">
-                Trazado de Narrativa Forense
+                {t("trace_title")}
               </h1>
               <p className="text-sm text-white/40 mt-1 font-light leading-relaxed">
-                Última fase: detección de patrones de intrusión e ingeniería
-                social.
+                {t("trace_subtitle")}
               </p>
             </header>
 
@@ -730,8 +742,7 @@ export default function Wizard({ onComplete }: Props) {
                   id="whatsapp-heading"
                   className="text-sm text-white/70 font-light"
                 >
-                  ¿Sientes que has perdido o estás perdiendo el control de tus
-                  comunicaciones (WhatsApp, Telegram, etc.)?
+                  {t("trace_q_whatsapp")}
                 </h2>
                 <div
                   role="radiogroup"
@@ -744,7 +755,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("whatsappControl", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${whatsappControl === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    IDENTIFICADO
+                    {t("trace_identified")}
                   </button>
                   <button
                     role="radio"
@@ -752,7 +763,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("whatsappControl", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${whatsappControl === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    CONTROL INTEGRAL
+                    {t("trace_full_control")}
                   </button>
                 </div>
               </section>
@@ -762,8 +773,7 @@ export default function Wizard({ onComplete }: Props) {
                   id="family-heading"
                   className="text-sm text-white/70 font-light"
                 >
-                  ¿Sospechas que detrás de estas anomalías podrían encontrarse
-                  familiares directos o personas de tu entorno cercano?
+                  {t("trace_q_family")}
                 </h2>
                 <div
                   role="radiogroup"
@@ -776,7 +786,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("familySuspect", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${familySuspect === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    SOSPECHA CERCANA
+                    {t("trace_close_suspect")}
                   </button>
                   <button
                     role="radio"
@@ -784,7 +794,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("familySuspect", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${familySuspect === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    ENTORNO DESCARTADO
+                    {t("trace_environment_clear")}
                   </button>
                 </div>
               </section>
@@ -797,8 +807,7 @@ export default function Wizard({ onComplete }: Props) {
                   id="surveillance-heading"
                   className="text-sm text-white/70 font-light"
                 >
-                  ¿Te sientes bajo una vigilancia constante que excede lo
-                  puramente digital (persecución, ruidos, eventos físicos)?
+                  {t("trace_q_surveillance")}
                 </h2>
                 <div
                   role="radiogroup"
@@ -811,7 +820,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("constantSurveillance", true)}
                     className={`py-3 rounded-xl border transition-all text-xs ${constantSurveillance === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    PERCEPCIÓN FÍSICA
+                    {t("trace_physical_perception")}
                   </button>
                   <button
                     role="radio"
@@ -819,7 +828,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("constantSurveillance", false)}
                     className={`py-3 rounded-xl border transition-all text-xs ${constantSurveillance === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
-                    SOLO DIGITAL
+                    {t("trace_digital_only")}
                   </button>
                 </div>
               </section>
@@ -831,13 +840,13 @@ export default function Wizard({ onComplete }: Props) {
                   }
                   className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
                 >
-                  Volver
+                  {t("trace_back")}
                 </button>
                 <button
                   onClick={submit}
                   className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
                 >
-                  Finalizar Informe Triage
+                  {t("trace_submit")}
                 </button>
               </div>
             </div>

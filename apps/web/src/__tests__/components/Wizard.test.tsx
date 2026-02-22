@@ -12,6 +12,11 @@ vi.mock("@/components/AnimatedLogo", () => ({
   default: () => <div data-testid="animated-logo" />,
 }));
 
+// Mock LanguageSwitcher (uses usePathname from next/navigation)
+vi.mock("@/components/LanguageSwitcher", () => ({
+  default: () => <div data-testid="language-switcher" />,
+}));
+
 // Suppress ReactDOM.render warnings in tests
 const originalError = console.error;
 beforeEach(() => {
