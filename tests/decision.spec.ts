@@ -63,7 +63,7 @@ test("court-related legal risk yields critical priority with legal route", () =>
 
   assert.equal(result.route, "/contact/legal");
   assert.equal(result.priority, "critical");
-  assert.deepEqual(result.flags, ["active_procedure"]);
+  assert.deepEqual(result.flags, ["active_procedure", "legal_risk"]);
   assert.equal(result.actionCode, "IMMEDIATE_HUMAN_CONTACT");
 });
 
