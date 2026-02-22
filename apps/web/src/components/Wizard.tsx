@@ -329,7 +329,7 @@ export default function Wizard({ onComplete }: Props) {
 
             <section
               aria-label={t("triage_physical_integrity")}
-              className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/5"
             >
               <fieldset className="space-y-3">
                 <legend className="text-xs text-white/40 text-center block">
@@ -382,6 +382,60 @@ export default function Wizard({ onComplete }: Props) {
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
                     {t("triage_protected")}
+                  </button>
+                </div>
+              </fieldset>
+              <fieldset className="space-y-3">
+                <legend className="text-xs text-white/40 text-center block">
+                  {t("triage_credential_access")}
+                </legend>
+                <div
+                  role="radiogroup"
+                  aria-label={t("triage_credential_access")}
+                  className="flex gap-2"
+                >
+                  <button
+                    role="radio"
+                    aria-checked={attackerHasPasswords === true}
+                    onClick={() => updateField("attackerHasPasswords", true)}
+                    className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${attackerHasPasswords === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
+                  >
+                    {t("triage_passwords_compromised")}
+                  </button>
+                  <button
+                    role="radio"
+                    aria-checked={attackerHasPasswords === false}
+                    onClick={() => updateField("attackerHasPasswords", false)}
+                    className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${attackerHasPasswords === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
+                  >
+                    {t("triage_passwords_safe")}
+                  </button>
+                </div>
+              </fieldset>
+              <fieldset className="space-y-3">
+                <legend className="text-xs text-white/40 text-center block">
+                  {t("triage_evidence_volatility")}
+                </legend>
+                <div
+                  role="radiogroup"
+                  aria-label={t("triage_evidence_volatility")}
+                  className="flex gap-2"
+                >
+                  <button
+                    role="radio"
+                    aria-checked={evidenceIsAutoDeleted === true}
+                    onClick={() => updateField("evidenceIsAutoDeleted", true)}
+                    className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${evidenceIsAutoDeleted === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
+                  >
+                    {t("triage_auto_deleting")}
+                  </button>
+                  <button
+                    role="radio"
+                    aria-checked={evidenceIsAutoDeleted === false}
+                    onClick={() => updateField("evidenceIsAutoDeleted", false)}
+                    className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${evidenceIsAutoDeleted === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
+                  >
+                    {t("triage_evidence_stable")}
                   </button>
                 </div>
               </fieldset>
@@ -505,6 +559,79 @@ export default function Wizard({ onComplete }: Props) {
                     className={`py-3 rounded-xl border transition-all text-xs ${distortionIndicator === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
                   >
                     {t("cognitive_confusion_memory")}
+                  </button>
+                </div>
+              </section>
+
+              <section
+                aria-labelledby="emotional-distress-heading"
+                className="space-y-3"
+              >
+                <h2
+                  id="emotional-distress-heading"
+                  className="text-sm text-white/70"
+                >
+                  {t("cognitive_q_emotional_distress")}
+                </h2>
+                <div
+                  role="radiogroup"
+                  aria-labelledby="emotional-distress-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
+                  <button
+                    role="radio"
+                    aria-checked={hasEmotionalDistress === true}
+                    onClick={() => updateField("hasEmotionalDistress", true)}
+                    className={`py-3 rounded-xl border transition-all text-xs ${hasEmotionalDistress === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                  >
+                    {t("cognitive_emotional_yes")}
+                  </button>
+                  <button
+                    role="radio"
+                    aria-checked={hasEmotionalDistress === false}
+                    onClick={() => updateField("hasEmotionalDistress", false)}
+                    className={`py-3 rounded-xl border transition-all text-xs ${hasEmotionalDistress === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                  >
+                    {t("cognitive_emotional_no")}
+                  </button>
+                </div>
+              </section>
+
+              <section
+                aria-labelledby="shock-level-heading"
+                className="space-y-3"
+              >
+                <h2 id="shock-level-heading" className="text-sm text-white/70">
+                  {t("cognitive_q_shock_level")}
+                </h2>
+                <div
+                  role="radiogroup"
+                  aria-labelledby="shock-level-heading"
+                  className="flex gap-2"
+                >
+                  <button
+                    role="radio"
+                    aria-checked={shockLevel === "low"}
+                    onClick={() => updateField("shockLevel", "low")}
+                    className={`flex-1 py-3 rounded-xl border transition-all text-xs ${shockLevel === "low" ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                  >
+                    {t("cognitive_shock_low")}
+                  </button>
+                  <button
+                    role="radio"
+                    aria-checked={shockLevel === "medium"}
+                    onClick={() => updateField("shockLevel", "medium")}
+                    className={`flex-1 py-3 rounded-xl border transition-all text-xs ${shockLevel === "medium" ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                  >
+                    {t("cognitive_shock_medium")}
+                  </button>
+                  <button
+                    role="radio"
+                    aria-checked={shockLevel === "high"}
+                    onClick={() => updateField("shockLevel", "high")}
+                    className={`flex-1 py-3 rounded-xl border transition-all text-xs ${shockLevel === "high" ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                  >
+                    {t("cognitive_shock_high")}
                   </button>
                 </div>
               </section>

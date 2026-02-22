@@ -174,6 +174,58 @@ describe("Wizard", () => {
   );
 
   it(
+    "should set attackerHasPasswords via radio buttons",
+    () => {
+      render(<Wizard onComplete={onComplete} />);
+
+      const btn = screen.getByText("CONTRASEÑAS EXPUESTAS");
+      fireEvent.click(btn);
+
+      expect(btn.closest("button")).toHaveAttribute("aria-checked", "true");
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should set evidenceIsAutoDeleted via radio buttons",
+    () => {
+      render(<Wizard onComplete={onComplete} />);
+
+      const btn = screen.getByText("AUTOBORRADO ACTIVO");
+      fireEvent.click(btn);
+
+      expect(btn.closest("button")).toHaveAttribute("aria-checked", "true");
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should set hasEmotionalDistress in COGNITIVE phase",
+    () => {
+      goToPhase("COGNITIVE");
+
+      const btn = screen.getByText("ANGUSTIA SEVERA");
+      fireEvent.click(btn);
+
+      expect(btn.closest("button")).toHaveAttribute("aria-checked", "true");
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should set shockLevel in COGNITIVE phase",
+    () => {
+      goToPhase("COGNITIVE");
+
+      const btn = screen.getByText("SEVERO");
+      fireEvent.click(btn);
+
+      expect(btn.closest("button")).toHaveAttribute("aria-checked", "true");
+    },
+    { timeout: 10000 },
+  );
+
+  it(
     "should have proper ARIA attributes on radiogroups",
     () => {
       render(<Wizard onComplete={onComplete} />);
@@ -379,19 +431,23 @@ describe("Wizard", () => {
   // --- Full flow submission ---
 
   it(
-    "should call onComplete with V2 fields when CONTEXT answers are given",
+    "should call onComplete with all fields when fully answered",
     () => {
       const handler = vi.fn();
       render(<Wizard onComplete={handler} />);
 
-      // TRIAGE
+      // TRIAGE — profile, urgency, and all risk toggles
       fireEvent.click(screen.getByText("Particular afectado directamente"));
       fireEvent.click(screen.getByText("Consulta informativa / preventiva"));
+      fireEvent.click(screen.getByText("CONTRASEÑAS EXPUESTAS"));
+      fireEvent.click(screen.getByText("AUTOBORRADO ACTIVO"));
       fireEvent.click(
         screen.getByText("Siguiente Paso: Evaluación de Contexto"),
       );
 
-      // COGNITIVE → CONTEXT
+      // COGNITIVE — emotional distress + shock level
+      fireEvent.click(screen.getByText("ANGUSTIA SEVERA"));
+      fireEvent.click(screen.getByText("SEVERO"));
       fireEvent.click(screen.getByText("Siguiente Paso: Contexto"));
 
       // Fill CONTEXT fields
@@ -411,6 +467,13 @@ describe("Wizard", () => {
       const result = handler.mock.calls[0][0];
       expect(result.clientProfile).toBe("private_individual");
       expect(result.urgency).toBe("informational");
+      // New TRIAGE fields
+      expect(result.attackerHasPasswords).toBe(true);
+      expect(result.evidenceIsAutoDeleted).toBe(true);
+      // New COGNITIVE fields
+      expect(result.hasEmotionalDistress).toBe(true);
+      expect(result.cognitiveProfile.emotionalShockLevel).toBe("high");
+      // V2 CONTEXT fields
       expect(result.isOngoing).toBe(true);
       expect(result.estimatedIncidentStart).toBe("weeks");
       expect(result.dataSensitivityLevel).toBe("high");

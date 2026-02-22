@@ -89,6 +89,10 @@ describe("Wizard i18n — English locale", () => {
     expect(screen.getByText("SAFE ZONE")).toBeInTheDocument();
     expect(screen.getByText("AT RISK")).toBeInTheDocument();
     expect(screen.getByText("PROTECTED")).toBeInTheDocument();
+    expect(screen.getByText("PASSWORDS EXPOSED")).toBeInTheDocument();
+    expect(screen.getByText("CREDENTIALS SAFE")).toBeInTheDocument();
+    expect(screen.getByText("AUTO-DELETING ACTIVE")).toBeInTheDocument();
+    expect(screen.getByText("EVIDENCE STABLE")).toBeInTheDocument();
   });
 
   it("renders English next button", () => {
@@ -121,6 +125,12 @@ describe("Wizard i18n — English locale", () => {
     expect(screen.getByText("Stability Assessment")).toBeInTheDocument();
     expect(screen.getByText("TOTAL SURVEILLANCE")).toBeInTheDocument();
     expect(screen.getByText("RESTRICTED TECH")).toBeInTheDocument();
+    // New emotional distress + shock level fields
+    expect(screen.getByText("SEVERE DISTRESS")).toBeInTheDocument();
+    expect(screen.getByText("EMOTIONALLY STABLE")).toBeInTheDocument();
+    expect(screen.getByText("LOW")).toBeInTheDocument();
+    expect(screen.getByText("MODERATE")).toBeInTheDocument();
+    expect(screen.getByText("SEVERE")).toBeInTheDocument();
   });
 
   it("navigates COGNITIVE → CONTEXT in English", () => {
@@ -146,12 +156,16 @@ describe("Wizard i18n — English locale", () => {
     const handler = vi.fn();
     renderEnglish(handler);
 
-    // TRIAGE
+    // TRIAGE — including new credential/evidence toggles
     fireEvent.click(screen.getByText("Directly affected individual"));
     fireEvent.click(screen.getByText("Immediate legal risk"));
+    fireEvent.click(screen.getByText("PASSWORDS EXPOSED"));
+    fireEvent.click(screen.getByText("AUTO-DELETING ACTIVE"));
     fireEvent.click(screen.getByText("Next Step: Context Assessment"));
 
-    // COGNITIVE → CONTEXT
+    // COGNITIVE — including emotional distress + shock
+    fireEvent.click(screen.getByText("SEVERE DISTRESS"));
+    fireEvent.click(screen.getByText("SEVERE"));
     fireEvent.click(screen.getByText("Next Step: Context"));
 
     // Fill CONTEXT

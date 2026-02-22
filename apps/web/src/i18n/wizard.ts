@@ -24,9 +24,24 @@ export const wizardDict = {
     triage_safe_zone: "ZONA SEGURA",
     triage_at_risk: "EN RIESGO",
     triage_protected: "PROTEGIDOS",
+    triage_credential_access: "Credenciales Comprometidas",
+    triage_passwords_compromised: "CONTRASEÑAS EXPUESTAS",
+    triage_passwords_safe: "CREDENCIALES SEGURAS",
+    triage_evidence_volatility: "Volatilidad de Pruebas",
+    triage_auto_deleting: "AUTOBORRADO ACTIVO",
+    triage_evidence_stable: "PRUEBAS ESTABLES",
     triage_next: "Siguiente Paso: Evaluación de Contexto",
 
     // COGNITIVE phase
+    cognitive_q_emotional_distress:
+      "¿Estás experimentando angustia emocional significativa a causa de esta situación?",
+    cognitive_emotional_yes: "ANGUSTIA SEVERA",
+    cognitive_emotional_no: "ESTABLE EMOCIONALMENTE",
+    cognitive_q_shock_level:
+      "¿Cuál es tu nivel actual de impacto emocional o shock?",
+    cognitive_shock_low: "BAJO",
+    cognitive_shock_medium: "MODERADO",
+    cognitive_shock_high: "SEVERO",
     cognitive_title: "Evaluación de Estabilidad",
     cognitive_subtitle:
       "Necesitamos entender tu percepción sensorial para ajustar el motor de triage.",
@@ -108,9 +123,24 @@ export const wizardDict = {
     triage_safe_zone: "SAFE ZONE",
     triage_at_risk: "AT RISK",
     triage_protected: "PROTECTED",
+    triage_credential_access: "Compromised Credentials",
+    triage_passwords_compromised: "PASSWORDS EXPOSED",
+    triage_passwords_safe: "CREDENTIALS SAFE",
+    triage_evidence_volatility: "Evidence Volatility",
+    triage_auto_deleting: "AUTO-DELETING ACTIVE",
+    triage_evidence_stable: "EVIDENCE STABLE",
     triage_next: "Next Step: Context Assessment",
 
     // COGNITIVE phase
+    cognitive_q_emotional_distress:
+      "Are you experiencing significant emotional distress because of this situation?",
+    cognitive_emotional_yes: "SEVERE DISTRESS",
+    cognitive_emotional_no: "EMOTIONALLY STABLE",
+    cognitive_q_shock_level:
+      "What is your current level of emotional impact or shock?",
+    cognitive_shock_low: "LOW",
+    cognitive_shock_medium: "MODERATE",
+    cognitive_shock_high: "SEVERE",
     cognitive_title: "Stability Assessment",
     cognitive_subtitle:
       "We need to understand your sensory perception to calibrate the triage engine.",
