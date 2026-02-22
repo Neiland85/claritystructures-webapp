@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate --config=../../prisma.config.ts && next build",
+    "start": "next start",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

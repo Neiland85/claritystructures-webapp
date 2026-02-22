@@ -20,6 +20,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "lint:fix": "eslint --fix .",
+    "start": "pnpm --filter @claritystructures/web run start",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"
   },
