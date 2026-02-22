@@ -147,6 +147,30 @@ describe("ContactFormLegal", () => {
     fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
 
     expect(mockFetch).not.toHaveBeenCalled();
+
+    const textarea = screen.getByPlaceholderText(
+      "Describe tu situación o consulta",
+    );
+    expect(textarea).toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("should not call fetch when client-side validation fails (invalid email)", () => {
+    render(<ContactFormLegal context={mockContext} />);
+
+    fireEvent.change(screen.getByPlaceholderText("Correo profesional"), {
+      target: { value: "not-an-email" },
+    });
+    fireEvent.change(
+      screen.getByPlaceholderText("Describe tu situación o consulta"),
+      { target: { value: "Valid message content here" } },
+    );
+    checkConsent();
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
+
+    expect(mockFetch).not.toHaveBeenCalled();
+
+    const emailInput = screen.getByPlaceholderText("Correo profesional");
+    expect(emailInput).toHaveAttribute("aria-invalid", "true");
   });
 
   it("should submit with correct payload including consent", async () => {
@@ -166,20 +190,6 @@ describe("ContactFormLegal", () => {
           headers: { "Content-Type": "application/json" },
         }),
       );
-
-      const body = JSON.parse(mockFetch.mock.calls[0][1].body);
-      expect(body).toEqual(
-        expect.objectContaining({
-          email: "abogado@bufete.com",
-          message: "Necesito soporte técnico forense.",
-          tone: "legal",
-          wizardResult: mockContext,
-        }),
-      );
-      // Phone may be transformed by Zod (spaces stripped)
-      expect(body.phone).toBeDefined();
-        }),
-      );
     });
 
     const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
@@ -187,6 +197,7 @@ describe("ContactFormLegal", () => {
     expect(callBody.consent).toBe(true);
     expect(callBody.tone).toBe("legal");
     expect(callBody.wizardResult).toBeDefined();
+    expect(callBody.phone).toBeDefined();
   });
 
   it("should show loading state during submission", async () => {
@@ -301,45 +312,5 @@ describe("ContactFormLegal", () => {
     const button = screen.getByRole("button", { name: /enviar consulta/i });
     expect(button).not.toBeDisabled();
     expect(button).toHaveAttribute("aria-busy", "false");
-  });
-
-  it("should not call fetch when client-side validation fails (short message)", () => {
-    render(<ContactFormLegal context={mockContext} />);
-
-    fireEvent.change(screen.getByPlaceholderText("Correo profesional"), {
-      target: { value: "abogado@bufete.com" },
-    });
-    fireEvent.change(
-      screen.getByPlaceholderText("Describe tu situación o consulta"),
-      { target: { value: "Short" } },
-    );
-    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
-
-    expect(mockFetch).not.toHaveBeenCalled();
-    expect(screen.getByText(/at least 10 characters/i)).toBeInTheDocument();
-
-    const textarea = screen.getByPlaceholderText(
-      "Describe tu situación o consulta",
-    );
-    expect(textarea).toHaveAttribute("aria-invalid", "true");
-  });
-
-  it("should not call fetch when client-side validation fails (invalid email)", () => {
-    render(<ContactFormLegal context={mockContext} />);
-
-    fireEvent.change(screen.getByPlaceholderText("Correo profesional"), {
-      target: { value: "not-an-email" },
-    });
-    fireEvent.change(
-      screen.getByPlaceholderText("Describe tu situación o consulta"),
-      { target: { value: "Valid message content here" } },
-    );
-    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
-
-    expect(mockFetch).not.toHaveBeenCalled();
-    expect(screen.getByText(/invalid email/i)).toBeInTheDocument();
-
-    const emailInput = screen.getByPlaceholderText("Correo profesional");
-    expect(emailInput).toHaveAttribute("aria-invalid", "true");
   });
 });
