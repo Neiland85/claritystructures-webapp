@@ -625,7 +625,7 @@ describe("Wizard", () => {
   );
 
   it(
-    "should use default values when DETAILS fields are not filled",
+    "should use default values for optional DETAILS fields",
     () => {
       const handler = vi.fn();
       render(<Wizard onComplete={handler} />);
@@ -641,12 +641,16 @@ describe("Wizard", () => {
       fireEvent.click(screen.getByText("Siguiente Paso: Contexto"));
       fireEvent.click(screen.getByText("Siguiente Paso: Detalles"));
 
-      // Submit with defaults
+      // Select only required fields (incident + objective)
+      fireEvent.click(screen.getByText("Acoso / hostigamiento"));
+      fireEvent.click(screen.getByText("Documentar / preservar pruebas"));
+
+      // Submit
       fireEvent.click(screen.getByText("Finalizar Informe Triage"));
 
       expect(handler).toHaveBeenCalledTimes(1);
       const result = handler.mock.calls[0][0];
-      expect(result.incident).toBe("unspecified");
+      expect(result.incident).toBe("harassment");
       expect(result.devices).toBe(0);
       expect(result.actionsTaken).toEqual([]);
       expect(result.evidenceSources).toEqual([]);
@@ -673,6 +677,94 @@ describe("Wizard", () => {
 
       const form = screen.getByRole("form");
       expect(form).toHaveAttribute("aria-label", "Paso 4 de 4: Detalles");
+    },
+    { timeout: 10000 },
+  );
+
+  // --- UX polish: progress bar, disabled submit, submitting state ---
+
+  it(
+    "should render visual progress bar with 4 segments",
+    () => {
+      const { container } = render(<Wizard onComplete={onComplete} />);
+
+      // Progress bar is aria-hidden, find the container with 4 segments
+      const progressBar = container.querySelector("[aria-hidden='true']");
+      expect(progressBar).toBeInTheDocument();
+
+      const segments = progressBar!.querySelectorAll("div");
+      expect(segments).toHaveLength(4);
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should highlight correct progress segments per phase",
+    () => {
+      const { container } = render(<Wizard onComplete={onComplete} />);
+
+      const progressBar = container.querySelector("[aria-hidden='true']");
+      const segments = progressBar!.querySelectorAll("div");
+
+      // TRIAGE = index 0 → first segment lit, rest dim
+      expect(segments[0].className).toContain("bg-white/60");
+      expect(segments[1].className).toContain("bg-white/10");
+      expect(segments[2].className).toContain("bg-white/10");
+      expect(segments[3].className).toContain("bg-white/10");
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should disable submit button when incident and objective are not selected",
+    () => {
+      goToPhase("DETAILS");
+
+      const submitBtn = screen.getByText("Finalizar Informe Triage");
+      expect(submitBtn).toBeDisabled();
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should enable submit button when incident and objective are selected",
+    () => {
+      goToPhase("DETAILS");
+
+      fireEvent.click(screen.getByText("Acoso / hostigamiento"));
+      fireEvent.click(screen.getByText("Documentar / preservar pruebas"));
+
+      const submitBtn = screen.getByText("Finalizar Informe Triage");
+      expect(submitBtn).not.toBeDisabled();
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should show submitting text after submit is clicked",
+    () => {
+      // Use a handler that never resolves to keep isSubmitting=true
+      const handler = vi.fn();
+      render(<Wizard onComplete={handler} />);
+
+      // Navigate to DETAILS
+      fireEvent.click(screen.getByText("Particular afectado directamente"));
+      fireEvent.click(screen.getByText("Consulta informativa / preventiva"));
+      fireEvent.click(
+        screen.getByText("Siguiente Paso: Evaluación de Contexto"),
+      );
+      fireEvent.click(screen.getByText("Siguiente Paso: Contexto"));
+      fireEvent.click(screen.getByText("Siguiente Paso: Detalles"));
+
+      // Select required fields
+      fireEvent.click(screen.getByText("Acoso / hostigamiento"));
+      fireEvent.click(screen.getByText("Documentar / preservar pruebas"));
+
+      // Submit
+      fireEvent.click(screen.getByText("Finalizar Informe Triage"));
+
+      // After submitting, button should show submitting text
+      expect(screen.getByText("Procesando...")).toBeInTheDocument();
     },
     { timeout: 10000 },
   );

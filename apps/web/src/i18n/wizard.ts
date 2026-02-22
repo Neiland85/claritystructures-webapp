@@ -94,6 +94,7 @@ export const wizardDict = {
     details_q_objective: "¿Cuál es tu objetivo principal?",
     details_back: "Volver",
     details_submit: "Finalizar Informe Triage",
+    details_submitting: "Procesando...",
   },
   en: {
     // Phase labels
@@ -186,6 +187,7 @@ export const wizardDict = {
     details_q_objective: "What is your primary objective?",
     details_back: "Back",
     details_submit: "Finalize Triage Report",
+    details_submitting: "Processing...",
   },
 } as const satisfies Record<Lang, Record<string, string>>;
 

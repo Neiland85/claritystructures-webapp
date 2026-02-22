@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, useEffect } from "react";
+import { useReducer, useEffect, useState, useRef } from "react";
 import type {
   WizardResult,
   ClientProfile,
@@ -141,6 +141,8 @@ export default function Wizard({ onComplete }: Props) {
   } = state;
 
   const isStep1Complete = clientProfile && urgency;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigationDirection = useRef<"forward" | "back">("forward");
 
   useEffect(() => {
     trackEvent({
@@ -149,6 +151,11 @@ export default function Wizard({ onComplete }: Props) {
       payload: { phase },
     });
   }, [phase]);
+
+  function navigateTo(targetPhase: Phase, direction: "forward" | "back") {
+    navigationDirection.current = direction;
+    dispatch({ type: "SET_PHASE", payload: targetPhase });
+  }
 
   function updateField(field: keyof WizardState, value: any) {
     dispatch({ type: "UPDATE_FIELD", field, value });
@@ -167,6 +174,7 @@ export default function Wizard({ onComplete }: Props) {
 
   function submit() {
     if (!clientProfile || !urgency) return;
+    setIsSubmitting(true);
 
     const severityScore =
       (urgency === "critical" ? 40 : 0) +
@@ -269,6 +277,20 @@ export default function Wizard({ onComplete }: Props) {
           ))}
         </ol>
       </nav>
+
+      <div
+        aria-hidden="true"
+        className="flex gap-1.5 max-w-2xl mx-auto mb-4 px-2"
+      >
+        {phaseLabels.map((_, i) => (
+          <div
+            key={i}
+            className={`h-1 flex-1 rounded-full transition-all duration-500 ${
+              i <= phaseIndex ? "bg-white/60" : "bg-white/10"
+            }`}
+          />
+        ))}
+      </div>
 
       <div
         className="glass p-6 md:p-12 rounded-3xl shadow-2xl animate-in backdrop-blur-3xl max-w-2xl mx-auto"
@@ -466,9 +488,7 @@ export default function Wizard({ onComplete }: Props) {
             </section>
 
             <button
-              onClick={() =>
-                dispatch({ type: "SET_PHASE", payload: "COGNITIVE" })
-              }
+              onClick={() => navigateTo("COGNITIVE", "forward")}
               disabled={!isStep1Complete}
               aria-disabled={!isStep1Complete}
               className={`w-full py-4 rounded-xl font-semibold transition-all ${
@@ -483,7 +503,10 @@ export default function Wizard({ onComplete }: Props) {
         )}
 
         {phase === "COGNITIVE" && (
-          <div className="space-y-8 animate-in">
+          <div
+            key="COGNITIVE"
+            className={`space-y-8 ${navigationDirection.current === "forward" ? "slide-in-right" : "slide-in-left"}`}
+          >
             <header>
               <h1 className="text-2xl font-light tracking-tight text-white/90">
                 {t("cognitive_title")}
@@ -662,17 +685,13 @@ export default function Wizard({ onComplete }: Props) {
 
               <div className="pt-4 flex gap-4">
                 <button
-                  onClick={() =>
-                    dispatch({ type: "SET_PHASE", payload: "TRIAGE" })
-                  }
+                  onClick={() => navigateTo("TRIAGE", "back")}
                   className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
                 >
                   {t("cognitive_back")}
                 </button>
                 <button
-                  onClick={() =>
-                    dispatch({ type: "SET_PHASE", payload: "CONTEXT" })
-                  }
+                  onClick={() => navigateTo("CONTEXT", "forward")}
                   className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
                 >
                   {t("cognitive_next")}
@@ -683,7 +702,10 @@ export default function Wizard({ onComplete }: Props) {
         )}
 
         {phase === "CONTEXT" && (
-          <div className="space-y-8 animate-in">
+          <div
+            key="CONTEXT"
+            className={`space-y-8 ${navigationDirection.current === "forward" ? "slide-in-right" : "slide-in-left"}`}
+          >
             <header>
               <h1 className="text-2xl font-light tracking-tight text-white/90">
                 {t("context_title")}
@@ -856,17 +878,13 @@ export default function Wizard({ onComplete }: Props) {
 
               <div className="pt-4 flex gap-4">
                 <button
-                  onClick={() =>
-                    dispatch({ type: "SET_PHASE", payload: "COGNITIVE" })
-                  }
+                  onClick={() => navigateTo("COGNITIVE", "back")}
                   className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
                 >
                   {t("context_back")}
                 </button>
                 <button
-                  onClick={() =>
-                    dispatch({ type: "SET_PHASE", payload: "DETAILS" })
-                  }
+                  onClick={() => navigateTo("DETAILS", "forward")}
                   className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
                 >
                   {t("context_next")}
@@ -877,7 +895,10 @@ export default function Wizard({ onComplete }: Props) {
         )}
 
         {phase === "DETAILS" && (
-          <div className="space-y-8 animate-in">
+          <div
+            key="DETAILS"
+            className={`space-y-8 ${navigationDirection.current === "forward" ? "slide-in-right" : "slide-in-left"}`}
+          >
             <header>
               <h1 className="text-2xl font-light tracking-tight text-white/90">
                 {t("details_title")}
@@ -1033,18 +1054,22 @@ export default function Wizard({ onComplete }: Props) {
 
               <div className="pt-4 flex gap-4">
                 <button
-                  onClick={() =>
-                    dispatch({ type: "SET_PHASE", payload: "CONTEXT" })
-                  }
+                  onClick={() => navigateTo("CONTEXT", "back")}
                   className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
                 >
                   {t("details_back")}
                 </button>
                 <button
                   onClick={submit}
-                  className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
+                  disabled={isSubmitting || !incident || !objective}
+                  aria-disabled={isSubmitting || !incident || !objective}
+                  className={`flex-2 py-4 rounded-xl font-bold transition-all text-sm shadow-lg shadow-white/5 ${
+                    isSubmitting || !incident || !objective
+                      ? "bg-white/5 text-white/20 cursor-not-allowed border border-white/5"
+                      : "bg-white text-black hover:bg-neutral-200"
+                  }`}
                 >
-                  {t("details_submit")}
+                  {isSubmitting ? t("details_submitting") : t("details_submit")}
                 </button>
               </div>
             </div>
