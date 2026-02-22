@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
       })),
     });
   } catch (error) {
+    console.error("[CRON sla-breach-check]", error);
     logger.error("SLA breach check failed", error);
     return NextResponse.json(
       {
