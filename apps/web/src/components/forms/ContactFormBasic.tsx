@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { WizardResult } from "@claritystructures/domain";
-import { ContactIntakeSchema } from "@claritystructures/types";
+import { ContactIntakeSchema } from "@claritystructures/types/validations/contact-intake.schema";
 import ConsentBlock from "../ConsentBlock";
 import ContactConfirmation from "../ContactConfirmation";
 import { trackEvent } from "@/lib/analytics";

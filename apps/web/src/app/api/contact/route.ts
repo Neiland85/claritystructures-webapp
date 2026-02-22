@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ContactIntakeSchema } from "@claritystructures/types";
+import { ContactIntakeSchema } from "@claritystructures/types/validations/contact-intake.schema";
 
 export async function POST(req: NextRequest) {
   try {
