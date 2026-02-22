@@ -7,7 +7,12 @@ import type {
   UrgencyLevel,
 } from "@claritystructures/domain";
 import { decideIntake } from "@claritystructures/domain";
-import { clientProfiles, urgencyLevels } from "@/constants/wizardOptions";
+import {
+  clientProfiles,
+  urgencyLevels,
+  dataSensitivityLevels,
+  estimatedIncidentStarts,
+} from "@/constants/wizardOptions";
 import AnimatedLogo from "./AnimatedLogo";
 import { trackEvent } from "@/lib/analytics";
 
@@ -15,7 +20,7 @@ type Props = {
   onComplete: (data: WizardResult) => void;
 };
 
-type Phase = "TRIAGE" | "COGNITIVE" | "TRACE";
+type Phase = "TRIAGE" | "COGNITIVE" | "CONTEXT" | "TRACE";
 
 type WizardState = {
   phase: Phase;
@@ -33,6 +38,12 @@ type WizardState = {
   whatsappControl: boolean | null;
   familySuspect: boolean | null;
   constantSurveillance: boolean | null;
+  // V2 context signals
+  isOngoing: boolean | null;
+  hasAccessToDevices: boolean | null;
+  dataSensitivityLevel: "low" | "medium" | "high" | null;
+  estimatedIncidentStart: "unknown" | "recent" | "weeks" | "months" | null;
+  thirdPartiesInvolved: boolean | null;
 };
 
 type WizardAction =
@@ -55,6 +66,12 @@ const initialState: WizardState = {
   whatsappControl: null,
   familySuspect: null,
   constantSurveillance: null,
+  // V2 context signals
+  isOngoing: null,
+  hasAccessToDevices: null,
+  dataSensitivityLevel: null,
+  estimatedIncidentStart: null,
+  thirdPartiesInvolved: null,
 };
 
 function wizardReducer(state: WizardState, action: WizardAction): WizardState {
@@ -87,6 +104,11 @@ export default function Wizard({ onComplete }: Props) {
     whatsappControl,
     familySuspect,
     constantSurveillance,
+    isOngoing,
+    hasAccessToDevices,
+    dataSensitivityLevel,
+    estimatedIncidentStart,
+    thirdPartiesInvolved,
   } = state;
 
   const isStep1Complete = clientProfile && urgency;
@@ -153,6 +175,12 @@ export default function Wizard({ onComplete }: Props) {
       actionsTaken: [],
       evidenceSources: [],
       objective: "document",
+      // V2 context signals (only included when answered)
+      ...(isOngoing !== null && { isOngoing }),
+      ...(hasAccessToDevices !== null && { hasAccessToDevices }),
+      ...(dataSensitivityLevel !== null && { dataSensitivityLevel }),
+      ...(estimatedIncidentStart !== null && { estimatedIncidentStart }),
+      ...(thirdPartiesInvolved !== null && { thirdPartiesInvolved }),
     };
 
     trackEvent({
@@ -167,8 +195,15 @@ export default function Wizard({ onComplete }: Props) {
     onComplete(result);
   }
 
-  const phaseIndex = phase === "TRIAGE" ? 0 : phase === "COGNITIVE" ? 1 : 2;
-  const phaseLabels = ["Triage", "Evaluación", "Trazado"];
+  const phaseIndex =
+    phase === "TRIAGE"
+      ? 0
+      : phase === "COGNITIVE"
+        ? 1
+        : phase === "CONTEXT"
+          ? 2
+          : 3;
+  const phaseLabels = ["Triage", "Evaluación", "Contexto", "Trazado"];
 
   return (
     <div className="relative min-h-[700px] w-full max-w-4xl mx-auto dark pt-20">
@@ -472,6 +507,200 @@ export default function Wizard({ onComplete }: Props) {
                 </button>
                 <button
                   onClick={() =>
+                    dispatch({ type: "SET_PHASE", payload: "CONTEXT" })
+                  }
+                  className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
+                >
+                  Siguiente Paso: Contexto
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {phase === "CONTEXT" && (
+          <div className="space-y-8 animate-in">
+            <header>
+              <h1 className="text-2xl font-light tracking-tight text-white/90">
+                Contexto del Incidente
+              </h1>
+              <p className="text-sm text-white/40 mt-1 font-light leading-relaxed">
+                Información adicional para clasificar la exposición y alcance.
+              </p>
+            </header>
+
+            <div className="space-y-8">
+              <section aria-labelledby="ongoing-heading" className="space-y-3">
+                <h2 id="ongoing-heading" className="text-sm text-white/70">
+                  ¿El incidente sigue activo en este momento?
+                </h2>
+                <div
+                  role="radiogroup"
+                  aria-labelledby="ongoing-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
+                  <button
+                    role="radio"
+                    aria-checked={isOngoing === true}
+                    onClick={() => updateField("isOngoing", true)}
+                    className={`py-3 rounded-xl border transition-all text-xs ${isOngoing === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                  >
+                    ACTIVO AHORA
+                  </button>
+                  <button
+                    role="radio"
+                    aria-checked={isOngoing === false}
+                    onClick={() => updateField("isOngoing", false)}
+                    className={`py-3 rounded-xl border transition-all text-xs ${isOngoing === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                  >
+                    YA FINALIZADO
+                  </button>
+                </div>
+              </section>
+
+              <section
+                aria-labelledby="incident-start-heading"
+                className="space-y-3"
+              >
+                <h2
+                  id="incident-start-heading"
+                  className="text-sm text-white/70"
+                >
+                  ¿Cuándo comenzó aproximadamente el incidente?
+                </h2>
+                <div
+                  role="radiogroup"
+                  aria-labelledby="incident-start-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
+                  {estimatedIncidentStarts.map((opt) => (
+                    <button
+                      key={opt.value}
+                      role="radio"
+                      aria-checked={estimatedIncidentStart === opt.value}
+                      onClick={() =>
+                        updateField("estimatedIncidentStart", opt.value)
+                      }
+                      className={`py-3 rounded-xl border transition-all text-xs ${estimatedIncidentStart === opt.value ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    >
+                      {opt.label.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section
+                aria-labelledby="sensitivity-heading"
+                className="space-y-3"
+              >
+                <h2 id="sensitivity-heading" className="text-sm text-white/70">
+                  ¿Qué nivel de sensibilidad tienen los datos afectados?
+                </h2>
+                <div
+                  role="radiogroup"
+                  aria-labelledby="sensitivity-heading"
+                  className="flex gap-2"
+                >
+                  {dataSensitivityLevels.map((opt) => (
+                    <button
+                      key={opt.value}
+                      role="radio"
+                      aria-checked={dataSensitivityLevel === opt.value}
+                      onClick={() =>
+                        updateField("dataSensitivityLevel", opt.value)
+                      }
+                      className={`flex-1 py-3 rounded-xl border transition-all text-xs ${dataSensitivityLevel === opt.value ? "bg-white text-black border-white" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    >
+                      <div className="font-medium">
+                        {opt.label.toUpperCase()}
+                      </div>
+                      <div className="text-[10px] mt-0.5 opacity-60">
+                        {opt.description}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section
+                aria-labelledby="device-access-heading"
+                className="space-y-3"
+              >
+                <h2
+                  id="device-access-heading"
+                  className="text-sm text-white/70"
+                >
+                  ¿Tienes acceso físico a los dispositivos afectados?
+                </h2>
+                <div
+                  role="radiogroup"
+                  aria-labelledby="device-access-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
+                  <button
+                    role="radio"
+                    aria-checked={hasAccessToDevices === true}
+                    onClick={() => updateField("hasAccessToDevices", true)}
+                    className={`py-3 rounded-xl border transition-all text-xs ${hasAccessToDevices === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                  >
+                    SÍ, TENGO ACCESO
+                  </button>
+                  <button
+                    role="radio"
+                    aria-checked={hasAccessToDevices === false}
+                    onClick={() => updateField("hasAccessToDevices", false)}
+                    className={`py-3 rounded-xl border transition-all text-xs ${hasAccessToDevices === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                  >
+                    NO TENGO ACCESO
+                  </button>
+                </div>
+              </section>
+
+              <section
+                aria-labelledby="third-parties-heading"
+                className="space-y-3"
+              >
+                <h2
+                  id="third-parties-heading"
+                  className="text-sm text-white/70"
+                >
+                  ¿Hay terceros involucrados o afectados por el incidente?
+                </h2>
+                <div
+                  role="radiogroup"
+                  aria-labelledby="third-parties-heading"
+                  className="grid grid-cols-2 gap-3"
+                >
+                  <button
+                    role="radio"
+                    aria-checked={thirdPartiesInvolved === true}
+                    onClick={() => updateField("thirdPartiesInvolved", true)}
+                    className={`py-3 rounded-xl border transition-all text-xs ${thirdPartiesInvolved === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                  >
+                    SÍ, HAY TERCEROS
+                  </button>
+                  <button
+                    role="radio"
+                    aria-checked={thirdPartiesInvolved === false}
+                    onClick={() => updateField("thirdPartiesInvolved", false)}
+                    className={`py-3 rounded-xl border transition-all text-xs ${thirdPartiesInvolved === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                  >
+                    NO, SOLO YO
+                  </button>
+                </div>
+              </section>
+
+              <div className="pt-4 flex gap-4">
+                <button
+                  onClick={() =>
+                    dispatch({ type: "SET_PHASE", payload: "COGNITIVE" })
+                  }
+                  className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
+                >
+                  Volver
+                </button>
+                <button
+                  onClick={() =>
                     dispatch({ type: "SET_PHASE", payload: "TRACE" })
                   }
                   className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
@@ -598,7 +827,7 @@ export default function Wizard({ onComplete }: Props) {
               <div className="pt-4 flex gap-4">
                 <button
                   onClick={() =>
-                    dispatch({ type: "SET_PHASE", payload: "COGNITIVE" })
+                    dispatch({ type: "SET_PHASE", payload: "CONTEXT" })
                   }
                   className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
                 >

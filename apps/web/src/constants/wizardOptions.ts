@@ -53,3 +53,31 @@ export const urgencyLevels: {
     label: "Situación crítica (impacto legal o emocional grave)",
   },
 ];
+
+export const dataSensitivityLevels: {
+  value: "low" | "medium" | "high";
+  label: string;
+  description: string;
+}[] = [
+  { value: "low", label: "Baja", description: "Datos generales" },
+  {
+    value: "medium",
+    label: "Media",
+    description: "Datos personales identificables",
+  },
+  {
+    value: "high",
+    label: "Alta",
+    description: "Datos íntimos, financieros o médicos",
+  },
+];
+
+export const estimatedIncidentStarts: {
+  value: "unknown" | "recent" | "weeks" | "months";
+  label: string;
+}[] = [
+  { value: "unknown", label: "No lo sé" },
+  { value: "recent", label: "Reciente (días)" },
+  { value: "weeks", label: "Semanas" },
+  { value: "months", label: "Meses o más" },
+];
