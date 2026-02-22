@@ -147,6 +147,30 @@ describe("ContactFormLegal", () => {
     fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
 
     expect(mockFetch).not.toHaveBeenCalled();
+
+    const textarea = screen.getByPlaceholderText(
+      "Describe tu situación o consulta",
+    );
+    expect(textarea).toHaveAttribute("aria-invalid", "true");
+  });
+
+  it("should not call fetch when client-side validation fails (invalid email)", () => {
+    render(<ContactFormLegal context={mockContext} />);
+
+    fireEvent.change(screen.getByPlaceholderText("Correo profesional"), {
+      target: { value: "not-an-email" },
+    });
+    fireEvent.change(
+      screen.getByPlaceholderText("Describe tu situación o consulta"),
+      { target: { value: "Valid message content here" } },
+    );
+    checkConsent();
+    fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
+
+    expect(mockFetch).not.toHaveBeenCalled();
+
+    const emailInput = screen.getByPlaceholderText("Correo profesional");
+    expect(emailInput).toHaveAttribute("aria-invalid", "true");
   });
 
   it("should submit with correct payload including consent", async () => {
@@ -173,6 +197,7 @@ describe("ContactFormLegal", () => {
     expect(callBody.consent).toBe(true);
     expect(callBody.tone).toBe("legal");
     expect(callBody.wizardResult).toBeDefined();
+    expect(callBody.phone).toBeDefined();
   });
 
   it("should show loading state during submission", async () => {

@@ -117,12 +117,17 @@ describe("ContactFormBasic", () => {
       screen.getByPlaceholderText(
         "Cuéntanos brevemente lo que está ocurriendo",
       ),
-      { target: { value: "short" } },
+      { target: { value: "Short" } },
     );
     fireEvent.click(screen.getByTestId("consent-checkbox"));
     fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
 
     expect(mockFetch).not.toHaveBeenCalled();
+
+    const textarea = screen.getByPlaceholderText(
+      "Cuéntanos brevemente lo que está ocurriendo",
+    );
+    expect(textarea).toHaveAttribute("aria-invalid", "true");
   });
 
   it("should not call fetch when client-side validation fails (invalid email)", () => {
@@ -141,6 +146,9 @@ describe("ContactFormBasic", () => {
     fireEvent.click(screen.getByRole("button", { name: /enviar consulta/i }));
 
     expect(mockFetch).not.toHaveBeenCalled();
+
+    const emailInput = screen.getByPlaceholderText("Correo electrónico");
+    expect(emailInput).toHaveAttribute("aria-invalid", "true");
   });
 
   it("should submit validated payload on successful validation", async () => {
@@ -164,7 +172,6 @@ describe("ContactFormBasic", () => {
       );
     });
 
-    // Verify the payload contains expected fields
     const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(callBody.email).toBe("user@example.com");
     expect(callBody.consent).toBe(true);
