@@ -1,6 +1,6 @@
 # Production Dockerfile
 # Multi-stage build optimized for Next.js 16 with pnpm monorepo
-# Note: This Dockerfile requires the Next.js build to succeed locally first
+# Size optimized with layer caching and cleanup
 
 ARG NODE_VERSION=20-alpine
 
@@ -21,7 +21,7 @@ COPY packages/infra-notifications/package.json ./packages/infra-notifications/
 COPY packages/infra-persistence/package.json ./packages/infra-persistence/
 COPY packages/types/package.json ./packages/types/
 
-# Install all workspace dependencies (pnpm strict mode with symlinks)
+# Install all workspace dependencies with cache mount
 RUN --mount=type=cache,id=pnpm,target=/root/.pnpm-store \
     pnpm install --frozen-lockfile
 
@@ -33,12 +33,10 @@ FROM node:${NODE_VERSION} AS builder
 RUN corepack enable && corepack prepare pnpm@10.29.3 --activate
 WORKDIR /app
 
-# 1. Copy source code first (.dockerignore strips node_modules)
+# Copy source code first
 COPY . .
 
-# 2. Overlay dependency tree from deps stage
-#    Docker COPY merges directories — existing source files are preserved,
-#    node_modules directories (absent in source due to .dockerignore) are added.
+# Overlay dependency tree from deps stage
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 
@@ -50,7 +48,7 @@ ENV NODE_ENV=production
 RUN pnpm db:generate && pnpm build
 
 # ============================================
-# Stage 3: Production runtime
+# Stage 3: Production runtime (optimized)
 # ============================================
 FROM node:${NODE_VERSION} AS runner
 
@@ -71,8 +69,16 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 
-# Copy runtime dependencies
+# Copy runtime dependencies and cleanup unnecessary files
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+
+# Cleanup: Remove unnecessary files from node_modules to reduce image size
+# Keep only production-needed files (no .map, tests, or TypeScript sources)
+RUN find ./node_modules -type f -name "*.map" -delete && \
+    find ./node_modules -type f \( -name "*.md" -o -name "*.ts" \) ! -name "*.d.ts" ! -path "*/node_modules/prisma/prisma-client/*" -delete && \
+    find ./node_modules -type d \( -name "test" -o -name "tests" -o -name "__tests__" -o -name "docs" \) -exec rm -rf {} + 2>/dev/null || true && \
+    rm -rf ./node_modules/.bin/tsc* ./node_modules/.bin/prisma 2>/dev/null || true && \
+    true
 
 # Switch to non-root user
 USER nextjs
