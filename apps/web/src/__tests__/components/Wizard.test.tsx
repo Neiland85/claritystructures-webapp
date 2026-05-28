@@ -499,14 +499,14 @@ describe("Wizard", () => {
   it("should show correct step aria-label for CONTEXT phase", () => {
     goToPhase("CONTEXT");
 
-    const form = screen.getByRole("form");
+    const form = screen.getByRole("region", { name: /Paso \d de 4:/ });
     expect(form).toHaveAttribute("aria-label", "Paso 3 de 4: Contexto");
   }, 10000);
 
   it("should show correct step aria-label for DETAILS phase", () => {
     goToPhase("DETAILS");
 
-    const form = screen.getByRole("form");
+    const form = screen.getByRole("region", { name: /Paso \d de 4:/ });
     expect(form).toHaveAttribute("aria-label", "Paso 4 de 4: Detalles");
   }, 10000);
 

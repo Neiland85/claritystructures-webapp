@@ -1,30 +1,30 @@
 "use client";
 
-import { useReducer, useEffect, useState, useRef } from "react";
-import type {
-  WizardResult,
-  ClientProfile,
-  UrgencyLevel,
-} from "@claritystructures/domain";
-import { decideIntake } from "@claritystructures/domain";
+import { useLang } from "@/components/LanguageProvider";
 import {
-  getClientProfiles,
-  getUrgencyLevels,
-  getDataSensitivityLevels,
-  getEstimatedIncidentStarts,
-  getIncidentTypes,
-  getDeviceCounts,
-  getEvidenceSources,
   getActionsTaken,
+  getClientProfiles,
+  getDataSensitivityLevels,
+  getDeviceCounts,
+  getEstimatedIncidentStarts,
+  getEvidenceSources,
+  getIncidentTypes,
   getObjectives,
+  getUrgencyLevels,
 } from "@/constants/wizardOptions";
+import { useWizardContractContext } from "@/hooks/wizard/useWizardContractContext";
 import { useTranslation } from "@/i18n/useTranslation";
 import { wizardDict } from "@/i18n/wizard";
-import { useLang } from "@/components/LanguageProvider";
+import { trackEvent } from "@/lib/analytics";
+import type {
+  ClientProfile,
+  UrgencyLevel,
+  WizardResult,
+} from "@claritystructures/domain";
+import { decideIntake } from "@claritystructures/domain";
+import { useEffect, useReducer, useRef, useState } from "react";
 import AnimatedLogo from "./AnimatedLogo";
 import LanguageSwitcher from "./LanguageSwitcher";
-import { trackEvent } from "@/lib/analytics";
-import { useWizardContractContext } from "@/hooks/wizard/useWizardContractContext";
 
 type Props = {
   onComplete: (data: WizardResult) => void;
@@ -69,10 +69,6 @@ type WizardFieldUpdateAction<K extends keyof WizardState = keyof WizardState> =
 type WizardAction =
   | { type: "SET_PHASE"; payload: Phase }
   | WizardFieldUpdateAction;
-
-function ariaBool(value: boolean): "true" | "false" {
-  return value ? "true" : "false";
-}
 
 const initialState: WizardState = {
   phase: "TRIAGE",
@@ -347,7 +343,7 @@ export default function Wizard({ onComplete }: Props) {
 
       <div
         className="glass relative overflow-hidden p-5 sm:p-6 md:p-12 rounded-[1.5rem] sm:rounded-[2rem] border border-white/10 shadow-[0_30px_120px_rgba(0,0,0,0.45)] animate-in backdrop-blur-3xl max-w-3xl mx-auto"
-        role="form"
+        role="region"
         aria-label={`${t("step")} ${phaseIndex + 1} ${t("of")} ${phaseLabels.length}: ${phaseLabels[phaseIndex]}`}
       >
         {phase === "TRIAGE" && (
@@ -380,7 +376,9 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     key={opt.value}
                     role="radio"
-                    aria-checked={ariaBool(clientProfile === opt.value)}
+                    aria-checked={
+                      clientProfile === opt.value ? "true" : "false"
+                    }
                     onClick={() => updateField("clientProfile", opt.value)}
                     className={`text-left p-4 rounded-2xl border transition-all duration-200 ${
                       clientProfile === opt.value
@@ -412,7 +410,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     key={opt.value}
                     role="radio"
-                    aria-checked={ariaBool(urgency === opt.value)}
+                    aria-checked={urgency === opt.value ? "true" : "false"}
                     onClick={() => updateField("urgency", opt.value)}
                     className={`px-4 py-2.5 rounded-xl text-sm border transition-all duration-200 ${
                       urgency === opt.value
@@ -441,7 +439,9 @@ export default function Wizard({ onComplete }: Props) {
                 >
                   <button
                     role="radio"
-                    aria-checked={ariaBool(physicalSafetyRisk === true)}
+                    aria-checked={
+                      physicalSafetyRisk === true ? "true" : "false"
+                    }
                     onClick={() => updateField("physicalSafetyRisk", true)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
@@ -449,7 +449,9 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                   <button
                     role="radio"
-                    aria-checked={ariaBool(physicalSafetyRisk === false)}
+                    aria-checked={
+                      physicalSafetyRisk === false ? "true" : "false"
+                    }
                     onClick={() => updateField("physicalSafetyRisk", false)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
@@ -468,7 +470,9 @@ export default function Wizard({ onComplete }: Props) {
                 >
                   <button
                     role="radio"
-                    aria-checked={ariaBool(financialAssetRisk === true)}
+                    aria-checked={
+                      financialAssetRisk === true ? "true" : "false"
+                    }
                     onClick={() => updateField("financialAssetRisk", true)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === true ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
@@ -476,7 +480,9 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                   <button
                     role="radio"
-                    aria-checked={ariaBool(financialAssetRisk === false)}
+                    aria-checked={
+                      financialAssetRisk === false ? "true" : "false"
+                    }
                     onClick={() => updateField("financialAssetRisk", false)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
@@ -495,7 +501,9 @@ export default function Wizard({ onComplete }: Props) {
                 >
                   <button
                     role="radio"
-                    aria-checked={ariaBool(attackerHasPasswords === true)}
+                    aria-checked={
+                      attackerHasPasswords === true ? "true" : "false"
+                    }
                     onClick={() => updateField("attackerHasPasswords", true)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${attackerHasPasswords === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
@@ -503,7 +511,9 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                   <button
                     role="radio"
-                    aria-checked={ariaBool(attackerHasPasswords === false)}
+                    aria-checked={
+                      attackerHasPasswords === false ? "true" : "false"
+                    }
                     onClick={() => updateField("attackerHasPasswords", false)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${attackerHasPasswords === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
@@ -522,7 +532,9 @@ export default function Wizard({ onComplete }: Props) {
                 >
                   <button
                     role="radio"
-                    aria-checked={ariaBool(evidenceIsAutoDeleted === true)}
+                    aria-checked={
+                      evidenceIsAutoDeleted === true ? "true" : "false"
+                    }
                     onClick={() => updateField("evidenceIsAutoDeleted", true)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${evidenceIsAutoDeleted === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
@@ -530,7 +542,9 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                   <button
                     role="radio"
-                    aria-checked={ariaBool(evidenceIsAutoDeleted === false)}
+                    aria-checked={
+                      evidenceIsAutoDeleted === false ? "true" : "false"
+                    }
                     onClick={() => updateField("evidenceIsAutoDeleted", false)}
                     className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${evidenceIsAutoDeleted === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
                   >
@@ -543,7 +557,7 @@ export default function Wizard({ onComplete }: Props) {
             <button
               onClick={() => navigateTo("COGNITIVE", "forward")}
               disabled={!isStep1Complete}
-              aria-disabled={ariaBool(!isStep1Complete)}
+              aria-disabled={!isStep1Complete}
               className={`w-full py-4 rounded-xl font-semibold transition-all ${
                 isStep1Complete
                   ? "bg-white text-black hover:bg-neutral-200"
@@ -584,7 +598,9 @@ export default function Wizard({ onComplete }: Props) {
                 >
                   <button
                     role="radio"
-                    aria-checked={ariaBool(perceivedOmnipotence === true)}
+                    aria-checked={
+                      perceivedOmnipotence === true ? "true" : "false"
+                    }
                     onClick={() => updateField("perceivedOmnipotence", true)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${perceivedOmnipotence === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -592,7 +608,9 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                   <button
                     role="radio"
-                    aria-checked={ariaBool(perceivedOmnipotence === false)}
+                    aria-checked={
+                      perceivedOmnipotence === false ? "true" : "false"
+                    }
                     onClick={() => updateField("perceivedOmnipotence", false)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${perceivedOmnipotence === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -615,7 +633,7 @@ export default function Wizard({ onComplete }: Props) {
                 >
                   <button
                     role="radio"
-                    aria-checked={ariaBool(isVerifiable === true)}
+                    aria-checked={isVerifiable === true ? "true" : "false"}
                     onClick={() => updateField("isVerifiable", true)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isVerifiable === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -623,7 +641,7 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                   <button
                     role="radio"
-                    aria-checked={ariaBool(isVerifiable === false)}
+                    aria-checked={isVerifiable === false ? "true" : "false"}
                     onClick={() => updateField("isVerifiable", false)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isVerifiable === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -646,7 +664,9 @@ export default function Wizard({ onComplete }: Props) {
                 >
                   <button
                     role="radio"
-                    aria-checked={ariaBool(distortionIndicator === false)}
+                    aria-checked={
+                      distortionIndicator === false ? "true" : "false"
+                    }
                     onClick={() => updateField("distortionIndicator", false)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${distortionIndicator === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -654,7 +674,9 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                   <button
                     role="radio"
-                    aria-checked={ariaBool(distortionIndicator === true)}
+                    aria-checked={
+                      distortionIndicator === true ? "true" : "false"
+                    }
                     onClick={() => updateField("distortionIndicator", true)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${distortionIndicator === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -680,7 +702,9 @@ export default function Wizard({ onComplete }: Props) {
                 >
                   <button
                     role="radio"
-                    aria-checked={ariaBool(hasEmotionalDistress === true)}
+                    aria-checked={
+                      hasEmotionalDistress === true ? "true" : "false"
+                    }
                     onClick={() => updateField("hasEmotionalDistress", true)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasEmotionalDistress === true ? "bg-critical text-white border-critical" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -688,7 +712,9 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                   <button
                     role="radio"
-                    aria-checked={ariaBool(hasEmotionalDistress === false)}
+                    aria-checked={
+                      hasEmotionalDistress === false ? "true" : "false"
+                    }
                     onClick={() => updateField("hasEmotionalDistress", false)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasEmotionalDistress === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -711,7 +737,7 @@ export default function Wizard({ onComplete }: Props) {
                 >
                   <button
                     role="radio"
-                    aria-checked={ariaBool(shockLevel === "low")}
+                    aria-checked={shockLevel === "low" ? "true" : "false"}
                     onClick={() => updateField("shockLevel", "low")}
                     className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${shockLevel === "low" ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -719,7 +745,7 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                   <button
                     role="radio"
-                    aria-checked={ariaBool(shockLevel === "medium")}
+                    aria-checked={shockLevel === "medium" ? "true" : "false"}
                     onClick={() => updateField("shockLevel", "medium")}
                     className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${shockLevel === "medium" ? "bg-white/20 text-white border-white/40" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -727,7 +753,7 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                   <button
                     role="radio"
-                    aria-checked={ariaBool(shockLevel === "high")}
+                    aria-checked={shockLevel === "high" ? "true" : "false"}
                     onClick={() => updateField("shockLevel", "high")}
                     className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${shockLevel === "high" ? "bg-critical text-white border-critical" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -783,7 +809,7 @@ export default function Wizard({ onComplete }: Props) {
                 >
                   <button
                     role="radio"
-                    aria-checked={ariaBool(isOngoing === true)}
+                    aria-checked={isOngoing === true ? "true" : "false"}
                     onClick={() => updateField("isOngoing", true)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isOngoing === true ? "bg-critical text-white border-critical" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -791,7 +817,7 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                   <button
                     role="radio"
-                    aria-checked={ariaBool(isOngoing === false)}
+                    aria-checked={isOngoing === false ? "true" : "false"}
                     onClick={() => updateField("isOngoing", false)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isOngoing === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -819,9 +845,9 @@ export default function Wizard({ onComplete }: Props) {
                     <button
                       key={opt.value}
                       role="radio"
-                      aria-checked={ariaBool(
-                        estimatedIncidentStart === opt.value,
-                      )}
+                      aria-checked={
+                        estimatedIncidentStart === opt.value ? "true" : "false"
+                      }
                       onClick={() =>
                         updateField("estimatedIncidentStart", opt.value)
                       }
@@ -849,9 +875,9 @@ export default function Wizard({ onComplete }: Props) {
                     <button
                       key={opt.value}
                       role="radio"
-                      aria-checked={ariaBool(
-                        dataSensitivityLevel === opt.value,
-                      )}
+                      aria-checked={
+                        dataSensitivityLevel === opt.value ? "true" : "false"
+                      }
                       onClick={() =>
                         updateField("dataSensitivityLevel", opt.value)
                       }
@@ -885,7 +911,9 @@ export default function Wizard({ onComplete }: Props) {
                 >
                   <button
                     role="radio"
-                    aria-checked={ariaBool(hasAccessToDevices === true)}
+                    aria-checked={
+                      hasAccessToDevices === true ? "true" : "false"
+                    }
                     onClick={() => updateField("hasAccessToDevices", true)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasAccessToDevices === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -893,7 +921,9 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                   <button
                     role="radio"
-                    aria-checked={ariaBool(hasAccessToDevices === false)}
+                    aria-checked={
+                      hasAccessToDevices === false ? "true" : "false"
+                    }
                     onClick={() => updateField("hasAccessToDevices", false)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasAccessToDevices === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -919,7 +949,9 @@ export default function Wizard({ onComplete }: Props) {
                 >
                   <button
                     role="radio"
-                    aria-checked={ariaBool(thirdPartiesInvolved === true)}
+                    aria-checked={
+                      thirdPartiesInvolved === true ? "true" : "false"
+                    }
                     onClick={() => updateField("thirdPartiesInvolved", true)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${thirdPartiesInvolved === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -927,7 +959,9 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                   <button
                     role="radio"
-                    aria-checked={ariaBool(thirdPartiesInvolved === false)}
+                    aria-checked={
+                      thirdPartiesInvolved === false ? "true" : "false"
+                    }
                     onClick={() => updateField("thirdPartiesInvolved", false)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${thirdPartiesInvolved === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -988,7 +1022,7 @@ export default function Wizard({ onComplete }: Props) {
                     <button
                       key={opt.value}
                       role="radio"
-                      aria-checked={ariaBool(incident === opt.value)}
+                      aria-checked={incident === opt.value ? "true" : "false"}
                       onClick={() => updateField("incident", opt.value)}
                       className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${incident === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                     >
@@ -1014,7 +1048,7 @@ export default function Wizard({ onComplete }: Props) {
                     <button
                       key={opt.value}
                       role="radio"
-                      aria-checked={ariaBool(devices === opt.value)}
+                      aria-checked={devices === opt.value ? "true" : "false"}
                       onClick={() => updateField("devices", opt.value)}
                       className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${devices === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                     >
@@ -1043,9 +1077,9 @@ export default function Wizard({ onComplete }: Props) {
                     <button
                       key={opt.value}
                       role="checkbox"
-                      aria-checked={ariaBool(
-                        evidenceSources.includes(opt.value),
-                      )}
+                      aria-checked={
+                        evidenceSources.includes(opt.value) ? "true" : "false"
+                      }
                       onClick={() =>
                         toggleArrayField("evidenceSources", opt.value)
                       }
@@ -1076,7 +1110,9 @@ export default function Wizard({ onComplete }: Props) {
                     <button
                       key={opt.value}
                       role="checkbox"
-                      aria-checked={ariaBool(actionsTaken.includes(opt.value))}
+                      aria-checked={
+                        actionsTaken.includes(opt.value) ? "true" : "false"
+                      }
                       onClick={() =>
                         toggleArrayField("actionsTaken", opt.value)
                       }
@@ -1104,7 +1140,7 @@ export default function Wizard({ onComplete }: Props) {
                     <button
                       key={opt.value}
                       role="radio"
-                      aria-checked={ariaBool(objective === opt.value)}
+                      aria-checked={objective === opt.value ? "true" : "false"}
                       onClick={() => updateField("objective", opt.value)}
                       className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${objective === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                     >
@@ -1124,9 +1160,7 @@ export default function Wizard({ onComplete }: Props) {
                 <button
                   onClick={submit}
                   disabled={isSubmitting || !incident || !objective}
-                  aria-disabled={ariaBool(
-                    isSubmitting || !incident || !objective,
-                  )}
+                  aria-disabled={isSubmitting || !incident || !objective}
                   className={`flex-2 py-4 rounded-xl font-bold transition-all text-sm shadow-lg shadow-white/5 ${
                     isSubmitting || !incident || !objective
                       ? "bg-white/5 text-white/20 cursor-not-allowed border border-white/5"
