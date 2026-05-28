@@ -135,13 +135,13 @@ These are known and should be tracked before public production exposure.
 
 SEC-01 — Rate limiting fail-open
 
-apps/web/src/lib/rate-limit/upstash.ts currently allows requests if Upstash is not configured or if Redis fails.
+Status: partially resolved in `fix(security): fail closed rate limiting in production (#146)`.
 
-Acceptable for development and controlled preview, but not ideal for public production traffic.
+The Upstash rate-limit helper now fails closed in production when Redis is unavailable or not configured, while preserving fail-open behavior outside production for development and tests.
 
-Recommended next step:
+Pending next step:
 
-Require Upstash in production or fail closed for sensitive endpoints.
+Verify and enforce rate-limit wiring on sensitive API routes before public production exposure.
 SEC-02 — Cron bearer secret comparison
 
 Status: resolved in `fix(security): verify cron bearer token safely (#142)`.
