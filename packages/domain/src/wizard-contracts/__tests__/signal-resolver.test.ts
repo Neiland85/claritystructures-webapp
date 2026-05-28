@@ -93,6 +93,28 @@ describe("wizard signal resolver", () => {
     expect(derivationSignals).toHaveLength(1);
   });
 
+  it("does not derive question-level boolean risk signals for false answers", () => {
+    const signals = resolveSignalsForAnswers({
+      physicalSafetyRisk: false,
+      financialAssetRisk: false,
+      attackerHasPasswords: false,
+      evidenceIsAutoDeleted: false,
+    });
+
+    expect(signals.map((item) => item.signal)).not.toContain(
+      "risk.physical_safety",
+    );
+    expect(signals.map((item) => item.signal)).not.toContain(
+      "risk.financial_asset",
+    );
+    expect(signals.map((item) => item.signal)).not.toContain(
+      "risk.credential_compromise",
+    );
+    expect(signals.map((item) => item.signal)).not.toContain(
+      "risk.evidence_volatility",
+    );
+  });
+
   it("returns no signals for unknown questions", () => {
     expect(resolveSignalsForQuestionAnswer("q.unknown.missing", true)).toEqual(
       [],
