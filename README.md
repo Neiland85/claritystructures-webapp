@@ -154,16 +154,9 @@ Relevant routes:
 /api/cron/sla-breach-check
 TYPE-01 — Wizard updateField typing
 
-Wizard.tsx still contains generic any usage in the field update path.
+Status: resolved in `fix(wizard): type canonical field updates (#144)`.
 
-Recommended next step:
-
-function updateField<K extends keyof WizardState>(
-  field: K,
-  value: WizardState[K],
-) {
-  // ...
-}
+Wizard field updates now preserve the relationship between `field` and `value` through `WizardState[K]`.
 PRIV-01 — Client-side wizard_result
 
 sessionStorage is a privacy improvement over URL query params, but the full wizard result is still client-side during the browser session.
