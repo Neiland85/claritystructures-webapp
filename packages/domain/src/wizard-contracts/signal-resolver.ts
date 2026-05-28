@@ -53,7 +53,12 @@ function answerMatchesOption(
 
 function resolveSignalsFromQuestion(
   question: QuestionContract,
+  answer: AnswerValue,
 ): readonly ResolvedWizardSignal[] {
+  if (question.kind === "boolean" && answer !== true) {
+    return [];
+  }
+
   return (question.signalMapping?.signals ?? []).map((signal) => ({
     signal,
     questionId: question.id,
@@ -93,7 +98,7 @@ export function resolveSignalsForQuestionAnswer(
   }
 
   return uniqueSignals([
-    ...resolveSignalsFromQuestion(question),
+    ...resolveSignalsFromQuestion(question, answer),
     ...resolveSignalsFromAnsweredOptions(question, answer),
   ]);
 }
