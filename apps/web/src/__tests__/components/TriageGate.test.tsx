@@ -14,7 +14,7 @@ describe("TriageGate", () => {
     render(<TriageGate />);
 
     expect(screen.getByText("Authentication Required")).toBeInTheDocument();
-    expect(screen.getByPlaceholderText("Access token")).toBeInTheDocument();
+    expect(screen.getByLabelText("Admin access token")).toBeInTheDocument();
     expect(screen.getByText("Unlock Dashboard")).toBeInTheDocument();
   });
 
@@ -28,7 +28,7 @@ describe("TriageGate", () => {
   it("should enable submit button when token is entered", () => {
     render(<TriageGate />);
 
-    const input = screen.getByPlaceholderText("Access token");
+    const input = screen.getByLabelText("Admin access token");
     fireEvent.change(input, { target: { value: "my-secret-token" } });
 
     const button = screen.getByText("Unlock Dashboard");
@@ -38,7 +38,7 @@ describe("TriageGate", () => {
   it("should render TriageTable after submitting a valid token", () => {
     render(<TriageGate />);
 
-    const input = screen.getByPlaceholderText("Access token");
+    const input = screen.getByLabelText("Admin access token");
     fireEvent.change(input, { target: { value: "my-secret-token" } });
 
     const form = input.closest("form")!;
@@ -53,7 +53,7 @@ describe("TriageGate", () => {
   it("should NOT submit when token is whitespace only", () => {
     render(<TriageGate />);
 
-    const input = screen.getByPlaceholderText("Access token");
+    const input = screen.getByLabelText("Admin access token");
     fireEvent.change(input, { target: { value: "   " } });
 
     const form = input.closest("form")!;
@@ -67,7 +67,7 @@ describe("TriageGate", () => {
     render(<TriageGate />);
 
     // Authenticate
-    const input = screen.getByPlaceholderText("Access token");
+    const input = screen.getByLabelText("Admin access token");
     fireEvent.change(input, { target: { value: "token123" } });
     fireEvent.submit(input.closest("form")!);
 
@@ -83,7 +83,7 @@ describe("TriageGate", () => {
   it("should use password input type for token field", () => {
     render(<TriageGate />);
 
-    const input = screen.getByPlaceholderText("Access token");
+    const input = screen.getByLabelText("Admin access token");
     expect(input).toHaveAttribute("type", "password");
   });
 });
