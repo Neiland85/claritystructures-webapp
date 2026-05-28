@@ -6,9 +6,24 @@ const logger = createLogger("rate-limit");
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
+function isProductionRuntime(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+function fallbackRateLimitResult(limit: number): {
+  success: boolean;
+  remaining: number;
+} {
+  if (isProductionRuntime()) {
+    return { success: false, remaining: 0 };
+  }
+
+  return { success: true, remaining: limit };
+}
+
 if (!UPSTASH_URL || !UPSTASH_TOKEN) {
   logger.warn(
-    "UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN not set — rate limiting is disabled",
+    "UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN not set — rate limiting is disabled outside production",
   );
 }
 
@@ -22,9 +37,9 @@ export async function checkRateLimit(
   limit: number,
   windowMs: number,
 ): Promise<{ success: boolean; remaining: number }> {
-  // If Redis is not configured, fail open (allow all requests)
   if (!redis) {
-    return { success: true, remaining: limit };
+    logger.error("Rate limit unavailable: Upstash Redis is not configured");
+    return fallbackRateLimitResult(limit);
   }
 
   const key = `rate-limit:${identifier}`;
@@ -32,7 +47,6 @@ export async function checkRateLimit(
   const windowStart = now - windowMs;
 
   try {
-    // Remove old entries and get current count in a pipeline
     const pipeline = redis.pipeline();
     pipeline.zremrangebyscore(key, 0, windowStart);
     pipeline.zadd(key, { score: now, member: `${now}` });
@@ -47,9 +61,8 @@ export async function checkRateLimit(
       remaining: Math.max(0, limit - count),
     };
   } catch (error) {
-    logger.error("Rate limit check failed, failing open", error);
-    // Fail open - allow request if Redis is down
-    return { success: true, remaining: limit };
+    logger.error("Rate limit check failed", error);
+    return fallbackRateLimitResult(limit);
   }
 }
 
