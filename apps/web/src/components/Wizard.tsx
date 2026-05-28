@@ -24,6 +24,7 @@ import { useLang } from "@/components/LanguageProvider";
 import AnimatedLogo from "./AnimatedLogo";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { trackEvent } from "@/lib/analytics";
+import { useWizardContractContext } from "@/hooks/wizard/useWizardContractContext";
 
 type Props = {
   onComplete: (data: WizardResult) => void;
@@ -144,6 +145,30 @@ export default function Wizard({ onComplete }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigationDirection = useRef<"forward" | "back">("forward");
 
+  const contractContext = useWizardContractContext({
+    clientProfile,
+    urgency,
+    hasEmotionalDistress,
+    physicalSafetyRisk,
+    financialAssetRisk,
+    attackerHasPasswords,
+    evidenceIsAutoDeleted,
+    perceivedOmnipotence,
+    isVerifiable,
+    distortionIndicator,
+    shockLevel,
+    isOngoing,
+    hasAccessToDevices,
+    dataSensitivityLevel,
+    estimatedIncidentStart,
+    thirdPartiesInvolved,
+    incident,
+    devices: devices === null ? [] : [String(devices)],
+    evidenceSources,
+    actionsTaken,
+    objective,
+  });
+
   useEffect(() => {
     trackEvent({
       name: "wizard.step_view",
@@ -186,7 +211,19 @@ export default function Wizard({ onComplete }: Props) {
     trackEvent({
       name: "wizard.step_submit",
       timestamp: Date.now(),
-      payload: { phase, severityScore },
+      payload: {
+        phase,
+        severityScore,
+        contractSignalCount: contractContext.signals.length,
+        contractSnippetCount: contractContext.snippets.length,
+        hasLegalDerivationSignal: contractContext.hasLegalDerivationSignal,
+        hasEvidenceVolatilitySignal:
+          contractContext.hasEvidenceVolatilitySignal,
+        hasCredentialCompromiseSignal:
+          contractContext.hasCredentialCompromiseSignal,
+        hasPhysicalSafetySignal: contractContext.hasPhysicalSafetySignal,
+        hasSensitivePrivacySignal: contractContext.hasSensitivePrivacySignal,
+      },
     });
 
     trackEvent({

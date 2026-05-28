@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterAll } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import Wizard from "@/components/Wizard";
+import { trackEvent } from "@/lib/analytics";
 
 // Mock analytics
 vi.mock("@/lib/analytics", () => ({
@@ -677,6 +678,53 @@ describe("Wizard", () => {
 
       const form = screen.getByRole("form");
       expect(form).toHaveAttribute("aria-label", "Paso 4 de 4: Detalles");
+    },
+    { timeout: 10000 },
+  );
+
+  it(
+    "should include derived contract context metadata when submitting",
+    () => {
+      const handler = vi.fn();
+      render(<Wizard onComplete={handler} />);
+
+      fireEvent.click(screen.getByText("Particular afectado directamente"));
+      fireEvent.click(screen.getByText("Consulta informativa / preventiva"));
+      fireEvent.click(screen.getByText("CONTRASEÑAS EXPUESTAS"));
+      fireEvent.click(screen.getByText("AUTOBORRADO ACTIVO"));
+      fireEvent.click(
+        screen.getByText("Siguiente Paso: Evaluación de Contexto"),
+      );
+
+      fireEvent.click(screen.getByText("Siguiente Paso: Contexto"));
+
+      fireEvent.click(screen.getByText("ALTA"));
+      fireEvent.click(screen.getByText("Siguiente Paso: Detalles"));
+
+      fireEvent.click(screen.getByText("Acoso / hostigamiento"));
+      fireEvent.click(screen.getByText("Documentar / preservar pruebas"));
+
+      fireEvent.click(screen.getByText("Finalizar Informe Triage"));
+
+      const submitEvent = vi
+        .mocked(trackEvent)
+        .mock.calls.map(([event]) => event)
+        .find((event) => event.name === "wizard.step_submit");
+
+      expect(submitEvent).toBeDefined();
+
+      if (!submitEvent?.payload) {
+        throw new Error("wizard.step_submit event payload not found");
+      }
+
+      expect(submitEvent.payload).toMatchObject({
+        hasEvidenceVolatilitySignal: true,
+        hasCredentialCompromiseSignal: true,
+        hasSensitivePrivacySignal: true,
+      });
+
+      expect(submitEvent.payload.contractSignalCount).toBeGreaterThan(0);
+      expect(submitEvent.payload.contractSnippetCount).toBeGreaterThan(0);
     },
     { timeout: 10000 },
   );
