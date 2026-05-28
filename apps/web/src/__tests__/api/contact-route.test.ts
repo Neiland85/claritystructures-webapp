@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const executeMock = vi.fn();
+const checkRateLimitMock = vi.fn();
+const getIdentifierMock = vi.fn();
 
 vi.mock("@/application/di-container", () => ({
   createSubmitIntakeUseCase: vi.fn(() => ({
@@ -16,6 +18,11 @@ vi.mock("@/lib/logger", () => ({
     info: vi.fn(),
     debug: vi.fn(),
   })),
+}));
+
+vi.mock("@/lib/rate-limit/upstash", () => ({
+  checkRateLimit: checkRateLimitMock,
+  getIdentifier: getIdentifierMock,
 }));
 
 const { POST } = await import("@/app/api/contact/route");
@@ -54,6 +61,10 @@ const VALID_BODY = {
 describe("POST /api/contact", () => {
   beforeEach(() => {
     executeMock.mockReset();
+    checkRateLimitMock.mockReset();
+    getIdentifierMock.mockReset();
+    getIdentifierMock.mockReturnValue("ip:127.0.0.1");
+    checkRateLimitMock.mockResolvedValue({ success: true, remaining: 9 });
     executeMock.mockResolvedValue({
       record: {
         id: "intake-001",
@@ -116,6 +127,18 @@ describe("POST /api/contact", () => {
     });
 
     expect(consentMeta.ipHash).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("should return 429 when rate limit is exceeded", async () => {
+    checkRateLimitMock.mockResolvedValueOnce({ success: false, remaining: 0 });
+
+    const res = await POST(createRequest(VALID_BODY));
+    const json = await res.json();
+
+    expect(res.status).toBe(429);
+    expect(json).toEqual({ error: "Too many requests" });
+    expect(checkRateLimitMock).toHaveBeenCalledWith("ip:127.0.0.1", 10, 60_000);
+    expect(executeMock).not.toHaveBeenCalled();
   });
 
   it("should return 400 if consent is missing", async () => {
