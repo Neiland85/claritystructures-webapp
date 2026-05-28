@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createCheckSlaBreachesUseCase } from "@/application/di-container";
 import { createLogger } from "@/lib/logger";
+import { verifyCronBearerToken } from "@/lib/auth/verify-cron-bearer";
 
 const logger = createLogger("cron/sla-breach");
 
@@ -17,11 +18,9 @@ export const dynamic = "force-dynamic";
  * Queries breached SLA timers and logs them in the audit trail.
  */
 export async function POST(req: NextRequest) {
-  // Verify cron secret
-  const authHeader = req.headers.get("authorization");
-  const cronSecret = process.env.CRON_SECRET;
+  const authResult = verifyCronBearerToken(req.headers.get("authorization"));
 
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+  if (!authResult.authenticated) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
