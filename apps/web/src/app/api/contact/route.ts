@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ContactIntakeSchema } from "@claritystructures/types/validations/contact-intake.schema";
 import { createSubmitIntakeUseCase } from "@/application/di-container";
 import { createLogger } from "@/lib/logger";
+import { checkRateLimit, getIdentifier } from "@/lib/rate-limit/upstash";
 
 const logger = createLogger("api/contact");
 
@@ -29,6 +30,12 @@ async function sha256Hex(value: string): Promise<string> {
 
 export async function POST(req: NextRequest) {
   try {
+    const rateLimit = await checkRateLimit(getIdentifier(req), 10, 60_000);
+
+    if (!rateLimit.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const body = await req.json();
 
     const parse = ContactIntakeSchema.safeParse(body);
