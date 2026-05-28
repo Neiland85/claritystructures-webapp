@@ -1,51 +1,258 @@
 # Clarity Structures Webapp
 
-Clarity Structures Webapp is a TypeScript/Next.js reference implementation for intake triage with a deterministic, snapshot-tested Decision Engine used to classify routes, priority, flags, and action codes from structured wizard input.
+Clarity Structures Webapp is a proprietary TypeScript / Next.js application for structured intake triage, legal-operational routing, consent-aware contact capture and administrative review.
 
-## What this is **not**
+The project combines a deterministic domain decision engine, a canonical wizard contract, a production-oriented contact intake flow, an admin triage console and supporting infrastructure for auditability, notifications, consent recording and preproduction readiness.
 
-- Not legal advice.
-- Not forensic certification.
-- Not an autonomous investigation system.
-- Not a replacement for expert human review.
-- Not a generic ML classifier.
+## Status
 
-## Key guarantees
+Current main baseline:
 
-- **Deterministic:** same `WizardResult` input always yields the same decision output.
-- **Snapshot-locked:** canonical decision scenarios are protected by snapshot tests.
-- **Versioned V1/V2:** the public engine exposes baseline V1 and refined V2 decision paths.
-- **Explainable reasons:** V2 can emit explicit explanation reasons for refinements.
-- **Domain-isolated:** decision logic remains in `src/domain` with clean separation from UI and infrastructure.
+```text
+ff593ed fix(api): connect contact route to submit intake use case (#138)
+Current validation baseline:
 
-## Quick start (local)
+pnpm -r run typecheck  # OK
+pnpm -r run build      # OK
+pnpm test:run          # OK
 
-```bash
-# Install dependencies
+Test files: 78 passed
+Tests: 722 passed
+
+The test suite intentionally exercises failure scenarios such as database errors, notification failures, audit failures and error boundaries. Related stderr output is expected when the suite finishes green.
+
+License and ownership
+
+This repository is proprietary.
+
+license: UNLICENSED
+
+No open-source license is granted. Use, distribution, copying, modification or commercial exploitation requires explicit written authorization from Clarity Structures Digital S.L.
+
+What this is
+A structured digital intake and triage system.
+A deterministic decision-routing application.
+A preproduction-grade product foundation for Clarity Structures.
+A consent-aware contact capture flow.
+An administrative triage console protected by bearer-token authentication.
+A codebase prepared for technical audit, due diligence and controlled preview.
+What this is not
+Not legal advice.
+Not forensic certification.
+Not an autonomous investigation system.
+Not a replacement for expert human review.
+Not a generic ML classifier.
+Not open-source software.
+Core capabilities
+Deterministic decision engine
+Same structured WizardResult input yields the same decision output.
+Decision logic is snapshot-tested.
+V1 and V2 decision paths are versioned.
+V2 can emit explicit explanation reasons.
+Domain logic is isolated from UI and infrastructure.
+Canonical wizard contract
+
+The wizard has been progressively moved toward a contract-driven model:
+
+Canonical wizard contract registry.
+Wizard answer adapter.
+Contract context hook.
+Canonical signal resolution.
+Snippet resolution.
+UI wiring into derived contract metadata.
+Wizard UI
+
+Recent UI modernization includes:
+
+Modern visual shell.
+Modernized phase panels.
+Responsive layout polish.
+Mobile-friendly dense option grids.
+Clearer progress indication.
+Improved internal grouping and visual hierarchy.
+Contact intake flow
+
+/api/contact is connected to the real application use case.
+
+Current flow:
+
+ContactFormBasic / ContactFormLegal
+→ ContactIntakeSchema client validation
+→ /api/contact
+→ ContactIntakeSchema server validation
+→ honeypot rejection
+→ SubmitIntakeUseCase
+→ decision engine
+→ persistence
+→ consent recording
+→ notification
+→ audit trail
+
+New contact intakes are created with:
+
+status: pending
+
+The route returns useful operational metadata:
+
+success
+intakeId
+computed priority
+computed route
+Consent and privacy
+Contact forms require explicit consent.
+Consent version is sent with submissions.
+Consent acceptance is recorded by the submit use case.
+Wizard result is no longer pushed into URL query params.
+Current client-side transfer uses sessionStorage for wizard_result.
+Legacy URL context parsing remains for backward compatibility.
+Admin triage console
+
+The triage dashboard is protected by a bearer-token gate.
+
+The token is held in memory only.
+It is never persisted to local storage/session storage.
+The API validates bearer tokens server-side.
+ADMIN_API_TOKEN is preferred.
+JWT_SECRET is used as fallback if no dedicated admin token exists.
+The visual auth gate now makes token presence and unlock state explicit.
+API security
+
+Implemented security controls include:
+
+Bearer authentication for admin endpoints.
+CSRF validation for mutating protected routes.
+Double-submit CSRF cookie pattern.
+CSP headers from Next.js proxy.
+Security headers.
+Honeypot bot rejection on public contact route.
+Server-side schema validation.
+DOM/input sanitization via schemas and validation layers.
+Pre-commit secret audit.
+GitGuardian / CI security checks.
+Known preproduction risks
+
+These are known and should be tracked before public production exposure.
+
+SEC-01 — Rate limiting fail-open
+
+apps/web/src/lib/rate-limit/upstash.ts currently allows requests if Upstash is not configured or if Redis fails.
+
+Acceptable for development and controlled preview, but not ideal for public production traffic.
+
+Recommended next step:
+
+Require Upstash in production or fail closed for sensitive endpoints.
+SEC-02 — Cron bearer secret comparison
+
+Cron endpoints currently use direct string comparison for CRON_SECRET.
+
+Recommended next step:
+
+Use a timing-safe helper for cron bearer verification.
+
+Relevant routes:
+
+/api/cron/purge-expired
+/api/cron/sla-breach-check
+TYPE-01 — Wizard updateField typing
+
+Wizard.tsx still contains generic any usage in the field update path.
+
+Recommended next step:
+
+function updateField<K extends keyof WizardState>(
+  field: K,
+  value: WizardState[K],
+) {
+  // ...
+}
+PRIV-01 — Client-side wizard_result
+
+sessionStorage is a privacy improvement over URL query params, but the full wizard result is still client-side during the browser session.
+
+For higher assurance, consider a short-lived server-side draft token instead.
+
+TEST-01 — React act warnings
+
+Some ContactForm loading-state tests still emit React act(...) warnings. The suite passes, but these warnings should be cleaned up for quieter CI.
+
+Quick start
 pnpm install
 
-# Generate Prisma client and build all packages
-pnpm run build
+pnpm db:generate
 
-# Run tests
-pnpm run test
+pnpm -r run typecheck
 
-# Type-check all packages
-pnpm run typecheck
+pnpm -r run build
 
-# Start development server
-cd apps/web
-pnpm run dev
-```
+pnpm test:run
 
-## Decision Engine
+pnpm --filter @claritystructures/web dev
+Common validation commands
+pnpm -r run typecheck
+pnpm -r run build
+pnpm test:run
 
-See [`docs/decision-engine.md`](./docs/decision-engine.md).
+Focused tests:
 
-## Demo
+pnpm exec vitest run apps/web/src/__tests__/api/contact-route.test.ts
+pnpm exec vitest run apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts
+pnpm exec vitest run apps/web/src/__tests__/components/Wizard.test.tsx
+pnpm exec vitest run apps/web/src/__tests__/components/TriageGate.test.tsx
+pnpm exec vitest run apps/web/src/__tests__/components/TriageTable.test.tsx
+Environment variables
 
-Run the public Decision Engine demo harness:
+See:
 
-```bash
-npm run demo:decision-engine
+.env.example
+.env.production.local.example
+
+Important production variables include:
+
+DATABASE_URL
+JWT_SECRET
+SESSION_SECRET
+CRON_SECRET
+ADMIN_API_TOKEN
+SMTP_HOST
+SMTP_PORT
+SMTP_USER
+SMTP_PASS
+SMTP_FROM
+UPSTASH_REDIS_REST_URL
+UPSTASH_REDIS_REST_TOKEN
+NEXT_PUBLIC_APP_URL
+
+For production admin access, prefer a dedicated ADMIN_API_TOKEN instead of relying on JWT_SECRET.
+
+Architecture notes
+
+The codebase is structured around separation between:
+
+domain logic
+application use cases
+infrastructure adapters
+Next.js app/API routes
+UI components
+typed validation schemas
+
+The contact route now uses the application layer instead of behaving as a validation-only stub.
+
+Security policy
+
+See SECURITY.md.
+
+Decision engine
+
+See docs/decision-engine.md.
+
+Current recommended next PR
+fix(security): harden cron bearer secret verification
+
+Scope:
+
+add timing-safe cron bearer verification
+update cron routes
+reinforce cron route tests
+keep fail-closed behavior when CRON_SECRET is missing
 ```
