@@ -59,9 +59,16 @@ type WizardState = {
   objective: string | null;
 };
 
+type WizardFieldUpdateAction<K extends keyof WizardState = keyof WizardState> =
+  {
+    type: "UPDATE_FIELD";
+    field: K;
+    value: WizardState[K];
+  };
+
 type WizardAction =
   | { type: "SET_PHASE"; payload: Phase }
-  | { type: "UPDATE_FIELD"; field: keyof WizardState; value: any };
+  | WizardFieldUpdateAction;
 
 const initialState: WizardState = {
   phase: "TRIAGE",
@@ -182,7 +189,10 @@ export default function Wizard({ onComplete }: Props) {
     dispatch({ type: "SET_PHASE", payload: targetPhase });
   }
 
-  function updateField(field: keyof WizardState, value: any) {
+  function updateField<K extends keyof WizardState>(
+    field: K,
+    value: WizardState[K],
+  ) {
     dispatch({ type: "UPDATE_FIELD", field, value });
   }
 
