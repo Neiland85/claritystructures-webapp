@@ -11,8 +11,9 @@ import TriageTable from "@/components/TriageTable";
 export default function TriageGate() {
   const [token, setToken] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const hasToken = token.trim().length > 0;
 
-  if (submitted && token) {
+  if (submitted && hasToken) {
     return (
       <div>
         <div className="flex justify-end mb-4">
@@ -21,7 +22,7 @@ export default function TriageGate() {
               setToken("");
               setSubmitted(false);
             }}
-            className="text-xs text-slate-500 hover:text-white border border-white/10 px-3 py-1.5 rounded-lg transition-colors"
+            className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-medium text-slate-400 transition-colors hover:border-white/20 hover:bg-white/[0.07] hover:text-white"
           >
             Lock Dashboard
           </button>
@@ -32,15 +33,16 @@ export default function TriageGate() {
   }
 
   return (
-    <div className="flex items-center justify-center py-24">
-      <div className="w-full max-w-md p-8 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md shadow-2xl">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-500/10 border border-blue-500/20 mb-4">
+    <div className="flex items-center justify-center px-3 py-20 sm:py-24">
+      <div className="w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.05] p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-2xl sm:p-8">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl border border-blue-400/25 bg-blue-500/10 shadow-[0_0_40px_rgba(59,130,246,0.18)]">
             <svg
-              className="w-6 h-6 text-blue-400"
+              className="h-7 w-7 text-blue-300"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
@@ -50,34 +52,65 @@ export default function TriageGate() {
               />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-white">
+
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-blue-300/70">
+            Restricted console
+          </p>
+
+          <h2 className="text-2xl font-semibold tracking-tight text-white">
             Authentication Required
           </h2>
-          <p className="text-sm text-slate-400 mt-2">
+
+          <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-slate-400">
             Enter the admin access token to view the triage dashboard.
           </p>
         </div>
 
         <form
+          className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
-            if (token.trim()) {
+
+            if (hasToken) {
               setSubmitted(true);
             }
           }}
         >
-          <input
-            type="password"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder="Access token"
-            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all mb-4"
-            autoFocus
-          />
+          <label className="block">
+            <span className="mb-2 block text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
+              Admin access token
+            </span>
+
+            <input
+              type="password"
+              value={token}
+              onChange={(e) => setToken(e.currentTarget.value)}
+              placeholder="Paste access token"
+              className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-sm text-white outline-none transition-all placeholder:text-slate-600 focus:border-blue-400/50 focus:bg-white/[0.07] focus:ring-2 focus:ring-blue-500/30"
+              autoFocus
+              autoComplete="off"
+            />
+          </label>
+
+          <p
+            aria-live="polite"
+            className={`text-xs ${
+              hasToken ? "text-emerald-300/80" : "text-slate-500"
+            }`}
+          >
+            {hasToken
+              ? "Token detected — ready to unlock."
+              : "Paste a non-empty admin token to enable access."}
+          </p>
+
           <button
             type="submit"
-            disabled={!token.trim()}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white text-sm font-semibold rounded-xl transition-colors"
+            disabled={!hasToken}
+            className={`w-full rounded-2xl py-3.5 text-sm font-bold transition-all duration-200 ${
+              hasToken
+                ? "bg-white text-black shadow-[0_0_30px_rgba(255,255,255,0.16)] hover:bg-neutral-200"
+                : "cursor-not-allowed border border-white/10 bg-white/[0.04] text-slate-600"
+            }`}
           >
             Unlock Dashboard
           </button>
