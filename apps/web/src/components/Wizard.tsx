@@ -291,8 +291,8 @@ export default function Wizard({ onComplete }: Props) {
   ];
 
   return (
-    <div className="relative min-h-[760px] w-full max-w-5xl mx-auto dark px-4 pt-24 pb-10">
-      <div className="absolute top-4 right-4 md:top-6 md:right-6 p-2 z-50 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 shadow-2xl shadow-black/30 backdrop-blur-2xl">
+    <div className="relative min-h-[760px] w-full max-w-5xl mx-auto dark px-3 sm:px-4 pt-20 sm:pt-24 pb-8 sm:pb-10">
+      <div className="absolute top-3 right-3 sm:top-4 sm:right-4 md:top-6 md:right-6 p-1.5 sm:p-2 z-50 flex origin-top-right scale-90 sm:scale-100 items-center gap-2 sm:gap-3 rounded-2xl border border-white/10 bg-black/20 shadow-2xl shadow-black/30 backdrop-blur-2xl">
         <LanguageSwitcher />
         <AnimatedLogo />
       </div>
@@ -317,7 +317,7 @@ export default function Wizard({ onComplete }: Props) {
 
       <div
         aria-hidden="true"
-        className="flex gap-2 max-w-3xl mx-auto mb-6 px-2"
+        className="flex gap-1.5 sm:gap-2 max-w-3xl mx-auto mb-5 sm:mb-6 px-1 sm:px-2"
       >
         {phaseLabels.map((_, i) => (
           <div
@@ -332,14 +332,14 @@ export default function Wizard({ onComplete }: Props) {
       </div>
 
       <div
-        className="glass relative overflow-hidden p-6 md:p-12 rounded-[2rem] border border-white/10 shadow-[0_30px_120px_rgba(0,0,0,0.45)] animate-in backdrop-blur-3xl max-w-3xl mx-auto"
+        className="glass relative overflow-hidden p-5 sm:p-6 md:p-12 rounded-[1.5rem] sm:rounded-[2rem] border border-white/10 shadow-[0_30px_120px_rgba(0,0,0,0.45)] animate-in backdrop-blur-3xl max-w-3xl mx-auto"
         role="form"
         aria-label={`${t("step")} ${phaseIndex + 1} ${t("of")} ${phaseLabels.length}: ${phaseLabels[phaseIndex]}`}
       >
         {phase === "TRIAGE" && (
           <div className="space-y-6 md:space-y-10">
             <header className="space-y-3 border-b border-white/10 pb-6">
-              <h1 className="text-2xl md:text-4xl font-light tracking-tight text-white/95 leading-tight">
+              <h1 className="text-[2rem] sm:text-3xl md:text-4xl font-light tracking-tight text-white/95 leading-tight">
                 {t("triage_title")}
               </h1>
               <p className="max-w-2xl text-sm md:text-base text-white/45 font-light leading-relaxed">
@@ -566,7 +566,7 @@ export default function Wizard({ onComplete }: Props) {
                 <div
                   role="radiogroup"
                   aria-labelledby="omnipotence-heading"
-                  className="grid grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
                   <button
                     role="radio"
@@ -597,7 +597,7 @@ export default function Wizard({ onComplete }: Props) {
                 <div
                   role="radiogroup"
                   aria-labelledby="verifiable-heading"
-                  className="grid grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
                   <button
                     role="radio"
@@ -628,7 +628,7 @@ export default function Wizard({ onComplete }: Props) {
                 <div
                   role="radiogroup"
                   aria-labelledby="distortion-heading"
-                  className="grid grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
                   <button
                     role="radio"
@@ -662,7 +662,7 @@ export default function Wizard({ onComplete }: Props) {
                 <div
                   role="radiogroup"
                   aria-labelledby="emotional-distress-heading"
-                  className="grid grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
                   <button
                     role="radio"
@@ -722,7 +722,7 @@ export default function Wizard({ onComplete }: Props) {
                 </div>
               </section>
 
-              <div className="pt-4 flex gap-4">
+              <div className="pt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
                   onClick={() => navigateTo("TRIAGE", "back")}
                   className="flex-1 py-4 rounded-2xl border border-white/10 bg-white/[0.03] text-white/65 hover:bg-white/[0.07] hover:border-white/20 transition-all duration-200 text-sm"
@@ -765,7 +765,7 @@ export default function Wizard({ onComplete }: Props) {
                 <div
                   role="radiogroup"
                   aria-labelledby="ongoing-heading"
-                  className="grid grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
                   <button
                     role="radio"
@@ -799,7 +799,7 @@ export default function Wizard({ onComplete }: Props) {
                 <div
                   role="radiogroup"
                   aria-labelledby="incident-start-heading"
-                  className="grid grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
                   {estimatedIncidentStarts.map((opt) => (
                     <button
@@ -863,7 +863,7 @@ export default function Wizard({ onComplete }: Props) {
                 <div
                   role="radiogroup"
                   aria-labelledby="device-access-heading"
-                  className="grid grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
                   <button
                     role="radio"
@@ -897,7 +897,7 @@ export default function Wizard({ onComplete }: Props) {
                 <div
                   role="radiogroup"
                   aria-labelledby="third-parties-heading"
-                  className="grid grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
                   <button
                     role="radio"
@@ -918,7 +918,7 @@ export default function Wizard({ onComplete }: Props) {
                 </div>
               </section>
 
-              <div className="pt-4 flex gap-4">
+              <div className="pt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
                   onClick={() => navigateTo("COGNITIVE", "back")}
                   className="flex-1 py-4 rounded-2xl border border-white/10 bg-white/[0.03] text-white/65 hover:bg-white/[0.07] hover:border-white/20 transition-all duration-200 text-sm"
@@ -964,7 +964,7 @@ export default function Wizard({ onComplete }: Props) {
                 <div
                   role="radiogroup"
                   aria-labelledby="incident-type-heading"
-                  className="grid grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
                   {incidentTypes.map((opt) => (
                     <button
@@ -1019,7 +1019,7 @@ export default function Wizard({ onComplete }: Props) {
                 <div
                   role="group"
                   aria-labelledby="evidence-sources-heading"
-                  className="grid grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
                   {evidenceSourceOptions.map((opt) => (
                     <button
@@ -1050,7 +1050,7 @@ export default function Wizard({ onComplete }: Props) {
                 <div
                   role="group"
                   aria-labelledby="actions-taken-heading"
-                  className="grid grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
                   {actionTakenOptions.map((opt) => (
                     <button
@@ -1094,7 +1094,7 @@ export default function Wizard({ onComplete }: Props) {
                 </div>
               </section>
 
-              <div className="pt-4 flex gap-4">
+              <div className="pt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <button
                   onClick={() => navigateTo("CONTEXT", "back")}
                   className="flex-1 py-4 rounded-2xl border border-white/10 bg-white/[0.03] text-white/65 hover:bg-white/[0.07] hover:border-white/20 transition-all duration-200 text-sm"
