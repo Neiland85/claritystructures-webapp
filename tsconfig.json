@@ -8,13 +8,12 @@
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "baseUrl": ".",
     "paths": {
       "@claritystructures/types/validations/*": [
-        "packages/types/src/validations/*"
+        "./packages/types/src/validations/*"
       ],
-      "@claritystructures/*": ["packages/*/src"],
-      "@/*": ["apps/web/src/*"]
+      "@claritystructures/*": ["./packages/*/src"],
+      "@/*": ["./apps/web/src/*"]
     }
   },
   "include": [
