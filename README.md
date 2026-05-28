@@ -144,11 +144,9 @@ Recommended next step:
 Require Upstash in production or fail closed for sensitive endpoints.
 SEC-02 — Cron bearer secret comparison
 
-Cron endpoints currently use direct string comparison for CRON_SECRET.
+Status: resolved in `fix(security): verify cron bearer token safely (#142)`.
 
-Recommended next step:
-
-Use a timing-safe helper for cron bearer verification.
+Cron endpoints now use a dedicated timing-safe helper for `CRON_SECRET` bearer verification.
 
 Relevant routes:
 
