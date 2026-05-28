@@ -291,8 +291,8 @@ export default function Wizard({ onComplete }: Props) {
   ];
 
   return (
-    <div className="relative min-h-[700px] w-full max-w-4xl mx-auto dark pt-20">
-      <div className="absolute top-0 right-0 p-8 z-50 flex items-center gap-3">
+    <div className="relative min-h-[760px] w-full max-w-5xl mx-auto dark px-4 pt-24 pb-10">
+      <div className="absolute top-4 right-4 md:top-6 md:right-6 p-2 z-50 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 shadow-2xl shadow-black/30 backdrop-blur-2xl">
         <LanguageSwitcher />
         <AnimatedLogo />
       </div>
@@ -317,30 +317,32 @@ export default function Wizard({ onComplete }: Props) {
 
       <div
         aria-hidden="true"
-        className="flex gap-1.5 max-w-2xl mx-auto mb-4 px-2"
+        className="flex gap-2 max-w-3xl mx-auto mb-6 px-2"
       >
         {phaseLabels.map((_, i) => (
           <div
             key={i}
-            className={`h-1 flex-1 rounded-full transition-all duration-500 ${
-              i <= phaseIndex ? "bg-white/60" : "bg-white/10"
+            className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
+              i <= phaseIndex
+                ? "bg-white/80 shadow-[0_0_18px_rgba(255,255,255,0.25)]"
+                : "bg-white/10"
             }`}
           />
         ))}
       </div>
 
       <div
-        className="glass p-6 md:p-12 rounded-3xl shadow-2xl animate-in backdrop-blur-3xl max-w-2xl mx-auto"
+        className="glass relative overflow-hidden p-6 md:p-12 rounded-[2rem] border border-white/10 shadow-[0_30px_120px_rgba(0,0,0,0.45)] animate-in backdrop-blur-3xl max-w-3xl mx-auto"
         role="form"
         aria-label={`${t("step")} ${phaseIndex + 1} ${t("of")} ${phaseLabels.length}: ${phaseLabels[phaseIndex]}`}
       >
         {phase === "TRIAGE" && (
           <div className="space-y-6 md:space-y-10">
-            <header className="space-y-1">
-              <h1 className="text-xl md:text-3xl font-light tracking-tight text-white/95 leading-tight">
+            <header className="space-y-3 border-b border-white/10 pb-6">
+              <h1 className="text-2xl md:text-4xl font-light tracking-tight text-white/95 leading-tight">
                 {t("triage_title")}
               </h1>
-              <p className="text-xs md:text-sm text-white/40 font-light">
+              <p className="max-w-2xl text-sm md:text-base text-white/45 font-light leading-relaxed">
                 {t("triage_subtitle")}
               </p>
             </header>
@@ -366,10 +368,10 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={clientProfile === opt.value}
                     onClick={() => updateField("clientProfile", opt.value)}
-                    className={`text-left p-4 rounded-xl border transition-all ${
+                    className={`text-left p-4 rounded-2xl border transition-all duration-200 ${
                       clientProfile === opt.value
-                        ? "bg-white/10 border-white/40 ring-1 ring-white/20"
-                        : "bg-white/5 border-white/10 hover:border-white/20"
+                        ? "bg-white/15 border-white/50 ring-1 ring-white/30 shadow-[0_0_24px_rgba(255,255,255,0.08)]"
+                        : "bg-white/[0.04] border-white/10 hover:border-white/25 hover:bg-white/[0.07]"
                     }`}
                   >
                     <div className="font-medium text-sm text-white/80">
@@ -398,10 +400,10 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={urgency === opt.value}
                     onClick={() => updateField("urgency", opt.value)}
-                    className={`px-4 py-2 rounded-lg text-sm border transition-all ${
+                    className={`px-4 py-2.5 rounded-xl text-sm border transition-all duration-200 ${
                       urgency === opt.value
-                        ? "bg-white text-black border-white"
-                        : "bg-white/5 border-white/10 hover:border-white/20 text-white/60"
+                        ? "bg-white text-black border-white shadow-[0_0_24px_rgba(255,255,255,0.18)] shadow-[0_0_24px_rgba(255,255,255,0.18)]"
+                        : "bg-white/[0.04] border-white/10 hover:border-white/25 hover:bg-white/[0.07] text-white/60"
                     }`}
                   >
                     {opt.label}
@@ -412,9 +414,9 @@ export default function Wizard({ onComplete }: Props) {
 
             <section
               aria-label={t("triage_physical_integrity")}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-white/5"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t border-white/10"
             >
-              <fieldset className="space-y-3">
+              <fieldset className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
                 <legend className="text-xs text-white/40 text-center block">
                   {t("triage_physical_integrity")}
                 </legend>
@@ -441,7 +443,7 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                 </div>
               </fieldset>
-              <fieldset className="space-y-3">
+              <fieldset className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
                 <legend className="text-xs text-white/40 text-center block">
                   {t("triage_financial_assets")}
                 </legend>
@@ -468,7 +470,7 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                 </div>
               </fieldset>
-              <fieldset className="space-y-3">
+              <fieldset className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
                 <legend className="text-xs text-white/40 text-center block">
                   {t("triage_credential_access")}
                 </legend>
@@ -495,7 +497,7 @@ export default function Wizard({ onComplete }: Props) {
                   </button>
                 </div>
               </fieldset>
-              <fieldset className="space-y-3">
+              <fieldset className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
                 <legend className="text-xs text-white/40 text-center block">
                   {t("triage_evidence_volatility")}
                 </legend>
@@ -570,7 +572,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={perceivedOmnipotence === true}
                     onClick={() => updateField("perceivedOmnipotence", true)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${perceivedOmnipotence === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${perceivedOmnipotence === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_total_surveillance")}
                   </button>
@@ -578,7 +580,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={perceivedOmnipotence === false}
                     onClick={() => updateField("perceivedOmnipotence", false)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${perceivedOmnipotence === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${perceivedOmnipotence === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_restricted_tech")}
                   </button>
@@ -601,7 +603,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={isVerifiable === true}
                     onClick={() => updateField("isVerifiable", true)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${isVerifiable === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isVerifiable === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_material_proof")}
                   </button>
@@ -609,7 +611,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={isVerifiable === false}
                     onClick={() => updateField("isVerifiable", false)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${isVerifiable === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isVerifiable === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_circumstantial")}
                   </button>
@@ -632,7 +634,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={distortionIndicator === false}
                     onClick={() => updateField("distortionIndicator", false)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${distortionIndicator === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${distortionIndicator === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_clear_narrative")}
                   </button>
@@ -640,7 +642,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={distortionIndicator === true}
                     onClick={() => updateField("distortionIndicator", true)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${distortionIndicator === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${distortionIndicator === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_confusion_memory")}
                   </button>
@@ -666,7 +668,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={hasEmotionalDistress === true}
                     onClick={() => updateField("hasEmotionalDistress", true)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${hasEmotionalDistress === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasEmotionalDistress === true ? "bg-critical text-white border-critical" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_emotional_yes")}
                   </button>
@@ -674,7 +676,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={hasEmotionalDistress === false}
                     onClick={() => updateField("hasEmotionalDistress", false)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${hasEmotionalDistress === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasEmotionalDistress === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_emotional_no")}
                   </button>
@@ -697,7 +699,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={shockLevel === "low"}
                     onClick={() => updateField("shockLevel", "low")}
-                    className={`flex-1 py-3 rounded-xl border transition-all text-xs ${shockLevel === "low" ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${shockLevel === "low" ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_shock_low")}
                   </button>
@@ -705,7 +707,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={shockLevel === "medium"}
                     onClick={() => updateField("shockLevel", "medium")}
-                    className={`flex-1 py-3 rounded-xl border transition-all text-xs ${shockLevel === "medium" ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${shockLevel === "medium" ? "bg-white/20 text-white border-white/40" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_shock_medium")}
                   </button>
@@ -713,7 +715,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={shockLevel === "high"}
                     onClick={() => updateField("shockLevel", "high")}
-                    className={`flex-1 py-3 rounded-xl border transition-all text-xs ${shockLevel === "high" ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${shockLevel === "high" ? "bg-critical text-white border-critical" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_shock_high")}
                   </button>
@@ -766,7 +768,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={isOngoing === true}
                     onClick={() => updateField("isOngoing", true)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${isOngoing === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isOngoing === true ? "bg-critical text-white border-critical" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("context_active_now")}
                   </button>
@@ -774,7 +776,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={isOngoing === false}
                     onClick={() => updateField("isOngoing", false)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${isOngoing === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isOngoing === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("context_finished")}
                   </button>
@@ -804,7 +806,7 @@ export default function Wizard({ onComplete }: Props) {
                       onClick={() =>
                         updateField("estimatedIncidentStart", opt.value)
                       }
-                      className={`py-3 rounded-xl border transition-all text-xs ${estimatedIncidentStart === opt.value ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                      className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${estimatedIncidentStart === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                     >
                       {opt.label.toUpperCase()}
                     </button>
@@ -832,7 +834,7 @@ export default function Wizard({ onComplete }: Props) {
                       onClick={() =>
                         updateField("dataSensitivityLevel", opt.value)
                       }
-                      className={`flex-1 py-3 rounded-xl border transition-all text-xs ${dataSensitivityLevel === opt.value ? "bg-white text-black border-white" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                      className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${dataSensitivityLevel === opt.value ? "bg-white text-black border-white shadow-[0_0_24px_rgba(255,255,255,0.18)] shadow-[0_0_24px_rgba(255,255,255,0.18)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                     >
                       <div className="font-medium">
                         {opt.label.toUpperCase()}
@@ -864,7 +866,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={hasAccessToDevices === true}
                     onClick={() => updateField("hasAccessToDevices", true)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${hasAccessToDevices === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasAccessToDevices === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("context_has_access")}
                   </button>
@@ -872,7 +874,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={hasAccessToDevices === false}
                     onClick={() => updateField("hasAccessToDevices", false)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${hasAccessToDevices === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasAccessToDevices === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("context_no_access")}
                   </button>
@@ -898,7 +900,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={thirdPartiesInvolved === true}
                     onClick={() => updateField("thirdPartiesInvolved", true)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${thirdPartiesInvolved === true ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${thirdPartiesInvolved === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("context_yes_third_parties")}
                   </button>
@@ -906,7 +908,7 @@ export default function Wizard({ onComplete }: Props) {
                     role="radio"
                     aria-checked={thirdPartiesInvolved === false}
                     onClick={() => updateField("thirdPartiesInvolved", false)}
-                    className={`py-3 rounded-xl border transition-all text-xs ${thirdPartiesInvolved === false ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${thirdPartiesInvolved === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("context_no_only_me")}
                   </button>
@@ -967,7 +969,7 @@ export default function Wizard({ onComplete }: Props) {
                       role="radio"
                       aria-checked={incident === opt.value}
                       onClick={() => updateField("incident", opt.value)}
-                      className={`py-3 rounded-xl border transition-all text-xs ${incident === opt.value ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                      className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${incident === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                     >
                       {opt.label}
                     </button>
@@ -993,7 +995,7 @@ export default function Wizard({ onComplete }: Props) {
                       role="radio"
                       aria-checked={devices === opt.value}
                       onClick={() => updateField("devices", opt.value)}
-                      className={`flex-1 py-3 rounded-xl border transition-all text-xs ${devices === opt.value ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                      className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${devices === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                     >
                       {opt.label}
                     </button>
@@ -1024,7 +1026,7 @@ export default function Wizard({ onComplete }: Props) {
                       onClick={() =>
                         toggleArrayField("evidenceSources", opt.value)
                       }
-                      className={`py-3 rounded-xl border transition-all text-xs ${evidenceSources.includes(opt.value) ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                      className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${evidenceSources.includes(opt.value) ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                     >
                       {opt.label}
                     </button>
@@ -1055,7 +1057,7 @@ export default function Wizard({ onComplete }: Props) {
                       onClick={() =>
                         toggleArrayField("actionsTaken", opt.value)
                       }
-                      className={`py-3 rounded-xl border transition-all text-xs ${actionsTaken.includes(opt.value) ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                      className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${actionsTaken.includes(opt.value) ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                     >
                       {opt.label}
                     </button>
@@ -1081,7 +1083,7 @@ export default function Wizard({ onComplete }: Props) {
                       role="radio"
                       aria-checked={objective === opt.value}
                       onClick={() => updateField("objective", opt.value)}
-                      className={`py-3 rounded-xl border transition-all text-xs ${objective === opt.value ? "bg-white/10 border-white/40" : "bg-white/5 border-white/10 text-white/40 hover:bg-white/5"}`}
+                      className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${objective === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                     >
                       {opt.label}
                     </button>

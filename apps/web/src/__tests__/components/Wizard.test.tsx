@@ -755,7 +755,7 @@ describe("Wizard", () => {
       const segments = progressBar!.querySelectorAll("div");
 
       // TRIAGE = index 0 → first segment lit, rest dim
-      expect(segments[0].className).toContain("bg-white/60");
+      expect(segments[0].className).toContain("bg-white/80");
       expect(segments[1].className).toContain("bg-white/10");
       expect(segments[2].className).toContain("bg-white/10");
       expect(segments[3].className).toContain("bg-white/10");
