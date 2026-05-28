@@ -5,3 +5,4 @@ export * from "./canonical-wizard.v1";
 export * from "./contract-registry";
 export * from "./condition-evaluator";
 export * from "./snippet-resolver";
+export * from "./signal-resolver";
