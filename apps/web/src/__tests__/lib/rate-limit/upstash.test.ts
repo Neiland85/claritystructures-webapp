@@ -25,6 +25,7 @@ describe("upstash rate limiter", () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    vi.stubEnv("NODE_ENV", "test");
     vi.resetModules();
     const mod = await import("@/lib/rate-limit/upstash");
     checkRateLimit = mod.checkRateLimit;
@@ -46,11 +47,21 @@ describe("upstash rate limiter", () => {
       expect(result.remaining).toBe(0);
     });
 
-    it("should fail open when Redis throws", async () => {
+    it("should fail open outside production when Redis throws", async () => {
       mockPipeline.exec.mockRejectedValue(new Error("Redis connection failed"));
       const result = await checkRateLimit("user-1", 10, 10_000);
       expect(result.success).toBe(true);
       expect(result.remaining).toBe(10);
+    });
+
+    it("should fail closed in production when Redis throws", async () => {
+      vi.stubEnv("NODE_ENV", "production");
+
+      mockPipeline.exec.mockRejectedValue(new Error("Redis connection failed"));
+      const result = await checkRateLimit("user-1", 10, 10_000);
+
+      expect(result.success).toBe(false);
+      expect(result.remaining).toBe(0);
     });
 
     it("should call pipeline with correct key and window", async () => {
