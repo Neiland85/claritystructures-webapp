@@ -402,7 +402,7 @@ export default function Wizard({ onComplete }: Props) {
                     onClick={() => updateField("urgency", opt.value)}
                     className={`px-4 py-2.5 rounded-xl text-sm border transition-all duration-200 ${
                       urgency === opt.value
-                        ? "bg-white text-black border-white shadow-[0_0_24px_rgba(255,255,255,0.18)] shadow-[0_0_24px_rgba(255,255,255,0.18)]"
+                        ? "bg-white text-black border-white shadow-[0_0_24px_rgba(255,255,255,0.18)]"
                         : "bg-white/[0.04] border-white/10 hover:border-white/25 hover:bg-white/[0.07] text-white/60"
                     }`}
                   >
@@ -544,13 +544,13 @@ export default function Wizard({ onComplete }: Props) {
         {phase === "COGNITIVE" && (
           <div
             key="COGNITIVE"
-            className={`space-y-8 ${navigationDirection.current === "forward" ? "slide-in-right" : "slide-in-left"}`}
+            className={`space-y-8 md:space-y-10 ${navigationDirection.current === "forward" ? "slide-in-right" : "slide-in-left"}`}
           >
-            <header>
-              <h1 className="text-2xl font-light tracking-tight text-white/90">
+            <header className="space-y-3 border-b border-white/10 pb-6">
+              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white/95">
                 {t("cognitive_title")}
               </h1>
-              <p className="text-sm text-white/40 mt-1 font-light leading-relaxed">
+              <p className="max-w-2xl text-sm md:text-base text-white/45 font-light leading-relaxed">
                 {t("cognitive_subtitle")}
               </p>
             </header>
@@ -558,7 +558,7 @@ export default function Wizard({ onComplete }: Props) {
             <div className="space-y-8">
               <section
                 aria-labelledby="omnipotence-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2 id="omnipotence-heading" className="text-sm text-white/70">
                   {t("cognitive_q_omnipotence")}
@@ -589,7 +589,7 @@ export default function Wizard({ onComplete }: Props) {
 
               <section
                 aria-labelledby="verifiable-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2 id="verifiable-heading" className="text-sm text-white/70">
                   {t("cognitive_q_verifiable")}
@@ -620,7 +620,7 @@ export default function Wizard({ onComplete }: Props) {
 
               <section
                 aria-labelledby="distortion-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2 id="distortion-heading" className="text-sm text-white/70">
                   {t("cognitive_q_distortion")}
@@ -651,7 +651,7 @@ export default function Wizard({ onComplete }: Props) {
 
               <section
                 aria-labelledby="emotional-distress-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2
                   id="emotional-distress-heading"
@@ -685,7 +685,7 @@ export default function Wizard({ onComplete }: Props) {
 
               <section
                 aria-labelledby="shock-level-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2 id="shock-level-heading" className="text-sm text-white/70">
                   {t("cognitive_q_shock_level")}
@@ -725,13 +725,13 @@ export default function Wizard({ onComplete }: Props) {
               <div className="pt-4 flex gap-4">
                 <button
                   onClick={() => navigateTo("TRIAGE", "back")}
-                  className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
+                  className="flex-1 py-4 rounded-2xl border border-white/10 bg-white/[0.03] text-white/65 hover:bg-white/[0.07] hover:border-white/20 transition-all duration-200 text-sm"
                 >
                   {t("cognitive_back")}
                 </button>
                 <button
                   onClick={() => navigateTo("CONTEXT", "forward")}
-                  className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
+                  className="flex-[2] py-4 rounded-2xl bg-white text-black font-bold hover:bg-neutral-200 transition-all duration-200 text-sm shadow-[0_0_30px_rgba(255,255,255,0.16)]"
                 >
                   {t("cognitive_next")}
                 </button>
@@ -743,19 +743,22 @@ export default function Wizard({ onComplete }: Props) {
         {phase === "CONTEXT" && (
           <div
             key="CONTEXT"
-            className={`space-y-8 ${navigationDirection.current === "forward" ? "slide-in-right" : "slide-in-left"}`}
+            className={`space-y-8 md:space-y-10 ${navigationDirection.current === "forward" ? "slide-in-right" : "slide-in-left"}`}
           >
-            <header>
-              <h1 className="text-2xl font-light tracking-tight text-white/90">
+            <header className="space-y-3 border-b border-white/10 pb-6">
+              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white/95">
                 {t("context_title")}
               </h1>
-              <p className="text-sm text-white/40 mt-1 font-light leading-relaxed">
+              <p className="max-w-2xl text-sm md:text-base text-white/45 font-light leading-relaxed">
                 {t("context_subtitle")}
               </p>
             </header>
 
             <div className="space-y-8">
-              <section aria-labelledby="ongoing-heading" className="space-y-3">
+              <section
+                aria-labelledby="ongoing-heading"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+              >
                 <h2 id="ongoing-heading" className="text-sm text-white/70">
                   {t("context_q_ongoing")}
                 </h2>
@@ -785,7 +788,7 @@ export default function Wizard({ onComplete }: Props) {
 
               <section
                 aria-labelledby="incident-start-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2
                   id="incident-start-heading"
@@ -816,7 +819,7 @@ export default function Wizard({ onComplete }: Props) {
 
               <section
                 aria-labelledby="sensitivity-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2 id="sensitivity-heading" className="text-sm text-white/70">
                   {t("context_q_sensitivity")}
@@ -834,7 +837,7 @@ export default function Wizard({ onComplete }: Props) {
                       onClick={() =>
                         updateField("dataSensitivityLevel", opt.value)
                       }
-                      className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${dataSensitivityLevel === opt.value ? "bg-white text-black border-white shadow-[0_0_24px_rgba(255,255,255,0.18)] shadow-[0_0_24px_rgba(255,255,255,0.18)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
+                      className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${dataSensitivityLevel === opt.value ? "bg-white text-black border-white shadow-[0_0_24px_rgba(255,255,255,0.18)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                     >
                       <div className="font-medium">
                         {opt.label.toUpperCase()}
@@ -849,7 +852,7 @@ export default function Wizard({ onComplete }: Props) {
 
               <section
                 aria-labelledby="device-access-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2
                   id="device-access-heading"
@@ -883,7 +886,7 @@ export default function Wizard({ onComplete }: Props) {
 
               <section
                 aria-labelledby="third-parties-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2
                   id="third-parties-heading"
@@ -918,13 +921,13 @@ export default function Wizard({ onComplete }: Props) {
               <div className="pt-4 flex gap-4">
                 <button
                   onClick={() => navigateTo("COGNITIVE", "back")}
-                  className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
+                  className="flex-1 py-4 rounded-2xl border border-white/10 bg-white/[0.03] text-white/65 hover:bg-white/[0.07] hover:border-white/20 transition-all duration-200 text-sm"
                 >
                   {t("context_back")}
                 </button>
                 <button
                   onClick={() => navigateTo("DETAILS", "forward")}
-                  className="flex-2 py-4 rounded-xl bg-white text-black font-bold hover:bg-neutral-200 transition-all text-sm shadow-lg shadow-white/5"
+                  className="flex-[2] py-4 rounded-2xl bg-white text-black font-bold hover:bg-neutral-200 transition-all duration-200 text-sm shadow-[0_0_30px_rgba(255,255,255,0.16)]"
                 >
                   {t("context_next")}
                 </button>
@@ -936,13 +939,13 @@ export default function Wizard({ onComplete }: Props) {
         {phase === "DETAILS" && (
           <div
             key="DETAILS"
-            className={`space-y-8 ${navigationDirection.current === "forward" ? "slide-in-right" : "slide-in-left"}`}
+            className={`space-y-8 md:space-y-10 ${navigationDirection.current === "forward" ? "slide-in-right" : "slide-in-left"}`}
           >
-            <header>
-              <h1 className="text-2xl font-light tracking-tight text-white/90">
+            <header className="space-y-3 border-b border-white/10 pb-6">
+              <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white/95">
                 {t("details_title")}
               </h1>
-              <p className="text-sm text-white/40 mt-1 font-light leading-relaxed">
+              <p className="max-w-2xl text-sm md:text-base text-white/45 font-light leading-relaxed">
                 {t("details_subtitle")}
               </p>
             </header>
@@ -950,7 +953,7 @@ export default function Wizard({ onComplete }: Props) {
             <div className="space-y-8">
               <section
                 aria-labelledby="incident-type-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2
                   id="incident-type-heading"
@@ -979,7 +982,7 @@ export default function Wizard({ onComplete }: Props) {
 
               <section
                 aria-labelledby="device-count-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2 id="device-count-heading" className="text-sm text-white/70">
                   {t("details_q_devices")}
@@ -1005,7 +1008,7 @@ export default function Wizard({ onComplete }: Props) {
 
               <section
                 aria-labelledby="evidence-sources-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2
                   id="evidence-sources-heading"
@@ -1036,7 +1039,7 @@ export default function Wizard({ onComplete }: Props) {
 
               <section
                 aria-labelledby="actions-taken-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2
                   id="actions-taken-heading"
@@ -1067,7 +1070,7 @@ export default function Wizard({ onComplete }: Props) {
 
               <section
                 aria-labelledby="objective-heading"
-                className="space-y-3"
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
               >
                 <h2 id="objective-heading" className="text-sm text-white/70">
                   {t("details_q_objective")}
@@ -1094,7 +1097,7 @@ export default function Wizard({ onComplete }: Props) {
               <div className="pt-4 flex gap-4">
                 <button
                   onClick={() => navigateTo("CONTEXT", "back")}
-                  className="flex-1 py-4 rounded-xl border border-white/10 text-white/60 hover:bg-white/5 transition-all text-sm"
+                  className="flex-1 py-4 rounded-2xl border border-white/10 bg-white/[0.03] text-white/65 hover:bg-white/[0.07] hover:border-white/20 transition-all duration-200 text-sm"
                 >
                   {t("details_back")}
                 </button>
