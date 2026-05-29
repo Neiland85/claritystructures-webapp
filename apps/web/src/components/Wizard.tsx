@@ -22,7 +22,7 @@ import type {
   WizardResult,
 } from "@claritystructures/domain";
 import { decideIntake } from "@claritystructures/domain";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { type ReactNode, useEffect, useReducer, useRef, useState } from "react";
 import AnimatedLogo from "./AnimatedLogo";
 import LanguageSwitcher from "./LanguageSwitcher";
 
@@ -106,6 +106,32 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
     default:
       return state;
   }
+}
+
+type WizardRadioOptionProps = {
+  readonly selected: boolean;
+  readonly onSelect: () => void;
+  readonly className: string;
+  readonly children: ReactNode;
+};
+
+function WizardRadioOption({
+  selected,
+  onSelect,
+  className,
+  children,
+}: WizardRadioOptionProps) {
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected ? "true" : "false"}
+      onClick={onSelect}
+      className={className}
+    >
+      {children}
+    </button>
+  );
 }
 
 export default function Wizard({ onComplete }: Props) {
@@ -373,13 +399,10 @@ export default function Wizard({ onComplete }: Props) {
                 className="grid grid-cols-1 md:grid-cols-2 gap-3"
               >
                 {clientProfiles.map((opt) => (
-                  <button
+                  <WizardRadioOption
                     key={opt.value}
-                    role="radio"
-                    aria-checked={
-                      clientProfile === opt.value ? "true" : "false"
-                    }
-                    onClick={() => updateField("clientProfile", opt.value)}
+                    selected={clientProfile === opt.value}
+                    onSelect={() => updateField("clientProfile", opt.value)}
                     className={`text-left p-4 rounded-2xl border transition-all duration-200 ${
                       clientProfile === opt.value
                         ? "bg-white/15 border-white/50 ring-1 ring-white/30 shadow-[0_0_24px_rgba(255,255,255,0.08)]"
@@ -389,7 +412,7 @@ export default function Wizard({ onComplete }: Props) {
                     <div className="font-medium text-sm text-white/80">
                       {opt.label}
                     </div>
-                  </button>
+                  </WizardRadioOption>
                 ))}
               </div>
             </section>
@@ -407,11 +430,10 @@ export default function Wizard({ onComplete }: Props) {
                 className="flex flex-wrap gap-2"
               >
                 {urgencyLevels.map((opt) => (
-                  <button
+                  <WizardRadioOption
                     key={opt.value}
-                    role="radio"
-                    aria-checked={urgency === opt.value ? "true" : "false"}
-                    onClick={() => updateField("urgency", opt.value)}
+                    selected={urgency === opt.value}
+                    onSelect={() => updateField("urgency", opt.value)}
                     className={`px-4 py-2.5 rounded-xl text-sm border transition-all duration-200 ${
                       urgency === opt.value
                         ? "bg-white text-black border-white shadow-[0_0_24px_rgba(255,255,255,0.18)]"
@@ -419,7 +441,7 @@ export default function Wizard({ onComplete }: Props) {
                     }`}
                   >
                     {opt.label}
-                  </button>
+                  </WizardRadioOption>
                 ))}
               </div>
             </section>
