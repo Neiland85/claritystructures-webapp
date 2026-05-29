@@ -618,26 +618,20 @@ export default function Wizard({ onComplete }: Props) {
                   aria-labelledby="omnipotence-heading"
                   className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
-                  <button
-                    role="radio"
-                    aria-checked={
-                      perceivedOmnipotence === true ? "true" : "false"
-                    }
-                    onClick={() => updateField("perceivedOmnipotence", true)}
+                  <WizardRadioOption
+                    selected={perceivedOmnipotence === true}
+                    onSelect={() => updateField("perceivedOmnipotence", true)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${perceivedOmnipotence === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_total_surveillance")}
-                  </button>
-                  <button
-                    role="radio"
-                    aria-checked={
-                      perceivedOmnipotence === false ? "true" : "false"
-                    }
-                    onClick={() => updateField("perceivedOmnipotence", false)}
+                  </WizardRadioOption>
+                  <WizardRadioOption
+                    selected={perceivedOmnipotence === false}
+                    onSelect={() => updateField("perceivedOmnipotence", false)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${perceivedOmnipotence === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_restricted_tech")}
-                  </button>
+                  </WizardRadioOption>
                 </div>
               </section>
 
@@ -653,22 +647,20 @@ export default function Wizard({ onComplete }: Props) {
                   aria-labelledby="verifiable-heading"
                   className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
-                  <button
-                    role="radio"
-                    aria-checked={isVerifiable === true ? "true" : "false"}
-                    onClick={() => updateField("isVerifiable", true)}
+                  <WizardRadioOption
+                    selected={isVerifiable === true}
+                    onSelect={() => updateField("isVerifiable", true)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isVerifiable === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_material_proof")}
-                  </button>
-                  <button
-                    role="radio"
-                    aria-checked={isVerifiable === false ? "true" : "false"}
-                    onClick={() => updateField("isVerifiable", false)}
+                  </WizardRadioOption>
+                  <WizardRadioOption
+                    selected={isVerifiable === false}
+                    onSelect={() => updateField("isVerifiable", false)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isVerifiable === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_circumstantial")}
-                  </button>
+                  </WizardRadioOption>
                 </div>
               </section>
 
@@ -684,26 +676,20 @@ export default function Wizard({ onComplete }: Props) {
                   aria-labelledby="distortion-heading"
                   className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
-                  <button
-                    role="radio"
-                    aria-checked={
-                      distortionIndicator === false ? "true" : "false"
-                    }
-                    onClick={() => updateField("distortionIndicator", false)}
+                  <WizardRadioOption
+                    selected={distortionIndicator === false}
+                    onSelect={() => updateField("distortionIndicator", false)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${distortionIndicator === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_clear_narrative")}
-                  </button>
-                  <button
-                    role="radio"
-                    aria-checked={
-                      distortionIndicator === true ? "true" : "false"
-                    }
-                    onClick={() => updateField("distortionIndicator", true)}
+                  </WizardRadioOption>
+                  <WizardRadioOption
+                    selected={distortionIndicator === true}
+                    onSelect={() => updateField("distortionIndicator", true)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${distortionIndicator === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_confusion_memory")}
-                  </button>
+                  </WizardRadioOption>
                 </div>
               </section>
 
@@ -722,26 +708,20 @@ export default function Wizard({ onComplete }: Props) {
                   aria-labelledby="emotional-distress-heading"
                   className="grid grid-cols-1 sm:grid-cols-2 gap-3"
                 >
-                  <button
-                    role="radio"
-                    aria-checked={
-                      hasEmotionalDistress === true ? "true" : "false"
-                    }
-                    onClick={() => updateField("hasEmotionalDistress", true)}
+                  <WizardRadioOption
+                    selected={hasEmotionalDistress === true}
+                    onSelect={() => updateField("hasEmotionalDistress", true)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasEmotionalDistress === true ? "bg-critical text-white border-critical" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_emotional_yes")}
-                  </button>
-                  <button
-                    role="radio"
-                    aria-checked={
-                      hasEmotionalDistress === false ? "true" : "false"
-                    }
-                    onClick={() => updateField("hasEmotionalDistress", false)}
+                  </WizardRadioOption>
+                  <WizardRadioOption
+                    selected={hasEmotionalDistress === false}
+                    onSelect={() => updateField("hasEmotionalDistress", false)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasEmotionalDistress === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_emotional_no")}
-                  </button>
+                  </WizardRadioOption>
                 </div>
               </section>
 
@@ -757,30 +737,27 @@ export default function Wizard({ onComplete }: Props) {
                   aria-labelledby="shock-level-heading"
                   className="flex gap-2"
                 >
-                  <button
-                    role="radio"
-                    aria-checked={shockLevel === "low" ? "true" : "false"}
-                    onClick={() => updateField("shockLevel", "low")}
+                  <WizardRadioOption
+                    selected={shockLevel === "low"}
+                    onSelect={() => updateField("shockLevel", "low")}
                     className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${shockLevel === "low" ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_shock_low")}
-                  </button>
-                  <button
-                    role="radio"
-                    aria-checked={shockLevel === "medium" ? "true" : "false"}
-                    onClick={() => updateField("shockLevel", "medium")}
+                  </WizardRadioOption>
+                  <WizardRadioOption
+                    selected={shockLevel === "medium"}
+                    onSelect={() => updateField("shockLevel", "medium")}
                     className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${shockLevel === "medium" ? "bg-white/20 text-white border-white/40" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_shock_medium")}
-                  </button>
-                  <button
-                    role="radio"
-                    aria-checked={shockLevel === "high" ? "true" : "false"}
-                    onClick={() => updateField("shockLevel", "high")}
+                  </WizardRadioOption>
+                  <WizardRadioOption
+                    selected={shockLevel === "high"}
+                    onSelect={() => updateField("shockLevel", "high")}
                     className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${shockLevel === "high" ? "bg-critical text-white border-critical" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {t("cognitive_shock_high")}
-                  </button>
+                  </WizardRadioOption>
                 </div>
               </section>
 
