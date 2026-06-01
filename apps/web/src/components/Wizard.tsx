@@ -24,6 +24,7 @@ import type {
 import { decideIntake } from "@claritystructures/domain";
 import { type ReactNode, useEffect, useReducer, useRef, useState } from "react";
 import { WizardNavigation } from "./wizard/WizardNavigation";
+import { WizardCognitivePhase } from "./wizard/WizardCognitivePhase";
 import { WizardPhaseShell } from "./wizard/WizardPhaseShell";
 import { WizardTriagePhase } from "./wizard/WizardTriagePhase";
 
@@ -386,183 +387,49 @@ export default function Wizard({ onComplete }: Props) {
       )}
 
       {phase === "COGNITIVE" && (
-        <div
-          key="COGNITIVE"
-          className={`space-y-8 md:space-y-10 ${navigationDirection.current === "forward" ? "slide-in-right" : "slide-in-left"}`}
-        >
-          <header className="space-y-3 border-b border-white/10 pb-6">
-            <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white/95">
-              {t("cognitive_title")}
-            </h1>
-            <p className="max-w-2xl text-sm md:text-base text-white/45 font-light leading-relaxed">
-              {t("cognitive_subtitle")}
-            </p>
-          </header>
-
-          <div className="space-y-8">
-            <section
-              aria-labelledby="omnipotence-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2 id="omnipotence-heading" className="text-sm text-white/70">
-                {t("cognitive_q_omnipotence")}
-              </h2>
-              <div
-                role="radiogroup"
-                aria-labelledby="omnipotence-heading"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-              >
-                <WizardRadioOption
-                  selected={perceivedOmnipotence === true}
-                  onSelect={() => updateField("perceivedOmnipotence", true)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${perceivedOmnipotence === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("cognitive_total_surveillance")}
-                </WizardRadioOption>
-                <WizardRadioOption
-                  selected={perceivedOmnipotence === false}
-                  onSelect={() => updateField("perceivedOmnipotence", false)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${perceivedOmnipotence === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("cognitive_restricted_tech")}
-                </WizardRadioOption>
-              </div>
-            </section>
-
-            <section
-              aria-labelledby="verifiable-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2 id="verifiable-heading" className="text-sm text-white/70">
-                {t("cognitive_q_verifiable")}
-              </h2>
-              <div
-                role="radiogroup"
-                aria-labelledby="verifiable-heading"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-              >
-                <WizardRadioOption
-                  selected={isVerifiable === true}
-                  onSelect={() => updateField("isVerifiable", true)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isVerifiable === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("cognitive_material_proof")}
-                </WizardRadioOption>
-                <WizardRadioOption
-                  selected={isVerifiable === false}
-                  onSelect={() => updateField("isVerifiable", false)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isVerifiable === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("cognitive_circumstantial")}
-                </WizardRadioOption>
-              </div>
-            </section>
-
-            <section
-              aria-labelledby="distortion-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2 id="distortion-heading" className="text-sm text-white/70">
-                {t("cognitive_q_distortion")}
-              </h2>
-              <div
-                role="radiogroup"
-                aria-labelledby="distortion-heading"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-              >
-                <WizardRadioOption
-                  selected={distortionIndicator === false}
-                  onSelect={() => updateField("distortionIndicator", false)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${distortionIndicator === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("cognitive_clear_narrative")}
-                </WizardRadioOption>
-                <WizardRadioOption
-                  selected={distortionIndicator === true}
-                  onSelect={() => updateField("distortionIndicator", true)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${distortionIndicator === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("cognitive_confusion_memory")}
-                </WizardRadioOption>
-              </div>
-            </section>
-
-            <section
-              aria-labelledby="emotional-distress-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2
-                id="emotional-distress-heading"
-                className="text-sm text-white/70"
-              >
-                {t("cognitive_q_emotional_distress")}
-              </h2>
-              <div
-                role="radiogroup"
-                aria-labelledby="emotional-distress-heading"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-              >
-                <WizardRadioOption
-                  selected={hasEmotionalDistress === true}
-                  onSelect={() => updateField("hasEmotionalDistress", true)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasEmotionalDistress === true ? "bg-critical text-white border-critical" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("cognitive_emotional_yes")}
-                </WizardRadioOption>
-                <WizardRadioOption
-                  selected={hasEmotionalDistress === false}
-                  onSelect={() => updateField("hasEmotionalDistress", false)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasEmotionalDistress === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("cognitive_emotional_no")}
-                </WizardRadioOption>
-              </div>
-            </section>
-
-            <section
-              aria-labelledby="shock-level-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2 id="shock-level-heading" className="text-sm text-white/70">
-                {t("cognitive_q_shock_level")}
-              </h2>
-              <div
-                role="radiogroup"
-                aria-labelledby="shock-level-heading"
-                className="flex gap-2"
-              >
-                <WizardRadioOption
-                  selected={shockLevel === "low"}
-                  onSelect={() => updateField("shockLevel", "low")}
-                  className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${shockLevel === "low" ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("cognitive_shock_low")}
-                </WizardRadioOption>
-                <WizardRadioOption
-                  selected={shockLevel === "medium"}
-                  onSelect={() => updateField("shockLevel", "medium")}
-                  className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${shockLevel === "medium" ? "bg-white/20 text-white border-white/40" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("cognitive_shock_medium")}
-                </WizardRadioOption>
-                <WizardRadioOption
-                  selected={shockLevel === "high"}
-                  onSelect={() => updateField("shockLevel", "high")}
-                  className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${shockLevel === "high" ? "bg-critical text-white border-critical" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("cognitive_shock_high")}
-                </WizardRadioOption>
-              </div>
-            </section>
-
-            <WizardNavigation
-              backLabel={t("cognitive_back")}
-              onBack={() => navigateTo("TRIAGE", "back")}
-              primaryLabel={t("cognitive_next")}
-              onPrimary={() => navigateTo("CONTEXT", "forward")}
-            />
-          </div>
-        </div>
+        <WizardCognitivePhase
+          navigationDirection={navigationDirection.current}
+          perceivedOmnipotence={perceivedOmnipotence}
+          isVerifiable={isVerifiable}
+          distortionIndicator={distortionIndicator}
+          hasEmotionalDistress={hasEmotionalDistress}
+          shockLevel={shockLevel}
+          labels={{
+            title: t("cognitive_title"),
+            subtitle: t("cognitive_subtitle"),
+            qOmnipotence: t("cognitive_q_omnipotence"),
+            totalSurveillance: t("cognitive_total_surveillance"),
+            restrictedTech: t("cognitive_restricted_tech"),
+            qVerifiable: t("cognitive_q_verifiable"),
+            materialProof: t("cognitive_material_proof"),
+            circumstantial: t("cognitive_circumstantial"),
+            qDistortion: t("cognitive_q_distortion"),
+            clearNarrative: t("cognitive_clear_narrative"),
+            confusionMemory: t("cognitive_confusion_memory"),
+            qEmotionalDistress: t("cognitive_q_emotional_distress"),
+            emotionalYes: t("cognitive_emotional_yes"),
+            emotionalNo: t("cognitive_emotional_no"),
+            qShockLevel: t("cognitive_q_shock_level"),
+            shockLow: t("cognitive_shock_low"),
+            shockMedium: t("cognitive_shock_medium"),
+            shockHigh: t("cognitive_shock_high"),
+            back: t("cognitive_back"),
+            next: t("cognitive_next"),
+          }}
+          onPerceivedOmnipotenceChange={(value) =>
+            updateField("perceivedOmnipotence", value)
+          }
+          onIsVerifiableChange={(value) => updateField("isVerifiable", value)}
+          onDistortionIndicatorChange={(value) =>
+            updateField("distortionIndicator", value)
+          }
+          onHasEmotionalDistressChange={(value) =>
+            updateField("hasEmotionalDistress", value)
+          }
+          onShockLevelChange={(value) => updateField("shockLevel", value)}
+          onBack={() => navigateTo("TRIAGE", "back")}
+          onNext={() => navigateTo("CONTEXT", "forward")}
+        />
       )}
 
       {phase === "CONTEXT" && (
