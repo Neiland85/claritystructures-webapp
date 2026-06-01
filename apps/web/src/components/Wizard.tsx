@@ -23,6 +23,7 @@ import type {
 } from "@claritystructures/domain";
 import { decideIntake } from "@claritystructures/domain";
 import { type ReactNode, useEffect, useReducer, useRef, useState } from "react";
+import { WizardNavigation } from "./wizard/WizardNavigation";
 import { WizardPhaseShell } from "./wizard/WizardPhaseShell";
 
 type Props = {
@@ -531,18 +532,12 @@ export default function Wizard({ onComplete }: Props) {
             </fieldset>
           </section>
 
-          <button
-            onClick={() => navigateTo("COGNITIVE", "forward")}
-            disabled={!isStep1Complete}
-            aria-disabled={!isStep1Complete}
-            className={`w-full py-4 rounded-xl font-semibold transition-all ${
-              isStep1Complete
-                ? "bg-white text-black hover:bg-neutral-200"
-                : "bg-white/5 text-white/20 cursor-not-allowed border border-white/5"
-            }`}
-          >
-            {t("triage_next")}
-          </button>
+          <WizardNavigation
+            primaryLabel={t("triage_next")}
+            onPrimary={() => navigateTo("COGNITIVE", "forward")}
+            primaryDisabled={!isStep1Complete}
+            variant="triage"
+          />
         </div>
       )}
 
@@ -716,20 +711,12 @@ export default function Wizard({ onComplete }: Props) {
               </div>
             </section>
 
-            <div className="pt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <button
-                onClick={() => navigateTo("TRIAGE", "back")}
-                className="flex-1 py-4 rounded-2xl border border-white/10 bg-white/[0.03] text-white/65 hover:bg-white/[0.07] hover:border-white/20 transition-all duration-200 text-sm"
-              >
-                {t("cognitive_back")}
-              </button>
-              <button
-                onClick={() => navigateTo("CONTEXT", "forward")}
-                className="flex-[2] py-4 rounded-2xl bg-white text-black font-bold hover:bg-neutral-200 transition-all duration-200 text-sm shadow-[0_0_30px_rgba(255,255,255,0.16)]"
-              >
-                {t("cognitive_next")}
-              </button>
-            </div>
+            <WizardNavigation
+              backLabel={t("cognitive_back")}
+              onBack={() => navigateTo("TRIAGE", "back")}
+              primaryLabel={t("cognitive_next")}
+              onPrimary={() => navigateTo("CONTEXT", "forward")}
+            />
           </div>
         </div>
       )}
@@ -909,20 +896,12 @@ export default function Wizard({ onComplete }: Props) {
               </div>
             </section>
 
-            <div className="pt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <button
-                onClick={() => navigateTo("COGNITIVE", "back")}
-                className="flex-1 py-4 rounded-2xl border border-white/10 bg-white/[0.03] text-white/65 hover:bg-white/[0.07] hover:border-white/20 transition-all duration-200 text-sm"
-              >
-                {t("context_back")}
-              </button>
-              <button
-                onClick={() => navigateTo("DETAILS", "forward")}
-                className="flex-[2] py-4 rounded-2xl bg-white text-black font-bold hover:bg-neutral-200 transition-all duration-200 text-sm shadow-[0_0_30px_rgba(255,255,255,0.16)]"
-              >
-                {t("context_next")}
-              </button>
-            </div>
+            <WizardNavigation
+              backLabel={t("context_back")}
+              onBack={() => navigateTo("COGNITIVE", "back")}
+              primaryLabel={t("context_next")}
+              onPrimary={() => navigateTo("DETAILS", "forward")}
+            />
           </div>
         </div>
       )}
@@ -1081,26 +1060,16 @@ export default function Wizard({ onComplete }: Props) {
               </div>
             </section>
 
-            <div className="pt-4 flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <button
-                onClick={() => navigateTo("CONTEXT", "back")}
-                className="flex-1 py-4 rounded-2xl border border-white/10 bg-white/[0.03] text-white/65 hover:bg-white/[0.07] hover:border-white/20 transition-all duration-200 text-sm"
-              >
-                {t("details_back")}
-              </button>
-              <button
-                onClick={submit}
-                disabled={isSubmitting || !incident || !objective}
-                aria-disabled={isSubmitting || !incident || !objective}
-                className={`flex-2 py-4 rounded-xl font-bold transition-all text-sm shadow-lg shadow-white/5 ${
-                  isSubmitting || !incident || !objective
-                    ? "bg-white/5 text-white/20 cursor-not-allowed border border-white/5"
-                    : "bg-white text-black hover:bg-neutral-200"
-                }`}
-              >
-                {isSubmitting ? t("details_submitting") : t("details_submit")}
-              </button>
-            </div>
+            <WizardNavigation
+              backLabel={t("details_back")}
+              onBack={() => navigateTo("CONTEXT", "back")}
+              primaryLabel={
+                isSubmitting ? t("details_submitting") : t("details_submit")
+              }
+              onPrimary={submit}
+              primaryDisabled={isSubmitting || !incident || !objective}
+              variant="submit"
+            />
           </div>
         </div>
       )}
