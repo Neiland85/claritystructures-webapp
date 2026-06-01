@@ -25,6 +25,7 @@ import { decideIntake } from "@claritystructures/domain";
 import { type ReactNode, useEffect, useReducer, useRef, useState } from "react";
 import { WizardNavigation } from "./wizard/WizardNavigation";
 import { WizardPhaseShell } from "./wizard/WizardPhaseShell";
+import { WizardTriagePhase } from "./wizard/WizardTriagePhase";
 
 type Props = {
   onComplete: (data: WizardResult) => void;
@@ -337,208 +338,51 @@ export default function Wizard({ onComplete }: Props) {
       ofLabel={t("of")}
     >
       {phase === "TRIAGE" && (
-        <div className="space-y-6 md:space-y-10">
-          <header className="space-y-3 border-b border-white/10 pb-6">
-            <h1 className="text-[2rem] sm:text-3xl md:text-4xl font-light tracking-tight text-white/95 leading-tight">
-              {t("triage_title")}
-            </h1>
-            <p className="max-w-2xl text-sm md:text-base text-white/45 font-light leading-relaxed">
-              {t("triage_subtitle")}
-            </p>
-          </header>
-
-          <section
-            aria-labelledby="client-profile-heading"
-            className="space-y-4"
-          >
-            <h2
-              id="client-profile-heading"
-              className="text-xs uppercase tracking-widest text-white/30 font-semibold"
-            >
-              {t("triage_section_profile")}
-            </h2>
-            <div
-              role="radiogroup"
-              aria-labelledby="client-profile-heading"
-              className="grid grid-cols-1 md:grid-cols-2 gap-3"
-            >
-              {clientProfiles.map((opt) => (
-                <WizardRadioOption
-                  key={opt.value}
-                  selected={clientProfile === opt.value}
-                  onSelect={() => updateField("clientProfile", opt.value)}
-                  className={`text-left p-4 rounded-2xl border transition-all duration-200 ${
-                    clientProfile === opt.value
-                      ? "bg-white/15 border-white/50 ring-1 ring-white/30 shadow-[0_0_24px_rgba(255,255,255,0.08)]"
-                      : "bg-white/[0.04] border-white/10 hover:border-white/25 hover:bg-white/[0.07]"
-                  }`}
-                >
-                  <div className="font-medium text-sm text-white/80">
-                    {opt.label}
-                  </div>
-                </WizardRadioOption>
-              ))}
-            </div>
-          </section>
-
-          <section aria-labelledby="urgency-heading" className="space-y-4">
-            <h2
-              id="urgency-heading"
-              className="text-xs uppercase tracking-widest text-white/30 font-semibold"
-            >
-              {t("triage_section_urgency")}
-            </h2>
-            <div
-              role="radiogroup"
-              aria-labelledby="urgency-heading"
-              className="flex flex-wrap gap-2"
-            >
-              {urgencyLevels.map((opt) => (
-                <WizardRadioOption
-                  key={opt.value}
-                  selected={urgency === opt.value}
-                  onSelect={() => updateField("urgency", opt.value)}
-                  className={`px-4 py-2.5 rounded-xl text-sm border transition-all duration-200 ${
-                    urgency === opt.value
-                      ? "bg-white text-black border-white shadow-[0_0_24px_rgba(255,255,255,0.18)]"
-                      : "bg-white/[0.04] border-white/10 hover:border-white/25 hover:bg-white/[0.07] text-white/60"
-                  }`}
-                >
-                  {opt.label}
-                </WizardRadioOption>
-              ))}
-            </div>
-          </section>
-
-          <section
-            aria-label={t("triage_physical_integrity")}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6 border-t border-white/10"
-          >
-            <fieldset className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-              <legend className="text-xs text-white/40 text-center block">
-                {t("triage_physical_integrity")}
-              </legend>
-              <div
-                role="radiogroup"
-                aria-label={t("triage_physical_integrity")}
-                className="flex gap-2"
-              >
-                <button
-                  role="radio"
-                  aria-checked={physicalSafetyRisk === true ? "true" : "false"}
-                  onClick={() => updateField("physicalSafetyRisk", true)}
-                  className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
-                >
-                  {t("triage_threat_real")}
-                </button>
-                <button
-                  role="radio"
-                  aria-checked={physicalSafetyRisk === false ? "true" : "false"}
-                  onClick={() => updateField("physicalSafetyRisk", false)}
-                  className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
-                >
-                  {t("triage_safe_zone")}
-                </button>
-              </div>
-            </fieldset>
-            <fieldset className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-              <legend className="text-xs text-white/40 text-center block">
-                {t("triage_financial_assets")}
-              </legend>
-              <div
-                role="radiogroup"
-                aria-label={t("triage_financial_assets")}
-                className="flex gap-2"
-              >
-                <button
-                  role="radio"
-                  aria-checked={financialAssetRisk === true ? "true" : "false"}
-                  onClick={() => updateField("financialAssetRisk", true)}
-                  className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === true ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
-                >
-                  {t("triage_at_risk")}
-                </button>
-                <button
-                  role="radio"
-                  aria-checked={financialAssetRisk === false ? "true" : "false"}
-                  onClick={() => updateField("financialAssetRisk", false)}
-                  className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
-                >
-                  {t("triage_protected")}
-                </button>
-              </div>
-            </fieldset>
-            <fieldset className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-              <legend className="text-xs text-white/40 text-center block">
-                {t("triage_credential_access")}
-              </legend>
-              <div
-                role="radiogroup"
-                aria-label={t("triage_credential_access")}
-                className="flex gap-2"
-              >
-                <button
-                  role="radio"
-                  aria-checked={
-                    attackerHasPasswords === true ? "true" : "false"
-                  }
-                  onClick={() => updateField("attackerHasPasswords", true)}
-                  className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${attackerHasPasswords === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
-                >
-                  {t("triage_passwords_compromised")}
-                </button>
-                <button
-                  role="radio"
-                  aria-checked={
-                    attackerHasPasswords === false ? "true" : "false"
-                  }
-                  onClick={() => updateField("attackerHasPasswords", false)}
-                  className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${attackerHasPasswords === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
-                >
-                  {t("triage_passwords_safe")}
-                </button>
-              </div>
-            </fieldset>
-            <fieldset className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
-              <legend className="text-xs text-white/40 text-center block">
-                {t("triage_evidence_volatility")}
-              </legend>
-              <div
-                role="radiogroup"
-                aria-label={t("triage_evidence_volatility")}
-                className="flex gap-2"
-              >
-                <button
-                  role="radio"
-                  aria-checked={
-                    evidenceIsAutoDeleted === true ? "true" : "false"
-                  }
-                  onClick={() => updateField("evidenceIsAutoDeleted", true)}
-                  className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${evidenceIsAutoDeleted === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
-                >
-                  {t("triage_auto_deleting")}
-                </button>
-                <button
-                  role="radio"
-                  aria-checked={
-                    evidenceIsAutoDeleted === false ? "true" : "false"
-                  }
-                  onClick={() => updateField("evidenceIsAutoDeleted", false)}
-                  className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${evidenceIsAutoDeleted === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
-                >
-                  {t("triage_evidence_stable")}
-                </button>
-              </div>
-            </fieldset>
-          </section>
-
-          <WizardNavigation
-            primaryLabel={t("triage_next")}
-            onPrimary={() => navigateTo("COGNITIVE", "forward")}
-            primaryDisabled={!isStep1Complete}
-            variant="triage"
-          />
-        </div>
+        <WizardTriagePhase
+          clientProfiles={clientProfiles}
+          urgencyLevels={urgencyLevels}
+          clientProfile={clientProfile}
+          urgency={urgency}
+          physicalSafetyRisk={physicalSafetyRisk}
+          financialAssetRisk={financialAssetRisk}
+          attackerHasPasswords={attackerHasPasswords}
+          evidenceIsAutoDeleted={evidenceIsAutoDeleted}
+          labels={{
+            title: t("triage_title"),
+            subtitle: t("triage_subtitle"),
+            sectionProfile: t("triage_section_profile"),
+            sectionUrgency: t("triage_section_urgency"),
+            physicalIntegrity: t("triage_physical_integrity"),
+            financialAssets: t("triage_financial_assets"),
+            credentialAccess: t("triage_credential_access"),
+            evidenceVolatility: t("triage_evidence_volatility"),
+            threatReal: t("triage_threat_real"),
+            safeZone: t("triage_safe_zone"),
+            atRisk: t("triage_at_risk"),
+            protected: t("triage_protected"),
+            passwordsCompromised: t("triage_passwords_compromised"),
+            passwordsSafe: t("triage_passwords_safe"),
+            autoDeleting: t("triage_auto_deleting"),
+            evidenceStable: t("triage_evidence_stable"),
+            next: t("triage_next"),
+          }}
+          onClientProfileChange={(value) => updateField("clientProfile", value)}
+          onUrgencyChange={(value) => updateField("urgency", value)}
+          onPhysicalSafetyRiskChange={(value) =>
+            updateField("physicalSafetyRisk", value)
+          }
+          onFinancialAssetRiskChange={(value) =>
+            updateField("financialAssetRisk", value)
+          }
+          onAttackerHasPasswordsChange={(value) =>
+            updateField("attackerHasPasswords", value)
+          }
+          onEvidenceIsAutoDeletedChange={(value) =>
+            updateField("evidenceIsAutoDeleted", value)
+          }
+          onNext={() => navigateTo("COGNITIVE", "forward")}
+          nextDisabled={!isStep1Complete}
+        />
       )}
 
       {phase === "COGNITIVE" && (
