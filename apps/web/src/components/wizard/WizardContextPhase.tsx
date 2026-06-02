@@ -40,7 +40,9 @@ type WizardContextPhaseProps = {
   readonly thirdPartiesInvolved: boolean | null;
   readonly labels: WizardContextLabels;
   readonly onIsOngoingChange: (value: boolean) => void;
-  readonly onEstimatedIncidentStartChange: (value: EstimatedIncidentStart) => void;
+  readonly onEstimatedIncidentStartChange: (
+    value: EstimatedIncidentStart,
+  ) => void;
   readonly onDataSensitivityLevelChange: (value: DataSensitivityLevel) => void;
   readonly onHasAccessToDevicesChange: (value: boolean) => void;
   readonly onThirdPartiesInvolvedChange: (value: boolean) => void;
