@@ -65,7 +65,12 @@ export async function proxy(request: NextRequest) {
   }
 
   // ── Rate limiting (API routes only) ──────────────────────────
-  if (request.nextUrl.pathname.startsWith("/api/")) {
+  // /api/contact owns a route-level limiter with a wider window.
+  // Keep proxy-level protection for other API routes, but avoid double-limiting contact submissions.
+  const shouldApplyProxyRateLimit =
+    pathname.startsWith("/api/") && pathname !== "/api/contact";
+
+  if (shouldApplyProxyRateLimit) {
     const identifier = getIdentifier(request);
     const { success, remaining } = await checkRateLimit(identifier, 10, 10_000);
 
