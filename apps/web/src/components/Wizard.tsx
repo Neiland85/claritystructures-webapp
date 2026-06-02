@@ -24,7 +24,7 @@ import type {
 import { decideIntake } from "@claritystructures/domain";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { WizardNavigation } from "./wizard/WizardNavigation";
-import { WizardAriaOption } from "./wizard/WizardAriaOption";
+import { WizardDetailsPhase } from "./wizard/WizardDetailsPhase";
 import { WizardCognitivePhase } from "./wizard/WizardCognitivePhase";
 import { WizardContextPhase } from "./wizard/WizardContextPhase";
 import { WizardPhaseShell } from "./wizard/WizardPhaseShell";
@@ -454,167 +454,43 @@ export default function Wizard({ onComplete }: Props) {
       )}
 
       {phase === "DETAILS" && (
-        <div
-          key="DETAILS"
-          className={`space-y-8 md:space-y-10 ${navigationDirection.current === "forward" ? "slide-in-right" : "slide-in-left"}`}
-        >
-          <header className="space-y-3 border-b border-white/10 pb-6">
-            <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white/95">
-              {t("details_title")}
-            </h1>
-            <p className="max-w-2xl text-sm md:text-base text-white/45 font-light leading-relaxed">
-              {t("details_subtitle")}
-            </p>
-          </header>
-
-          <div className="space-y-8">
-            <section
-              aria-labelledby="incident-type-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2 id="incident-type-heading" className="text-sm text-white/70">
-                {t("details_q_incident")}
-              </h2>
-              <div
-                role="radiogroup"
-                aria-labelledby="incident-type-heading"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-              >
-                {incidentTypes.map((opt) => (
-                  <WizardAriaOption
-                    key={opt.value}
-                    role="radio"
-                    checked={incident === opt.value}
-                    onClick={() => updateField("incident", opt.value)}
-                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${incident === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                  >
-                    {opt.label}
-                  </WizardAriaOption>
-                ))}
-              </div>
-            </section>
-
-            <section
-              aria-labelledby="device-count-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2 id="device-count-heading" className="text-sm text-white/70">
-                {t("details_q_devices")}
-              </h2>
-              <div
-                role="radiogroup"
-                aria-labelledby="device-count-heading"
-                className="flex gap-2"
-              >
-                {deviceCounts.map((opt) => (
-                  <WizardAriaOption
-                    key={opt.value}
-                    role="radio"
-                    checked={devices === opt.value}
-                    onClick={() => updateField("devices", opt.value)}
-                    className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${devices === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                  >
-                    {opt.label}
-                  </WizardAriaOption>
-                ))}
-              </div>
-            </section>
-
-            <section
-              aria-labelledby="evidence-sources-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2
-                id="evidence-sources-heading"
-                className="text-sm text-white/70"
-              >
-                {t("details_q_evidence_sources")}
-              </h2>
-              <div
-                role="group"
-                aria-labelledby="evidence-sources-heading"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-              >
-                {evidenceSourceOptions.map((opt) => (
-                  <WizardAriaOption
-                    key={opt.value}
-                    role="checkbox"
-                    checked={evidenceSources.includes(opt.value)}
-                    onClick={() =>
-                      toggleArrayField("evidenceSources", opt.value)
-                    }
-                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${evidenceSources.includes(opt.value) ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                  >
-                    {opt.label}
-                  </WizardAriaOption>
-                ))}
-              </div>
-            </section>
-
-            <section
-              aria-labelledby="actions-taken-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2 id="actions-taken-heading" className="text-sm text-white/70">
-                {t("details_q_actions_taken")}
-              </h2>
-              <div
-                role="group"
-                aria-labelledby="actions-taken-heading"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-              >
-                {actionTakenOptions.map((opt) => (
-                  <WizardAriaOption
-                    key={opt.value}
-                    role="checkbox"
-                    checked={actionsTaken.includes(opt.value)}
-                    onClick={() => toggleArrayField("actionsTaken", opt.value)}
-                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${actionsTaken.includes(opt.value) ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                  >
-                    {opt.label}
-                  </WizardAriaOption>
-                ))}
-              </div>
-            </section>
-
-            <section
-              aria-labelledby="objective-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2 id="objective-heading" className="text-sm text-white/70">
-                {t("details_q_objective")}
-              </h2>
-              <div
-                role="radiogroup"
-                aria-labelledby="objective-heading"
-                className="grid grid-cols-1 gap-3"
-              >
-                {objectiveOptions.map((opt) => (
-                  <WizardAriaOption
-                    key={opt.value}
-                    role="radio"
-                    checked={objective === opt.value}
-                    onClick={() => updateField("objective", opt.value)}
-                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${objective === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                  >
-                    {opt.label}
-                  </WizardAriaOption>
-                ))}
-              </div>
-            </section>
-
-            <WizardNavigation
-              backLabel={t("details_back")}
-              onBack={() => navigateTo("CONTEXT", "back")}
-              primaryLabel={
-                isSubmitting ? t("details_submitting") : t("details_submit")
-              }
-              onPrimary={submit}
-              primaryDisabled={isSubmitting || !incident || !objective}
-              variant="submit"
-            />
-          </div>
-        </div>
+        <WizardDetailsPhase
+          navigationDirection={navigationDirection.current}
+          incidentTypes={incidentTypes}
+          deviceCounts={deviceCounts}
+          evidenceSourceOptions={evidenceSourceOptions}
+          actionTakenOptions={actionTakenOptions}
+          objectiveOptions={objectiveOptions}
+          incident={incident}
+          devices={devices}
+          evidenceSources={evidenceSources}
+          actionsTaken={actionsTaken}
+          objective={objective}
+          isSubmitting={isSubmitting}
+          labels={{
+            title: t("details_title"),
+            subtitle: t("details_subtitle"),
+            qIncident: t("details_q_incident"),
+            qDevices: t("details_q_devices"),
+            qEvidenceSources: t("details_q_evidence_sources"),
+            qActionsTaken: t("details_q_actions_taken"),
+            qObjective: t("details_q_objective"),
+            back: t("details_back"),
+            submit: t("details_submit"),
+            submitting: t("details_submitting"),
+          }}
+          onIncidentChange={(value) => updateField("incident", value)}
+          onDevicesChange={(value) => updateField("devices", value)}
+          onEvidenceSourceToggle={(value) =>
+            toggleArrayField("evidenceSources", value)
+          }
+          onActionTakenToggle={(value) =>
+            toggleArrayField("actionsTaken", value)
+          }
+          onObjectiveChange={(value) => updateField("objective", value)}
+          onBack={() => navigateTo("CONTEXT", "back")}
+          onSubmit={submit}
+        />
       )}
     </WizardPhaseShell>
   );
