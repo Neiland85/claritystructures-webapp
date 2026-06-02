@@ -9,6 +9,15 @@ import { checkRateLimit, getIdentifier } from "./lib/rate-limit/upstash";
  * See: https://nextjs.org/docs/messages/middleware-to-proxy
  */
 export async function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // Rate-limit health checks bypass:
+  // /api/health must remain observable for uptime checks and deployment smoke tests.
+  // Business/API abuse protection remains active for protected API routes below.
+  if (pathname === "/api/health") {
+    return NextResponse.next();
+  }
+
   // Forward nonce via request headers so RSC can read it via next/headers
   const nonce = crypto.randomUUID();
   const requestHeaders = new Headers(request.headers);
