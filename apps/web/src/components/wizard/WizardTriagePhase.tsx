@@ -64,7 +64,7 @@ function TriageRadioOption({
     <button
       type="button"
       role="radio"
-      aria-checked={selected ? "true" : "false"}
+      aria-checked={selected}
       onClick={onSelect}
       className={className}
     >
@@ -179,7 +179,7 @@ export function WizardTriagePhase({
             <button
               type="button"
               role="radio"
-              aria-checked={physicalSafetyRisk === true ? "true" : "false"}
+              aria-checked={physicalSafetyRisk === true}
               onClick={() => onPhysicalSafetyRiskChange(true)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
             >
@@ -188,7 +188,7 @@ export function WizardTriagePhase({
             <button
               type="button"
               role="radio"
-              aria-checked={physicalSafetyRisk === false ? "true" : "false"}
+              aria-checked={physicalSafetyRisk === false}
               onClick={() => onPhysicalSafetyRiskChange(false)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
             >
@@ -209,7 +209,7 @@ export function WizardTriagePhase({
             <button
               type="button"
               role="radio"
-              aria-checked={financialAssetRisk === true ? "true" : "false"}
+              aria-checked={financialAssetRisk === true}
               onClick={() => onFinancialAssetRiskChange(true)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === true ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
             >
@@ -218,7 +218,7 @@ export function WizardTriagePhase({
             <button
               type="button"
               role="radio"
-              aria-checked={financialAssetRisk === false ? "true" : "false"}
+              aria-checked={financialAssetRisk === false}
               onClick={() => onFinancialAssetRiskChange(false)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
             >
@@ -239,7 +239,7 @@ export function WizardTriagePhase({
             <button
               type="button"
               role="radio"
-              aria-checked={attackerHasPasswords === true ? "true" : "false"}
+              aria-checked={attackerHasPasswords === true}
               onClick={() => onAttackerHasPasswordsChange(true)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${attackerHasPasswords === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
             >
@@ -248,7 +248,7 @@ export function WizardTriagePhase({
             <button
               type="button"
               role="radio"
-              aria-checked={attackerHasPasswords === false ? "true" : "false"}
+              aria-checked={attackerHasPasswords === false}
               onClick={() => onAttackerHasPasswordsChange(false)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${attackerHasPasswords === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
             >
@@ -269,7 +269,7 @@ export function WizardTriagePhase({
             <button
               type="button"
               role="radio"
-              aria-checked={evidenceIsAutoDeleted === true ? "true" : "false"}
+              aria-checked={evidenceIsAutoDeleted === true}
               onClick={() => onEvidenceIsAutoDeletedChange(true)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${evidenceIsAutoDeleted === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
             >
@@ -278,7 +278,7 @@ export function WizardTriagePhase({
             <button
               type="button"
               role="radio"
-              aria-checked={evidenceIsAutoDeleted === false ? "true" : "false"}
+              aria-checked={evidenceIsAutoDeleted === false}
               onClick={() => onEvidenceIsAutoDeletedChange(false)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${evidenceIsAutoDeleted === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
             >

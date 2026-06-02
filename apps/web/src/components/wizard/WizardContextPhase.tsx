@@ -67,7 +67,7 @@ function ContextRadioOption({
     <button
       type="button"
       role="radio"
-      aria-checked={selected ? "true" : "false"}
+      aria-checked={selected}
       onClick={onSelect}
       className={className}
     >
