@@ -136,8 +136,13 @@ describe("POST /api/contact", () => {
     const json = await res.json();
 
     expect(res.status).toBe(429);
+    expect(res.headers.get("Retry-After")).toBe("60");
     expect(json).toEqual({ error: "Too many requests" });
-    expect(checkRateLimitMock).toHaveBeenCalledWith("ip:127.0.0.1", 10, 60_000);
+    expect(checkRateLimitMock).toHaveBeenCalledWith(
+      "contact:ip:127.0.0.1",
+      10,
+      60_000,
+    );
     expect(executeMock).not.toHaveBeenCalled();
   });
 

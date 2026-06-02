@@ -30,10 +30,17 @@ async function sha256Hex(value: string): Promise<string> {
 
 export async function POST(req: NextRequest) {
   try {
-    const rateLimit = await checkRateLimit(getIdentifier(req), 10, 60_000);
+    const identifier = getIdentifier(req);
+    const rateLimit = await checkRateLimit(`contact:${identifier}`, 10, 60_000);
 
     if (!rateLimit.success) {
-      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+      return NextResponse.json(
+        { error: "Too many requests" },
+        {
+          status: 429,
+          headers: { "Retry-After": "60" },
+        },
+      );
     }
 
     const body = await req.json();
