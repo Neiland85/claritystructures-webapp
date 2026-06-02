@@ -24,6 +24,7 @@ import type {
 import { decideIntake } from "@claritystructures/domain";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { WizardNavigation } from "./wizard/WizardNavigation";
+import { WizardAriaOption } from "./wizard/WizardAriaOption";
 import { WizardCognitivePhase } from "./wizard/WizardCognitivePhase";
 import { WizardContextPhase } from "./wizard/WizardContextPhase";
 import { WizardPhaseShell } from "./wizard/WizardPhaseShell";
@@ -480,15 +481,15 @@ export default function Wizard({ onComplete }: Props) {
                 className="grid grid-cols-1 sm:grid-cols-2 gap-3"
               >
                 {incidentTypes.map((opt) => (
-                  <button
+                  <WizardAriaOption
                     key={opt.value}
                     role="radio"
-                    aria-checked={incident === opt.value}
+                    checked={incident === opt.value}
                     onClick={() => updateField("incident", opt.value)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${incident === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {opt.label}
-                  </button>
+                  </WizardAriaOption>
                 ))}
               </div>
             </section>
@@ -506,15 +507,15 @@ export default function Wizard({ onComplete }: Props) {
                 className="flex gap-2"
               >
                 {deviceCounts.map((opt) => (
-                  <button
+                  <WizardAriaOption
                     key={opt.value}
                     role="radio"
-                    aria-checked={devices === opt.value}
+                    checked={devices === opt.value}
                     onClick={() => updateField("devices", opt.value)}
                     className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${devices === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {opt.label}
-                  </button>
+                  </WizardAriaOption>
                 ))}
               </div>
             </section>
@@ -535,17 +536,17 @@ export default function Wizard({ onComplete }: Props) {
                 className="grid grid-cols-1 sm:grid-cols-2 gap-3"
               >
                 {evidenceSourceOptions.map((opt) => (
-                  <button
+                  <WizardAriaOption
                     key={opt.value}
                     role="checkbox"
-                    aria-checked={evidenceSources.includes(opt.value)}
+                    checked={evidenceSources.includes(opt.value)}
                     onClick={() =>
                       toggleArrayField("evidenceSources", opt.value)
                     }
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${evidenceSources.includes(opt.value) ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {opt.label}
-                  </button>
+                  </WizardAriaOption>
                 ))}
               </div>
             </section>
@@ -563,15 +564,15 @@ export default function Wizard({ onComplete }: Props) {
                 className="grid grid-cols-1 sm:grid-cols-2 gap-3"
               >
                 {actionTakenOptions.map((opt) => (
-                  <button
+                  <WizardAriaOption
                     key={opt.value}
                     role="checkbox"
-                    aria-checked={actionsTaken.includes(opt.value)}
+                    checked={actionsTaken.includes(opt.value)}
                     onClick={() => toggleArrayField("actionsTaken", opt.value)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${actionsTaken.includes(opt.value) ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {opt.label}
-                  </button>
+                  </WizardAriaOption>
                 ))}
               </div>
             </section>
@@ -589,15 +590,15 @@ export default function Wizard({ onComplete }: Props) {
                 className="grid grid-cols-1 gap-3"
               >
                 {objectiveOptions.map((opt) => (
-                  <button
+                  <WizardAriaOption
                     key={opt.value}
                     role="radio"
-                    aria-checked={objective === opt.value}
+                    checked={objective === opt.value}
                     onClick={() => updateField("objective", opt.value)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${objective === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
                     {opt.label}
-                  </button>
+                  </WizardAriaOption>
                 ))}
               </div>
             </section>
