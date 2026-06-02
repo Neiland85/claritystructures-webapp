@@ -483,7 +483,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     key={opt.value}
                     role="radio"
-                    aria-checked={incident === opt.value ? "true" : "false"}
+                    aria-checked={incident === opt.value}
                     onClick={() => updateField("incident", opt.value)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${incident === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -509,7 +509,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     key={opt.value}
                     role="radio"
-                    aria-checked={devices === opt.value ? "true" : "false"}
+                    aria-checked={devices === opt.value}
                     onClick={() => updateField("devices", opt.value)}
                     className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${devices === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -538,9 +538,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     key={opt.value}
                     role="checkbox"
-                    aria-checked={
-                      evidenceSources.includes(opt.value) ? "true" : "false"
-                    }
+                    aria-checked={evidenceSources.includes(opt.value)}
                     onClick={() =>
                       toggleArrayField("evidenceSources", opt.value)
                     }
@@ -568,9 +566,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     key={opt.value}
                     role="checkbox"
-                    aria-checked={
-                      actionsTaken.includes(opt.value) ? "true" : "false"
-                    }
+                    aria-checked={actionsTaken.includes(opt.value)}
                     onClick={() => toggleArrayField("actionsTaken", opt.value)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${actionsTaken.includes(opt.value) ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
@@ -596,7 +592,7 @@ export default function Wizard({ onComplete }: Props) {
                   <button
                     key={opt.value}
                     role="radio"
-                    aria-checked={objective === opt.value ? "true" : "false"}
+                    aria-checked={objective === opt.value}
                     onClick={() => updateField("objective", opt.value)}
                     className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${objective === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
                   >
