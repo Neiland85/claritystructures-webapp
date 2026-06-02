@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { WizardNavigation } from "./WizardNavigation";
+import { WizardAriaOption } from "./WizardAriaOption";
 
 type NavigationDirection = "forward" | "back";
 type DataSensitivityLevel = "low" | "medium" | "high";
@@ -64,15 +65,15 @@ function ContextRadioOption({
   children,
 }: ContextRadioOptionProps) {
   return (
-    <button
+    <WizardAriaOption
       type="button"
       role="radio"
-      aria-checked={selected}
+      checked={selected}
       onClick={onSelect}
       className={className}
     >
       {children}
-    </button>
+    </WizardAriaOption>
   );
 }
 

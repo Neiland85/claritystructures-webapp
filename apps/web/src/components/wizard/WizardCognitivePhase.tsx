@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { WizardNavigation } from "./WizardNavigation";
+import { WizardAriaOption } from "./WizardAriaOption";
 
 type NavigationDirection = "forward" | "back";
 type ShockLevel = "low" | "medium" | "high";
@@ -58,15 +59,15 @@ function CognitiveRadioOption({
   children,
 }: CognitiveRadioOptionProps) {
   return (
-    <button
+    <WizardAriaOption
       type="button"
       role="radio"
-      aria-checked={selected}
+      checked={selected}
       onClick={onSelect}
       className={className}
     >
       {children}
-    </button>
+    </WizardAriaOption>
   );
 }
 

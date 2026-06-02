@@ -1,6 +1,7 @@
 import type { ClientProfile, UrgencyLevel } from "@claritystructures/domain";
 import type { ReactNode } from "react";
 import { WizardNavigation } from "./WizardNavigation";
+import { WizardAriaOption } from "./WizardAriaOption";
 
 type TriageOption<T extends string> = {
   readonly value: T;
@@ -61,15 +62,15 @@ function TriageRadioOption({
   children,
 }: TriageRadioOptionProps) {
   return (
-    <button
+    <WizardAriaOption
       type="button"
       role="radio"
-      aria-checked={selected}
+      checked={selected}
       onClick={onSelect}
       className={className}
     >
       {children}
-    </button>
+    </WizardAriaOption>
   );
 }
 
@@ -176,24 +177,24 @@ export function WizardTriagePhase({
             aria-label={labels.physicalIntegrity}
             className="flex gap-2"
           >
-            <button
+            <WizardAriaOption
               type="button"
               role="radio"
-              aria-checked={physicalSafetyRisk === true}
+              checked={physicalSafetyRisk === true}
               onClick={() => onPhysicalSafetyRiskChange(true)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
             >
               {labels.threatReal}
-            </button>
-            <button
+            </WizardAriaOption>
+            <WizardAriaOption
               type="button"
               role="radio"
-              aria-checked={physicalSafetyRisk === false}
+              checked={physicalSafetyRisk === false}
               onClick={() => onPhysicalSafetyRiskChange(false)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${physicalSafetyRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
             >
               {labels.safeZone}
-            </button>
+            </WizardAriaOption>
           </div>
         </fieldset>
 
@@ -206,24 +207,24 @@ export function WizardTriagePhase({
             aria-label={labels.financialAssets}
             className="flex gap-2"
           >
-            <button
+            <WizardAriaOption
               type="button"
               role="radio"
-              aria-checked={financialAssetRisk === true}
+              checked={financialAssetRisk === true}
               onClick={() => onFinancialAssetRiskChange(true)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === true ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
             >
               {labels.atRisk}
-            </button>
-            <button
+            </WizardAriaOption>
+            <WizardAriaOption
               type="button"
               role="radio"
-              aria-checked={financialAssetRisk === false}
+              checked={financialAssetRisk === false}
               onClick={() => onFinancialAssetRiskChange(false)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${financialAssetRisk === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
             >
               {labels.protected}
-            </button>
+            </WizardAriaOption>
           </div>
         </fieldset>
 
@@ -236,24 +237,24 @@ export function WizardTriagePhase({
             aria-label={labels.credentialAccess}
             className="flex gap-2"
           >
-            <button
+            <WizardAriaOption
               type="button"
               role="radio"
-              aria-checked={attackerHasPasswords === true}
+              checked={attackerHasPasswords === true}
               onClick={() => onAttackerHasPasswordsChange(true)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${attackerHasPasswords === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
             >
               {labels.passwordsCompromised}
-            </button>
-            <button
+            </WizardAriaOption>
+            <WizardAriaOption
               type="button"
               role="radio"
-              aria-checked={attackerHasPasswords === false}
+              checked={attackerHasPasswords === false}
               onClick={() => onAttackerHasPasswordsChange(false)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${attackerHasPasswords === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
             >
               {labels.passwordsSafe}
-            </button>
+            </WizardAriaOption>
           </div>
         </fieldset>
 
@@ -266,24 +267,24 @@ export function WizardTriagePhase({
             aria-label={labels.evidenceVolatility}
             className="flex gap-2"
           >
-            <button
+            <WizardAriaOption
               type="button"
               role="radio"
-              aria-checked={evidenceIsAutoDeleted === true}
+              checked={evidenceIsAutoDeleted === true}
               onClick={() => onEvidenceIsAutoDeletedChange(true)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${evidenceIsAutoDeleted === true ? "bg-critical text-white border-critical" : "bg-white/5 border-white/10 text-white/40"}`}
             >
               {labels.autoDeleting}
-            </button>
-            <button
+            </WizardAriaOption>
+            <WizardAriaOption
               type="button"
               role="radio"
-              aria-checked={evidenceIsAutoDeleted === false}
+              checked={evidenceIsAutoDeleted === false}
               onClick={() => onEvidenceIsAutoDeletedChange(false)}
               className={`flex-1 py-2 rounded-lg text-[10px] border transition-all ${evidenceIsAutoDeleted === false ? "bg-white/20 text-white border-white/40" : "bg-white/5 border-white/10 text-white/40"}`}
             >
               {labels.evidenceStable}
-            </button>
+            </WizardAriaOption>
           </div>
         </fieldset>
       </section>
