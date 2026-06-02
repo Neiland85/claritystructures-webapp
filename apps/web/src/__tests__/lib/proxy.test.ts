@@ -105,7 +105,7 @@ describe("proxy (Edge Middleware)", () => {
 
   describe("rate limiting", () => {
     it("should check rate limit on API routes", async () => {
-      await proxy(createRequest("/api/contact"));
+      await proxy(createRequest("/api/triage"));
 
       expect(mockGetIdentifier).toHaveBeenCalled();
       expect(mockCheckRateLimit).toHaveBeenCalledWith(
@@ -128,13 +128,20 @@ describe("proxy (Edge Middleware)", () => {
       expect(mockCheckRateLimit).not.toHaveBeenCalled();
     });
 
+    it("should not apply proxy rate limit to contact submissions", async () => {
+      const response = await proxy(createRequest("/api/contact"));
+
+      expect(response.status).not.toBe(429);
+      expect(mockCheckRateLimit).not.toHaveBeenCalled();
+    });
+
     it("should return 429 when rate limit is exceeded", async () => {
       mockCheckRateLimit.mockResolvedValueOnce({
         success: false,
         remaining: 0,
       });
 
-      const response = await proxy(createRequest("/api/contact"));
+      const response = await proxy(createRequest("/api/triage"));
 
       expect(response.status).toBe(429);
       expect(response.headers.get("Retry-After")).toBe("10");
