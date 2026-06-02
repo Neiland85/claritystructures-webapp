@@ -121,6 +121,13 @@ describe("proxy (Edge Middleware)", () => {
       expect(mockCheckRateLimit).not.toHaveBeenCalled();
     });
 
+    it("should not rate limit health checks", async () => {
+      const response = await proxy(createRequest("/api/health"));
+
+      expect(response.status).not.toBe(429);
+      expect(mockCheckRateLimit).not.toHaveBeenCalled();
+    });
+
     it("should return 429 when rate limit is exceeded", async () => {
       mockCheckRateLimit.mockResolvedValueOnce({
         success: false,
