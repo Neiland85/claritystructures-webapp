@@ -14,9 +14,11 @@ const mockPipeline = {
 };
 
 vi.mock("@upstash/redis", () => ({
-  Redis: vi.fn().mockImplementation(() => ({
-    pipeline: () => mockPipeline,
-  })),
+  Redis: vi.fn().mockImplementation(function () {
+    return {
+      pipeline: () => mockPipeline,
+    };
+  }),
 }));
 
 describe("upstash rate limiter", () => {

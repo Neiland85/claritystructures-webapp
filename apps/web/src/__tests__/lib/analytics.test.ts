@@ -12,6 +12,7 @@ describe("trackEvent", () => {
   const mockCapture = vi.fn();
 
   beforeEach(() => {
+    mockCapture.mockClear();
     vi.resetModules();
     vi.mocked(hasAnalyticalConsent).mockReturnValue(true);
     // Simulate browser environment
