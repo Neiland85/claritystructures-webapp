@@ -1,12 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { Mock } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import DPIAModal from "@/components/DPIAModal";
 
 describe("DPIAModal", () => {
-  let onClose: ReturnType<typeof vi.fn>;
+  let onClose: Mock<() => void>;
 
   beforeEach(() => {
-    onClose = vi.fn();
+    onClose = vi.fn<() => void>();
   });
 
   it("should not render when isOpen is false", () => {

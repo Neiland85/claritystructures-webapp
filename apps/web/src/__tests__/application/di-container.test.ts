@@ -2,54 +2,74 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // Mock all external dependencies BEFORE importing the module
 vi.mock("@claritystructures/infra-persistence", () => ({
-  PrismaIntakeRepository: vi.fn().mockImplementation(() => ({
-    save: vi.fn(),
-    findAll: vi.fn(),
-    findById: vi.fn(),
-    updateStatus: vi.fn(),
-  })),
-  PrismaAuditTrail: vi.fn().mockImplementation(() => ({
-    record: vi.fn(),
-  })),
-  PrismaConsentRepository: vi.fn().mockImplementation(() => ({
-    recordAcceptance: vi.fn(),
-    findActiveVersion: vi.fn(),
-  })),
-  PrismaLegalDerivationRepository: vi.fn().mockImplementation(() => ({
-    recordConsent: vi.fn(),
-    findByIntakeId: vi.fn(),
-    revokeConsent: vi.fn(),
-  })),
-  PrismaTransferLogRepository: vi.fn().mockImplementation(() => ({
-    recordTransfer: vi.fn(),
-    findByIntakeId: vi.fn(),
-  })),
-  PrismaSlaRepository: vi.fn().mockImplementation(() => ({
-    findByIntakeId: vi.fn(),
-    findBreached: vi.fn(),
-  })),
-  PrismaLegalHoldRepository: vi.fn().mockImplementation(() => ({
-    place: vi.fn(),
-    lift: vi.fn(),
-    findActiveByIntakeId: vi.fn(),
-    findAllActive: vi.fn(),
-  })),
-  PrismaDeletionLogRepository: vi.fn().mockImplementation(() => ({
-    record: vi.fn(),
-    findByIntakeId: vi.fn(),
-  })),
+  PrismaIntakeRepository: vi.fn().mockImplementation(function () {
+    return {
+      save: vi.fn(),
+      findAll: vi.fn(),
+      findById: vi.fn(),
+      updateStatus: vi.fn(),
+    };
+  }),
+  PrismaAuditTrail: vi.fn().mockImplementation(function () {
+    return {
+      record: vi.fn(),
+    };
+  }),
+  PrismaConsentRepository: vi.fn().mockImplementation(function () {
+    return {
+      recordAcceptance: vi.fn(),
+      findActiveVersion: vi.fn(),
+    };
+  }),
+  PrismaLegalDerivationRepository: vi.fn().mockImplementation(function () {
+    return {
+      recordConsent: vi.fn(),
+      findByIntakeId: vi.fn(),
+      revokeConsent: vi.fn(),
+    };
+  }),
+  PrismaTransferLogRepository: vi.fn().mockImplementation(function () {
+    return {
+      recordTransfer: vi.fn(),
+      findByIntakeId: vi.fn(),
+    };
+  }),
+  PrismaSlaRepository: vi.fn().mockImplementation(function () {
+    return {
+      findByIntakeId: vi.fn(),
+      findBreached: vi.fn(),
+    };
+  }),
+  PrismaLegalHoldRepository: vi.fn().mockImplementation(function () {
+    return {
+      place: vi.fn(),
+      lift: vi.fn(),
+      findActiveByIntakeId: vi.fn(),
+      findAllActive: vi.fn(),
+    };
+  }),
+  PrismaDeletionLogRepository: vi.fn().mockImplementation(function () {
+    return {
+      record: vi.fn(),
+      findByIntakeId: vi.fn(),
+    };
+  }),
   prisma: {
     $disconnect: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
 vi.mock("@claritystructures/infra-notifications", () => ({
-  MailNotifier: vi.fn().mockImplementation(() => ({
-    notify: vi.fn(),
-  })),
-  ConsoleAuditTrail: vi.fn().mockImplementation(() => ({
-    log: vi.fn(),
-  })),
+  MailNotifier: vi.fn().mockImplementation(function () {
+    return {
+      notify: vi.fn(),
+    };
+  }),
+  ConsoleAuditTrail: vi.fn().mockImplementation(function () {
+    return {
+      log: vi.fn(),
+    };
+  }),
 }));
 
 vi.mock("@/application/event-subscriptions", () => ({
