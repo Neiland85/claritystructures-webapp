@@ -22,9 +22,10 @@ import type {
   WizardResult,
 } from "@claritystructures/domain";
 import { decideIntake } from "@claritystructures/domain";
-import { type ReactNode, useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { WizardNavigation } from "./wizard/WizardNavigation";
 import { WizardCognitivePhase } from "./wizard/WizardCognitivePhase";
+import { WizardContextPhase } from "./wizard/WizardContextPhase";
 import { WizardPhaseShell } from "./wizard/WizardPhaseShell";
 import { WizardTriagePhase } from "./wizard/WizardTriagePhase";
 
@@ -108,32 +109,6 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
     default:
       return state;
   }
-}
-
-type WizardRadioOptionProps = {
-  readonly selected: boolean;
-  readonly onSelect: () => void;
-  readonly className: string;
-  readonly children: ReactNode;
-};
-
-function WizardRadioOption({
-  selected,
-  onSelect,
-  className,
-  children,
-}: WizardRadioOptionProps) {
-  return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={selected ? "true" : "false"}
-      onClick={onSelect}
-      className={className}
-    >
-      {children}
-    </button>
-  );
 }
 
 export default function Wizard({ onComplete }: Props) {
@@ -433,188 +408,48 @@ export default function Wizard({ onComplete }: Props) {
       )}
 
       {phase === "CONTEXT" && (
-        <div
-          key="CONTEXT"
-          className={`space-y-8 md:space-y-10 ${navigationDirection.current === "forward" ? "slide-in-right" : "slide-in-left"}`}
-        >
-          <header className="space-y-3 border-b border-white/10 pb-6">
-            <h1 className="text-2xl md:text-3xl font-light tracking-tight text-white/95">
-              {t("context_title")}
-            </h1>
-            <p className="max-w-2xl text-sm md:text-base text-white/45 font-light leading-relaxed">
-              {t("context_subtitle")}
-            </p>
-          </header>
-
-          <div className="space-y-8">
-            <section
-              aria-labelledby="ongoing-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2 id="ongoing-heading" className="text-sm text-white/70">
-                {t("context_q_ongoing")}
-              </h2>
-              <div
-                role="radiogroup"
-                aria-labelledby="ongoing-heading"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-              >
-                <button
-                  role="radio"
-                  aria-checked={isOngoing === true ? "true" : "false"}
-                  onClick={() => updateField("isOngoing", true)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isOngoing === true ? "bg-critical text-white border-critical" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("context_active_now")}
-                </button>
-                <button
-                  role="radio"
-                  aria-checked={isOngoing === false ? "true" : "false"}
-                  onClick={() => updateField("isOngoing", false)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${isOngoing === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("context_finished")}
-                </button>
-              </div>
-            </section>
-
-            <section
-              aria-labelledby="incident-start-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2 id="incident-start-heading" className="text-sm text-white/70">
-                {t("context_q_start")}
-              </h2>
-              <div
-                role="radiogroup"
-                aria-labelledby="incident-start-heading"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-              >
-                {estimatedIncidentStarts.map((opt) => (
-                  <button
-                    key={opt.value}
-                    role="radio"
-                    aria-checked={
-                      estimatedIncidentStart === opt.value ? "true" : "false"
-                    }
-                    onClick={() =>
-                      updateField("estimatedIncidentStart", opt.value)
-                    }
-                    className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${estimatedIncidentStart === opt.value ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                  >
-                    {opt.label.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section
-              aria-labelledby="sensitivity-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2 id="sensitivity-heading" className="text-sm text-white/70">
-                {t("context_q_sensitivity")}
-              </h2>
-              <div
-                role="radiogroup"
-                aria-labelledby="sensitivity-heading"
-                className="flex gap-2"
-              >
-                {dataSensitivityLevels.map((opt) => (
-                  <button
-                    key={opt.value}
-                    role="radio"
-                    aria-checked={
-                      dataSensitivityLevel === opt.value ? "true" : "false"
-                    }
-                    onClick={() =>
-                      updateField("dataSensitivityLevel", opt.value)
-                    }
-                    className={`flex-1 py-3 rounded-2xl border transition-all duration-200 text-xs ${dataSensitivityLevel === opt.value ? "bg-white text-black border-white shadow-[0_0_24px_rgba(255,255,255,0.18)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                  >
-                    <div className="font-medium">{opt.label.toUpperCase()}</div>
-                    <div className="text-[10px] mt-0.5 opacity-60">
-                      {opt.description}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section
-              aria-labelledby="device-access-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2 id="device-access-heading" className="text-sm text-white/70">
-                {t("context_q_device_access")}
-              </h2>
-              <div
-                role="radiogroup"
-                aria-labelledby="device-access-heading"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-              >
-                <button
-                  role="radio"
-                  aria-checked={hasAccessToDevices === true ? "true" : "false"}
-                  onClick={() => updateField("hasAccessToDevices", true)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasAccessToDevices === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("context_has_access")}
-                </button>
-                <button
-                  role="radio"
-                  aria-checked={hasAccessToDevices === false ? "true" : "false"}
-                  onClick={() => updateField("hasAccessToDevices", false)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${hasAccessToDevices === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("context_no_access")}
-                </button>
-              </div>
-            </section>
-
-            <section
-              aria-labelledby="third-parties-heading"
-              className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
-            >
-              <h2 id="third-parties-heading" className="text-sm text-white/70">
-                {t("context_q_third_parties")}
-              </h2>
-              <div
-                role="radiogroup"
-                aria-labelledby="third-parties-heading"
-                className="grid grid-cols-1 sm:grid-cols-2 gap-3"
-              >
-                <button
-                  role="radio"
-                  aria-checked={
-                    thirdPartiesInvolved === true ? "true" : "false"
-                  }
-                  onClick={() => updateField("thirdPartiesInvolved", true)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${thirdPartiesInvolved === true ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("context_yes_third_parties")}
-                </button>
-                <button
-                  role="radio"
-                  aria-checked={
-                    thirdPartiesInvolved === false ? "true" : "false"
-                  }
-                  onClick={() => updateField("thirdPartiesInvolved", false)}
-                  className={`py-3 rounded-2xl border transition-all duration-200 text-xs ${thirdPartiesInvolved === false ? "bg-white/15 border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.06)]" : "bg-white/[0.04] border-white/10 text-white/45 hover:bg-white/[0.07] hover:border-white/20"}`}
-                >
-                  {t("context_no_only_me")}
-                </button>
-              </div>
-            </section>
-
-            <WizardNavigation
-              backLabel={t("context_back")}
-              onBack={() => navigateTo("COGNITIVE", "back")}
-              primaryLabel={t("context_next")}
-              onPrimary={() => navigateTo("DETAILS", "forward")}
-            />
-          </div>
-        </div>
+        <WizardContextPhase
+          navigationDirection={navigationDirection.current}
+          estimatedIncidentStarts={estimatedIncidentStarts}
+          dataSensitivityLevels={dataSensitivityLevels}
+          isOngoing={isOngoing}
+          estimatedIncidentStart={estimatedIncidentStart}
+          dataSensitivityLevel={dataSensitivityLevel}
+          hasAccessToDevices={hasAccessToDevices}
+          thirdPartiesInvolved={thirdPartiesInvolved}
+          labels={{
+            title: t("context_title"),
+            subtitle: t("context_subtitle"),
+            qOngoing: t("context_q_ongoing"),
+            activeNow: t("context_active_now"),
+            finished: t("context_finished"),
+            qStart: t("context_q_start"),
+            qSensitivity: t("context_q_sensitivity"),
+            qDeviceAccess: t("context_q_device_access"),
+            hasAccess: t("context_has_access"),
+            noAccess: t("context_no_access"),
+            qThirdParties: t("context_q_third_parties"),
+            yesThirdParties: t("context_yes_third_parties"),
+            noOnlyMe: t("context_no_only_me"),
+            back: t("context_back"),
+            next: t("context_next"),
+          }}
+          onIsOngoingChange={(value) => updateField("isOngoing", value)}
+          onEstimatedIncidentStartChange={(value) =>
+            updateField("estimatedIncidentStart", value)
+          }
+          onDataSensitivityLevelChange={(value) =>
+            updateField("dataSensitivityLevel", value)
+          }
+          onHasAccessToDevicesChange={(value) =>
+            updateField("hasAccessToDevices", value)
+          }
+          onThirdPartiesInvolvedChange={(value) =>
+            updateField("thirdPartiesInvolved", value)
+          }
+          onBack={() => navigateTo("COGNITIVE", "back")}
+          onNext={() => navigateTo("DETAILS", "forward")}
+        />
       )}
 
       {phase === "DETAILS" && (
