@@ -46,14 +46,22 @@ export default function ContactConfirmation({ tone }: Props) {
   const copy = CONFIRMATION_COPY[tone];
 
   return (
-    <div className="space-y-4 max-w-xl">
-      <h1 className="text-xl font-semibold">{copy.title}</h1>
+    <div className="relative max-w-2xl space-y-5 overflow-hidden rounded-3xl border border-cyan-400/20 bg-neutral-950/90 p-6 shadow-2xl shadow-cyan-950/40 ring-1 ring-white/10 backdrop-blur md:p-8">
+      <h1 className="bg-gradient-to-r from-white via-cyan-100 to-emerald-100 bg-clip-text text-2xl font-semibold tracking-tight text-transparent md:text-3xl">
+        {copy.title}
+      </h1>
 
-      <p className="text-neutral-300">{copy.message}</p>
+      <p className="max-w-prose text-base leading-7 text-neutral-200">
+        {copy.message}
+      </p>
 
-      {copy.next && <p className="text-sm text-neutral-400">{copy.next}</p>}
+      {copy.next && (
+        <p className="rounded-2xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm leading-6 text-amber-100">
+          {copy.next}
+        </p>
+      )}
 
-      <p className="text-xs text-neutral-500">
+      <p className="border-t border-white/10 pt-4 text-xs leading-6 text-neutral-400">
         Este canal no sustituye servicios de emergencia, asesoramiento jurídico
         ni intervención pericial formal. Es un servicio de trazado técnico de
         datos y evidencias digitales orientado a ordenar la información inicial,
