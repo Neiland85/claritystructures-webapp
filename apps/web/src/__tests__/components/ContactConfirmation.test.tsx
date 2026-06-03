@@ -13,7 +13,9 @@ describe("ContactConfirmation", () => {
   it("should render critical tone confirmation", () => {
     render(<ContactConfirmation tone="critical" />);
 
-    expect(screen.getByText("Situación crítica detectada")).toBeInTheDocument();
+    expect(
+      screen.getByText("Solicitud prioritaria registrada"),
+    ).toBeInTheDocument();
     expect(screen.getByText(/se tratan con prioridad/i)).toBeInTheDocument();
   });
 

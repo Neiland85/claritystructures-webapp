@@ -35,10 +35,10 @@ const CONFIRMATION_COPY: Record<
   },
 
   critical: {
-    title: "Situación crítica detectada",
+    title: "Solicitud prioritaria registrada",
     message:
-      "Hemos recibido tu solicitud. Este tipo de situaciones se tratan con prioridad.",
-    next: "Si existe riesgo inmediato, evita actuar sin indicaciones técnicas.",
+      "Hemos recibido tu solicitud y la hemos clasificado para revisión prioritaria.",
+    next: "Si existe riesgo inmediato para personas, dispositivos, pruebas o accesos, evita manipular sistemas, borrar archivos o actuar sin orientación técnica o legal.",
   },
 };
 
