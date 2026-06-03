@@ -16,7 +16,9 @@ describe("ContactConfirmation", () => {
     expect(
       screen.getByText("Solicitud prioritaria registrada"),
     ).toBeInTheDocument();
-    expect(screen.getByText(/se tratan con prioridad/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/clasificado para revisión prioritaria/i),
+    ).toBeInTheDocument();
   });
 
   it("should render family tone confirmation", () => {
@@ -41,7 +43,7 @@ describe("ContactConfirmation", () => {
     render(<ContactConfirmation tone="basic" />);
 
     expect(
-      screen.getByText(/no sustituye asesoramiento legal/i),
+      screen.getByText(/no sustituye servicios de emergencia/i),
     ).toBeInTheDocument();
   });
 });
