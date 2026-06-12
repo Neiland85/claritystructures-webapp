@@ -151,6 +151,31 @@ describe("SubmitIntakeUseCase", () => {
     expect(governanceEnvelope.policyBundleVersion).toBe(
       "wizard-guardian-policy/v0",
     );
+
+    const guardianDecision = event.metadata?.guardianDecision as {
+      decision: string;
+      allowedActions: string[];
+      blockedActions: string[];
+      requiresHumanReview: boolean;
+      riskLevel: string;
+      reasonCodes: string[];
+      policyBundleVersion: string;
+    };
+
+    expect(guardianDecision).toBeDefined();
+    expect(guardianDecision.decision).toBe("allow");
+    expect(guardianDecision.allowedActions).toContain("persist_intake");
+    expect(guardianDecision.allowedActions).toContain("notify_team");
+    expect(guardianDecision.blockedActions).toContain("evidence_handling");
+    expect(guardianDecision.blockedActions).toContain("legal_derivation");
+    expect(guardianDecision.requiresHumanReview).toBe(false);
+    expect(guardianDecision.riskLevel).toBe("low");
+    expect(guardianDecision.reasonCodes).toContain(
+      "sensitive_actions_blocked_by_default",
+    );
+    expect(guardianDecision.policyBundleVersion).toBe(
+      "wizard-guardian-policy/v0",
+    );
   });
 
   it("should NOT fail when notification throws", async () => {
