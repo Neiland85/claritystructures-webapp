@@ -1,0 +1,122 @@
+{
+  "folders": [
+    {
+      "name": "CLARITYSTRUCTURES-WEBAPP — NUCLEAR BASE",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "window.title": "CLARITYSTRUCTURES-WEBAPP — NUCLEAR BASE — ${activeFolderShort}${separator}${activeEditorShort}",
+
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.rulers": [100],
+
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": false,
+    "editor.formatOnType": false,
+
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascriptreact]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonc]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[markdown]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+
+    "typescript.tsdk": "./node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true,
+
+    "eslint.useFlatConfig": true,
+    "eslint.workingDirectories": [
+      {
+        "mode": "auto"
+      }
+    ],
+    "eslint.validate": [
+      "javascript",
+      "javascriptreact",
+      "typescript",
+      "typescriptreact"
+    ],
+
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    },
+
+    "prettier.requireConfig": true,
+
+    "files.exclude": {
+      "**/.git": true,
+      "**/.next": true,
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/coverage": true,
+      "**/generated": true,
+      "**/tsconfig.tsbuildinfo": true,
+      "**/.DS_Store": true
+    },
+
+    "search.exclude": {
+      "**/.next": true,
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/coverage": true,
+      "**/generated": true,
+      "**/tsconfig.tsbuildinfo": true
+    },
+
+    "files.watcherExclude": {
+      "**/.git/**": true,
+      "**/.next/**": true,
+      "**/node_modules/**": true,
+      "**/dist/**": true,
+      "**/coverage/**": true,
+      "**/generated/**": true
+    },
+
+    "npm.enableRunFromFolder": false,
+    "terminal.integrated.defaultProfile.osx": "zsh",
+
+    "workbench.editor.enablePreview": false,
+    "breadcrumbs.enabled": true,
+    "outline.showFiles": true
+  },
+  "extensions": {
+    "recommendations": [
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "editorconfig.editorconfig",
+      "prisma.prisma",
+      "redhat.vscode-yaml",
+      "mikestead.dotenv",
+      "github.vscode-github-actions",
+      "github.vscode-pull-request-github",
+      "github.copilot",
+      "github.copilot-chat"
+    ],
+    "unwantedRecommendations": [
+      "ms-azuretools.vscode-azureappservice",
+      "googlecloudtools.cloudcode",
+      "firefox-devtools.vscode-firefox-debug",
+      "ivory-lab.jenkinsfile-support"
+    ]
+  }
+}

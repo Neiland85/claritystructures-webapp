@@ -1,0 +1,284 @@
+== ClarityStructures Institutional Readiness ==
+2026-06-12T21:52:40Z
+
+== Git ==
+docs/institutional-baseline
+## docs/institutional-baseline
+?? docs/institutional/
+?? scripts/institutional-readiness.sh
+1887f5e feat(idempotency): defensive convergence layer
+5c6e169 feat(governance): audit guardian decision summary (#187)
+bff217d feat(governance): add guardian input adapter (#186)
+9498936 feat(governance): add guardian decision builder (#185)
+d61b8f1 feat(governance): add guardian decision types (#184)
+
+== Runtime ==
+v20.20.0
+10.29.3
+
+== Institutional docs ==
+OK: institutional docs present
+
+== Core controls grep ==
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:    "activeKey" TEXT,
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:CREATE TABLE "IdempotencyRecord" (
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:    CONSTRAINT "IdempotencyRecord_pkey" PRIMARY KEY ("id")
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:CREATE TABLE "OutboxEvent" (
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:    CONSTRAINT "OutboxEvent_pkey" PRIMARY KEY ("id")
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:CREATE UNIQUE INDEX "DerivationConsent_activeKey_key" ON "DerivationConsent"("activeKey");
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:CREATE INDEX "IdempotencyRecord_requestHash_idx" ON "IdempotencyRecord"("requestHash");
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:CREATE INDEX "IdempotencyRecord_status_idx" ON "IdempotencyRecord"("status");
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:CREATE INDEX "IdempotencyRecord_expiresAt_idx" ON "IdempotencyRecord"("expiresAt");
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:CREATE UNIQUE INDEX "IdempotencyRecord_scope_key_key" ON "IdempotencyRecord"("scope", "key");
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:CREATE UNIQUE INDEX "OutboxEvent_causationKey_key" ON "OutboxEvent"("causationKey");
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:CREATE INDEX "OutboxEvent_status_idx" ON "OutboxEvent"("status");
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:CREATE INDEX "OutboxEvent_aggregateId_idx" ON "OutboxEvent"("aggregateId");
+packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/migration.sql:CREATE INDEX "OutboxEvent_createdAt_idx" ON "OutboxEvent"("createdAt");
+packages/infra-persistence/prisma/schema.prisma:  activeKey       String?   @unique
+packages/infra-persistence/prisma/schema.prisma:model IdempotencyRecord {
+packages/infra-persistence/prisma/schema.prisma:model OutboxEvent {
+packages/infra-persistence/src/repositories/legal-derivation.repository.ts:    const activeKey = buildActiveKey(record);
+packages/infra-persistence/src/repositories/legal-derivation.repository.ts:          activeKey,
+packages/infra-persistence/src/repositories/legal-derivation.repository.ts:        where: { activeKey, revokedAt: null },
+packages/infra-persistence/src/repositories/legal-derivation.repository.ts:        activeKey: null,
+packages/infra-persistence/src/repositories/idempotency.repository.ts:  IdempotencyRecordView,
+packages/infra-persistence/src/repositories/idempotency.repository.ts:function toView(row: IdempotencyRow): IdempotencyRecordView {
+packages/infra-persistence/src/repositories/idempotency.repository.ts:    status: row.status as IdempotencyRecordView["status"],
+packages/infra-persistence/src/repositories/outbox.repository.ts:  OutboxEventRecord,
+packages/infra-persistence/src/repositories/outbox.repository.ts:  OutboxEventSummary,
+packages/infra-persistence/src/repositories/outbox.repository.ts:function toSummary(row: OutboxRow): OutboxEventSummary {
+packages/infra-persistence/src/repositories/outbox.repository.ts:    status: row.status as OutboxEventSummary["status"],
+packages/infra-persistence/src/repositories/outbox.repository.ts:  async enqueue(event: OutboxEventRecord): Promise<string> {
+packages/infra-persistence/src/repositories/outbox.repository.ts:  async findPending(limit = 50): Promise<OutboxEventSummary[]> {
+packages/domain/src/__tests__/transfer-packet.test.ts:  packetIdempotencyKey: "transfer_intake_001_v1",
+packages/domain/src/__tests__/transfer-packet.test.ts:      expect(packet.packetIdempotencyKey).toBe(
+packages/domain/src/__tests__/transfer-packet.test.ts:        packetOptions.packetIdempotencyKey,
+packages/domain/src/ports.ts:export type IdempotencyRecordView = {
+packages/domain/src/ports.ts:  | { state: "started"; record: IdempotencyRecordView }
+packages/domain/src/ports.ts:  | { state: "replayed"; record: IdempotencyRecordView }
+packages/domain/src/ports.ts:  | { state: "in_progress"; record: IdempotencyRecordView }
+packages/domain/src/ports.ts:  | { state: "conflict"; record: IdempotencyRecordView };
+packages/domain/src/ports.ts:export type OutboxEventRecord = {
+packages/domain/src/ports.ts:export type OutboxEventSummary = OutboxEventRecord & {
+packages/domain/src/ports.ts:  enqueue(event: OutboxEventRecord): Promise<string>;
+packages/domain/src/ports.ts:  findPending(limit?: number): Promise<OutboxEventSummary[]>;
+packages/domain/src/transfer-packet.ts:  packetIdempotencyKey?: string;
+packages/domain/src/transfer-packet.ts:  packetIdempotencyKey?: string;
+packages/domain/src/transfer-packet.ts:    packetIdempotencyKey: options.packetIdempotencyKey,
+apps/web/src/__tests__/infra/prisma-legal-derivation-repository.test.ts:          activeKey: expect.any(String),
+apps/web/src/__tests__/infra/prisma-legal-derivation-repository.test.ts:          activeKey: expect.any(String),
+apps/web/src/__tests__/infra/prisma-legal-derivation-repository.test.ts:          activeKey: null,
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(event.metadata).toHaveProperty("governanceEnvelope");
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    const governanceEnvelope = event.metadata?.governanceEnvelope as Record<
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(governanceEnvelope.riskLevel).toBe("low");
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(governanceEnvelope.requiresHumanReview).toBe(false);
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(governanceEnvelope.allowsEvidenceHandling).toBe(true);
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(governanceEnvelope.wizardResultHash).toMatch(/^djb2:/);
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(governanceEnvelope.policyBundleVersion).toBe(
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    const guardianDecision = event.metadata?.guardianDecision as {
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(guardianDecision).toBeDefined();
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(guardianDecision.decision).toBe("allow");
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(guardianDecision.allowedActions).toContain("persist_intake");
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(guardianDecision.allowedActions).toContain("notify_team");
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(guardianDecision.blockedActions).toContain("evidence_handling");
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(guardianDecision.blockedActions).toContain("legal_derivation");
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(guardianDecision.requiresHumanReview).toBe(false);
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(guardianDecision.riskLevel).toBe("low");
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(guardianDecision.reasonCodes).toContain(
+apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts:    expect(guardianDecision.policyBundleVersion).toBe(
+apps/web/src/application/use-cases/submit-intake.usecase.ts:      const governanceEnvelope = createIntakeGovernanceEnvelope({
+apps/web/src/application/use-cases/submit-intake.usecase.ts:      const guardianDecision = buildGuardianDecision({
+apps/web/src/application/use-cases/submit-intake.usecase.ts:        requestId: governanceEnvelope.requestId,
+apps/web/src/application/use-cases/submit-intake.usecase.ts:        schemaVersion: governanceEnvelope.schemaVersion,
+apps/web/src/application/use-cases/submit-intake.usecase.ts:        riskLevel: governanceEnvelope.governanceContext.riskLevel,
+apps/web/src/application/use-cases/submit-intake.usecase.ts:          governanceEnvelope.governanceContext.requiresHumanReview,
+apps/web/src/application/use-cases/submit-intake.usecase.ts:          governanceEnvelope.governanceContext.allowsAutomatedPreclassification,
+apps/web/src/application/use-cases/submit-intake.usecase.ts:          governanceEnvelope.governanceContext.allowsEvidenceHandling,
+apps/web/src/application/use-cases/submit-intake.usecase.ts:        policyBundleVersion: governanceEnvelope.integrity.policyBundleVersion,
+apps/web/src/application/use-cases/submit-intake.usecase.ts:            governanceEnvelope: {
+apps/web/src/application/use-cases/submit-intake.usecase.ts:              riskLevel: governanceEnvelope.governanceContext.riskLevel,
+apps/web/src/application/use-cases/submit-intake.usecase.ts:                governanceEnvelope.governanceContext.requiresHumanReview,
+apps/web/src/application/use-cases/submit-intake.usecase.ts:                governanceEnvelope.governanceContext.requiresLegalDerivation,
+apps/web/src/application/use-cases/submit-intake.usecase.ts:                governanceEnvelope.governanceContext
+apps/web/src/application/use-cases/submit-intake.usecase.ts:                governanceEnvelope.governanceContext.allowsEvidenceHandling,
+apps/web/src/application/use-cases/submit-intake.usecase.ts:              wizardResultHash: governanceEnvelope.integrity.wizardResultHash,
+apps/web/src/application/use-cases/submit-intake.usecase.ts:                governanceEnvelope.integrity.policyBundleVersion,
+apps/web/src/application/use-cases/submit-intake.usecase.ts:            guardianDecision,
+apps/web/src/application/use-cases/generate-transfer-packet.usecase.ts:        packetIdempotencyKey: fingerprint.key,
+scripts/institutional-readiness.sh:  grep -R "IdempotencyRecord\|OutboxEvent\|activeKey\|packetIdempotencyKey\|governanceEnvelope\|guardianDecision" \
+docs/contracts/INTAKE_GOVERNANCE_AUDIT_METADATA_v0.md:The audit metadata may include a reduced `governanceEnvelope`
+docs/contracts/INTAKE_GOVERNANCE_AUDIT_METADATA_v0.md:The `governanceEnvelope` audit metadata may contain:
+docs/institutional/08_RISK_REGISTER.md:| R-006 | Outbox events are modeled but not fully operationalized | Medium | OutboxEvent model/repository | Partial | Add worker/dispatcher |
+docs/institutional/06_OPERATIONAL_RUNBOOK.md:Query IdempotencyRecord.
+docs/institutional/09_INCIDENT_RESPONSE.md:1. Locate IdempotencyRecord by scope/key.
+docs/institutional/07_AUDITABILITY_MATRIX.md:| Operation already in progress | In-progress boundary | `IdempotencyRecord.status` | use-case behavior | retry boundary |
+docs/institutional/07_AUDITABILITY_MATRIX.md:| Duplicate active legal consent | `activeKey` | `legal-derivation.repository.ts` | repository tests | one active consent |
+
+== Prisma schema validation ==
+The schema at packages/infra-persistence/prisma/schema.prisma is valid 🚀
+
+== Prisma client generation ==
+
+> claritystructures-webapp@ db:generate /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> prisma generate --config prisma.config.ts
+
+
+✔ Generated Prisma Client (v7.4.0) to ./packages/infra-persistence/generated/prisma in 343ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+
+== Migration status ==
+
+> claritystructures-webapp@ db:migrate:status /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> prisma migrate status --config prisma.config.ts
+
+Datasource "db": PostgreSQL database "postgres", schema "public" at "aws-1-eu-west-1.pooler.supabase.com:5432"
+
+2 migrations found in prisma/migrations
+
+Database schema is up to date!
+
+== Safe migrate guard check ==
+
+> claritystructures-webapp@ db:migrate:dev:safe /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> node scripts/guard-prisma-datasource.mjs && prisma migrate dev --config prisma.config.ts
+
+ ELIFECYCLE  Command failed with exit code 1.
+
+== Idempotency validation ==
+
+> claritystructures-webapp@ validate:idempotency /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm exec prisma validate --config prisma.config.ts && pnpm db:generate && pnpm exec vitest run packages/domain/src/__tests__/idempotency.test.ts packages/domain/src/__tests__/transfer-packet.test.ts apps/web/src/__tests__/application/use-cases/generate-transfer-packet.usecase.test.ts
+
+The schema at packages/infra-persistence/prisma/schema.prisma is valid 🚀
+
+> claritystructures-webapp@ db:generate /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> prisma generate --config prisma.config.ts
+
+
+✔ Generated Prisma Client (v7.4.0) to ./packages/infra-persistence/generated/prisma in 160ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.7 [39m[90m/Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp[39m
+
+ [32m✓[39m packages/domain/src/__tests__/idempotency.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m packages/domain/src/__tests__/transfer-packet.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m apps/web/src/__tests__/application/use-cases/generate-transfer-packet.usecase.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m18 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 23:52:55
+[2m   Duration [22m 6.20s[2m (transform 554ms, setup 3.20s, import 287ms, tests 27ms, environment 13.69s)[22m
+
+
+== Full validation ==
+
+> claritystructures-webapp@ validate:full /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm validate:core && pnpm lint && pnpm build
+
+
+> claritystructures-webapp@ validate:core /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm validate:idempotency && pnpm typecheck
+
+
+> claritystructures-webapp@ validate:idempotency /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm exec prisma validate --config prisma.config.ts && pnpm db:generate && pnpm exec vitest run packages/domain/src/__tests__/idempotency.test.ts packages/domain/src/__tests__/transfer-packet.test.ts apps/web/src/__tests__/application/use-cases/generate-transfer-packet.usecase.test.ts
+
+The schema at packages/infra-persistence/prisma/schema.prisma is valid 🚀
+
+> claritystructures-webapp@ db:generate /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> prisma generate --config prisma.config.ts
+
+
+✔ Generated Prisma Client (v7.4.0) to ./packages/infra-persistence/generated/prisma in 151ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.7 [39m[90m/Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp[39m
+
+ [32m✓[39m packages/domain/src/__tests__/idempotency.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m packages/domain/src/__tests__/transfer-packet.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m apps/web/src/__tests__/application/use-cases/generate-transfer-packet.usecase.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m18 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 23:53:06
+[2m   Duration [22m 1.28s[2m (transform 443ms, setup 634ms, import 383ms, tests 28ms, environment 1.73s)[22m
+
+
+> claritystructures-webapp@ typecheck /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm -r run typecheck
+
+Scope: 6 of 7 workspace projects
+apps/web typecheck$ tsc --noEmit
+apps/web typecheck: Done
+
+> claritystructures-webapp@ lint /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> eslint .
+
+
+> claritystructures-webapp@ build /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm -r run build
+
+Scope: 6 of 7 workspace projects
+packages/domain build$ tsc -p tsconfig.json
+packages/domain build: Done
+packages/infra-persistence build$ prisma generate --config=../../prisma.config.ts
+packages/infra-persistence build: Loaded Prisma config from ../../prisma.config.ts.
+packages/infra-persistence build: Prisma schema loaded from prisma/schema.prisma.
+packages/infra-persistence build: ✔ Generated Prisma Client (v7.4.0) to ./generated/prisma in 161ms
+packages/infra-persistence build: Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+packages/infra-persistence build: Done
+apps/web build$ prisma generate --config=../../prisma.config.ts && next build
+apps/web build: Loaded Prisma config from ../../prisma.config.ts.
+apps/web build: Prisma schema loaded from ../../packages/infra-persistence/prisma/schema.prisma.
+apps/web build: ✔ Generated Prisma Client (v7.4.0) to ./../../packages/infra-persistence/generated/prisma in 162ms
+apps/web build: Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+apps/web build: ▲ Next.js 16.2.6 (Turbopack)
+apps/web build: - Environments: .env.local
+apps/web build: - Experiments (use with caution):
+apps/web build:   · optimizePackageImports
+apps/web build:   Creating an optimized production build ...
+apps/web build: ✓ Compiled successfully in 25.4s
+apps/web build:   Running TypeScript ...
+apps/web build:   Finished TypeScript in 5.5s ...
+apps/web build:   Collecting page data using 15 workers ...
+apps/web build: {"level":"warn","module":"rate-limit","message":"UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN not set — rate limiting is disabled outside production","timestamp":"2026-06-12T21:54:04.337Z"}
+apps/web build:   Generating static pages using 15 workers (0/7) ...
+apps/web build:   Generating static pages using 15 workers (1/7) 
+apps/web build:   Generating static pages using 15 workers (3/7) 
+apps/web build:   Generating static pages using 15 workers (5/7) 
+apps/web build: ✓ Generating static pages using 15 workers (7/7) in 298ms
+apps/web build:   Finalizing page optimization ...
+apps/web build: Route (app)
+apps/web build: ┌ ○ /
+apps/web build: ├ ○ /_not-found
+apps/web build: ├ ƒ /[lang]
+apps/web build: ├ ƒ /[lang]/contact
+apps/web build: ├ ƒ /[lang]/contact/basic
+apps/web build: ├ ƒ /[lang]/contact/critical
+apps/web build: ├ ƒ /[lang]/contact/family
+apps/web build: ├ ƒ /[lang]/contact/legal
+apps/web build: ├ ƒ /api/contact
+apps/web build: ├ ƒ /api/cron/purge-expired
+apps/web build: ├ ƒ /api/cron/sla-breach-check
+apps/web build: ├ ƒ /api/derivation
+apps/web build: ├ ƒ /api/health
+apps/web build: ├ ƒ /api/triage
+apps/web build: ├ ƒ /api/user/data
+apps/web build: ├ ○ /privacy
+apps/web build: └ ○ /triage
+apps/web build: ƒ Proxy (Middleware)
+apps/web build: ○  (Static)   prerendered as static content
+apps/web build: ƒ  (Dynamic)  server-rendered on demand
+apps/web build: Done
+
+== Result ==
+Institutional readiness script completed.
