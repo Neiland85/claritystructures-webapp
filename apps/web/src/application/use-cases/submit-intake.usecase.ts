@@ -8,9 +8,11 @@ import type {
   WizardResult,
 } from "@claritystructures/domain";
 import { decideIntakeWithExplanation } from "@claritystructures/domain";
+import { createIntakeGovernanceEnvelope } from "@/lib/governance/wizard-result-to-governance-envelope";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("SubmitIntakeUseCase");
+const POLICY_BUNDLE_VERSION = "wizard-guardian-policy/v0";
 
 /**
  * Submit Intake Use Case
@@ -97,6 +99,15 @@ export class SubmitIntakeUseCase {
       route: decision.decision.route,
     });
 
+    const governanceEnvelope = createIntakeGovernanceEnvelope({
+      wizardResult,
+      requestId: record.id,
+      consentVersion: consentMeta?.consentVersion ?? "unknown",
+      policyBundleVersion: POLICY_BUNDLE_VERSION,
+      ipHash: consentMeta?.ipHash,
+      userAgent: consentMeta?.userAgent,
+    });
+
     // 3. Record consent acceptance (if consent repository is available)
     if (this.consent && consentMeta) {
       try {
@@ -131,6 +142,18 @@ export class SubmitIntakeUseCase {
           route: decision.decision.route,
           modelVersion: decision.decision.decisionModelVersion,
           consentVersion: consentMeta?.consentVersion,
+          governanceEnvelope: {
+            schemaVersion: governanceEnvelope.schemaVersion,
+            riskLevel: governanceEnvelope.governanceContext.riskLevel,
+            requiresHumanReview:
+              governanceEnvelope.governanceContext.requiresHumanReview,
+            allowsEvidenceHandling:
+              governanceEnvelope.governanceContext.allowsEvidenceHandling,
+            wizardResultHash: governanceEnvelope.integrity.wizardResultHash,
+            hashAlgorithm: governanceEnvelope.integrity.hashAlgorithm,
+            policyBundleVersion:
+              governanceEnvelope.integrity.policyBundleVersion,
+          },
         },
         occurredAt: new Date(),
       });

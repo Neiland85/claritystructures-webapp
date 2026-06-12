@@ -137,6 +137,20 @@ describe("SubmitIntakeUseCase", () => {
     expect(event.metadata).toHaveProperty("priority");
     expect(event.metadata).toHaveProperty("route");
     expect(event.metadata).toHaveProperty("modelVersion");
+    expect(event.metadata).toHaveProperty("governanceEnvelope");
+
+    const governanceEnvelope = event.metadata?.governanceEnvelope as Record<
+      string,
+      unknown
+    >;
+
+    expect(governanceEnvelope.riskLevel).toBe("low");
+    expect(governanceEnvelope.requiresHumanReview).toBe(false);
+    expect(governanceEnvelope.allowsEvidenceHandling).toBe(true);
+    expect(governanceEnvelope.wizardResultHash).toMatch(/^djb2:/);
+    expect(governanceEnvelope.policyBundleVersion).toBe(
+      "wizard-guardian-policy/v0",
+    );
   });
 
   it("should NOT fail when notification throws", async () => {
