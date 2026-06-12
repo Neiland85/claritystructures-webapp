@@ -2,8 +2,14 @@
   "recommendations": [
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "GitHub.copilot",
-    "GitHub.copilot-chat"
+    "editorconfig.editorconfig",
+    "prisma.prisma",
+    "redhat.vscode-yaml",
+    "mikestead.dotenv",
+    "github.vscode-github-actions",
+    "github.vscode-pull-request-github",
+    "github.copilot",
+    "github.copilot-chat"
   ],
   "unwantedRecommendations": [
     "ms-azuretools.vscode-azureappservice",
