@@ -19,6 +19,7 @@ import {
   PrismaLegalHoldRepository,
   PrismaDeletionLogRepository,
   PrismaSlaRepository,
+  PrismaIdempotencyRepository,
   prisma,
 } from "@claritystructures/infra-persistence";
 import {
@@ -65,11 +66,14 @@ registerEventSubscriptions(compositeAudit);
 export function createSubmitIntakeUseCase(): SubmitIntakeUseCase {
   const repository = new PrismaIntakeRepository(prisma);
   const consentRepo = new PrismaConsentRepository(prisma);
+  const idempotency = new PrismaIdempotencyRepository(prisma);
+
   return new SubmitIntakeUseCase(
     repository,
     mailNotifier,
     compositeAudit,
     consentRepo,
+    idempotency,
   );
 }
 

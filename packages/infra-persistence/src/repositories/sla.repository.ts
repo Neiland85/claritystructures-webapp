@@ -27,7 +27,10 @@ export class PrismaSlaRepository implements SlaRepository {
       status: "pending",
     }));
 
-    await this.prisma.slaTimer.createMany({ data });
+    await this.prisma.slaTimer.createMany({
+      data,
+      skipDuplicates: true,
+    });
   }
 
   /**
@@ -40,6 +43,7 @@ export class PrismaSlaRepository implements SlaRepository {
     });
 
     if (!timer) return;
+    if (timer.completedAt) return;
 
     const now = new Date();
     const status = resolveSlaStatus(timer.deadlineAt, now);

@@ -1,0 +1,234 @@
+== defensive idempotency final audit ==
+2026-06-12T19:51:06Z
+
+== branch ==
+feat/defensive-idempotency-layer
+
+== status ==
+## feat/defensive-idempotency-layer
+ M apps/web/src/app/api/contact/route.ts
+ M apps/web/src/application/di-container.ts
+ M apps/web/src/application/use-cases/generate-transfer-packet.usecase.ts
+ M apps/web/src/application/use-cases/submit-intake.usecase.ts
+ M package.json
+ M packages/domain/src/__tests__/transfer-packet.test.ts
+ M packages/domain/src/index.ts
+ M packages/domain/src/ports.ts
+ M packages/domain/src/transfer-packet.ts
+ M packages/domain/tsconfig.json
+ M packages/infra-persistence/prisma/schema.prisma
+ M packages/infra-persistence/src/index.ts
+ M packages/infra-persistence/src/repositories/legal-derivation.repository.ts
+ M packages/infra-persistence/src/repositories/sla.repository.ts
+ M packages/infra-persistence/src/repositories/transfer-log.repository.ts
+?? packages/domain/src/__tests__/idempotency.test.ts
+?? packages/domain/src/idempotency.ts
+?? packages/infra-persistence/prisma/migrations/20260612162750_defensive_idempotency_layer/
+?? packages/infra-persistence/src/repositories/idempotency.repository.ts
+?? packages/infra-persistence/src/repositories/outbox.repository.ts
+?? scripts/guard-prisma-datasource.mjs
+
+== db guard ==
+
+> claritystructures-webapp@ db:migrate:dev:safe /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> node scripts/guard-prisma-datasource.mjs && prisma migrate dev --config prisma.config.ts
+
+ ELIFECYCLE  Command failed with exit code 1.
+
+== migration status ==
+
+> claritystructures-webapp@ db:migrate:status /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> prisma migrate status --config prisma.config.ts
+
+Datasource "db": PostgreSQL database "postgres", schema "public" at "aws-1-eu-west-1.pooler.supabase.com:5432"
+
+2 migrations found in prisma/migrations
+
+Database schema is up to date!
+
+== validations ==
+
+> claritystructures-webapp@ validate:idempotency /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm exec prisma validate --config prisma.config.ts && pnpm db:generate && pnpm exec vitest run packages/domain/src/__tests__/idempotency.test.ts packages/domain/src/__tests__/transfer-packet.test.ts apps/web/src/__tests__/application/use-cases/generate-transfer-packet.usecase.test.ts
+
+The schema at packages/infra-persistence/prisma/schema.prisma is valid 🚀
+
+> claritystructures-webapp@ db:generate /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> prisma generate --config prisma.config.ts
+
+
+✔ Generated Prisma Client (v7.4.0) to ./packages/infra-persistence/generated/prisma in 317ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.7 [39m[90m/Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp[39m
+
+ [32m✓[39m packages/domain/src/__tests__/idempotency.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 90[2mms[22m[39m
+ [32m✓[39m packages/domain/src/__tests__/transfer-packet.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+ [32m✓[39m apps/web/src/__tests__/application/use-cases/generate-transfer-packet.usecase.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 41[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m18 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 21:51:23
+[2m   Duration [22m 12.70s[2m (transform 2.25s, setup 10.01s, import 1.12s, tests 152ms, environment 24.70s)[22m
+
+
+> claritystructures-webapp@ validate:core /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm validate:idempotency && pnpm typecheck
+
+
+> claritystructures-webapp@ validate:idempotency /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm exec prisma validate --config prisma.config.ts && pnpm db:generate && pnpm exec vitest run packages/domain/src/__tests__/idempotency.test.ts packages/domain/src/__tests__/transfer-packet.test.ts apps/web/src/__tests__/application/use-cases/generate-transfer-packet.usecase.test.ts
+
+The schema at packages/infra-persistence/prisma/schema.prisma is valid 🚀
+
+> claritystructures-webapp@ db:generate /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> prisma generate --config prisma.config.ts
+
+
+✔ Generated Prisma Client (v7.4.0) to ./packages/infra-persistence/generated/prisma in 269ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.7 [39m[90m/Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp[39m
+
+ [32m✓[39m packages/domain/src/__tests__/idempotency.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m packages/domain/src/__tests__/transfer-packet.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m apps/web/src/__tests__/application/use-cases/generate-transfer-packet.usecase.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m18 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 21:51:41
+[2m   Duration [22m 1.23s[2m (transform 683ms, setup 885ms, import 365ms, tests 26ms, environment 1.58s)[22m
+
+
+> claritystructures-webapp@ typecheck /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm -r run typecheck
+
+Scope: 6 of 7 workspace projects
+apps/web typecheck$ tsc --noEmit
+apps/web typecheck: Done
+
+> claritystructures-webapp@ validate:full /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm validate:core && pnpm lint && pnpm build
+
+
+> claritystructures-webapp@ validate:core /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm validate:idempotency && pnpm typecheck
+
+
+> claritystructures-webapp@ validate:idempotency /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm exec prisma validate --config prisma.config.ts && pnpm db:generate && pnpm exec vitest run packages/domain/src/__tests__/idempotency.test.ts packages/domain/src/__tests__/transfer-packet.test.ts apps/web/src/__tests__/application/use-cases/generate-transfer-packet.usecase.test.ts
+
+The schema at packages/infra-persistence/prisma/schema.prisma is valid 🚀
+
+> claritystructures-webapp@ db:generate /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> prisma generate --config prisma.config.ts
+
+
+✔ Generated Prisma Client (v7.4.0) to ./packages/infra-persistence/generated/prisma in 271ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.7 [39m[90m/Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp[39m
+
+ [32m✓[39m packages/domain/src/__tests__/idempotency.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m packages/domain/src/__tests__/transfer-packet.test.ts [2m([22m[2m9 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+ [32m✓[39m apps/web/src/__tests__/application/use-cases/generate-transfer-packet.usecase.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m      Tests [22m [1m[32m18 passed[39m[22m[90m (18)[39m
+[2m   Start at [22m 21:51:58
+[2m   Duration [22m 7.74s[2m (transform 692ms, setup 8.04s, import 434ms, tests 26ms, environment 13.50s)[22m
+
+
+> claritystructures-webapp@ typecheck /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm -r run typecheck
+
+Scope: 6 of 7 workspace projects
+apps/web typecheck$ tsc --noEmit
+apps/web typecheck: Done
+
+> claritystructures-webapp@ lint /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> eslint .
+
+
+> claritystructures-webapp@ build /Users/estudio/Projects/GITHUB-PROJECTS-2026/GOVERNANZA_ORGANIZATIVA/Bootstrap/claritystructures-webapp
+> pnpm -r run build
+
+Scope: 6 of 7 workspace projects
+packages/domain build$ tsc -p tsconfig.json
+packages/domain build: Done
+packages/infra-persistence build$ prisma generate --config=../../prisma.config.ts
+packages/infra-persistence build: Loaded Prisma config from ../../prisma.config.ts.
+packages/infra-persistence build: Prisma schema loaded from prisma/schema.prisma.
+packages/infra-persistence build: ✔ Generated Prisma Client (v7.4.0) to ./generated/prisma in 312ms
+packages/infra-persistence build: Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+packages/infra-persistence build: Done
+apps/web build$ prisma generate --config=../../prisma.config.ts && next build
+apps/web build: Loaded Prisma config from ../../prisma.config.ts.
+apps/web build: Prisma schema loaded from ../../packages/infra-persistence/prisma/schema.prisma.
+apps/web build: ✔ Generated Prisma Client (v7.4.0) to ./../../packages/infra-persistence/generated/prisma in 147ms
+apps/web build: Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+apps/web build: ▲ Next.js 16.2.6 (Turbopack)
+apps/web build: - Environments: .env.local
+apps/web build: - Experiments (use with caution):
+apps/web build:   · optimizePackageImports
+apps/web build:   Creating an optimized production build ...
+apps/web build: ✓ Compiled successfully in 51s
+apps/web build:   Running TypeScript ...
+apps/web build:   Finished TypeScript in 11.0s ...
+apps/web build:   Collecting page data using 15 workers ...
+apps/web build: {"level":"warn","module":"rate-limit","message":"UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN not set — rate limiting is disabled outside production","timestamp":"2026-06-12T19:53:56.591Z"}
+apps/web build:   Generating static pages using 15 workers (0/7) ...
+apps/web build:   Generating static pages using 15 workers (1/7) 
+apps/web build:   Generating static pages using 15 workers (3/7) 
+apps/web build:   Generating static pages using 15 workers (5/7) 
+apps/web build: ✓ Generating static pages using 15 workers (7/7) in 858ms
+apps/web build:   Finalizing page optimization ...
+apps/web build: Route (app)
+apps/web build: ┌ ○ /
+apps/web build: ├ ○ /_not-found
+apps/web build: ├ ƒ /[lang]
+apps/web build: ├ ƒ /[lang]/contact
+apps/web build: ├ ƒ /[lang]/contact/basic
+apps/web build: ├ ƒ /[lang]/contact/critical
+apps/web build: ├ ƒ /[lang]/contact/family
+apps/web build: ├ ƒ /[lang]/contact/legal
+apps/web build: ├ ƒ /api/contact
+apps/web build: ├ ƒ /api/cron/purge-expired
+apps/web build: ├ ƒ /api/cron/sla-breach-check
+apps/web build: ├ ƒ /api/derivation
+apps/web build: ├ ƒ /api/health
+apps/web build: ├ ƒ /api/triage
+apps/web build: ├ ƒ /api/user/data
+apps/web build: ├ ○ /privacy
+apps/web build: └ ○ /triage
+apps/web build: ƒ Proxy (Middleware)
+apps/web build: ○  (Static)   prerendered as static content
+apps/web build: ƒ  (Dynamic)  server-rendered on demand
+apps/web build: Done
+
+== diff stat ==
+ apps/web/src/app/api/contact/route.ts              |  74 ++++-
+ apps/web/src/application/di-container.ts           |   4 +
+ .../use-cases/generate-transfer-packet.usecase.ts  |  30 ++-
+ .../application/use-cases/submit-intake.usecase.ts | 300 ++++++++++++---------
+ package.json                                       |   7 +-
+ .../domain/src/__tests__/transfer-packet.test.ts   |  99 ++++---
+ packages/domain/src/index.ts                       |  18 ++
+ packages/domain/src/ports.ts                       |  66 +++++
+ packages/domain/src/transfer-packet.ts             |  62 ++---
+ packages/domain/tsconfig.json                      |  16 +-
+ packages/infra-persistence/prisma/schema.prisma    |  54 +++-
+ packages/infra-persistence/src/index.ts            |   7 +
+ .../repositories/legal-derivation.repository.ts    |  56 +++-
+ .../src/repositories/sla.repository.ts             |   6 +-
+ .../src/repositories/transfer-log.repository.ts    |  62 ++++-
+ 15 files changed, 614 insertions(+), 247 deletions(-)

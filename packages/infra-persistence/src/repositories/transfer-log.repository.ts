@@ -1,7 +1,7 @@
 import type { PrismaClient } from "../../generated/prisma/index";
 import type {
-  TransferLogRepository,
   TransferLogEntry,
+  TransferLogRepository,
   TransferLogSummary,
 } from "@claritystructures/domain";
 
@@ -9,16 +9,41 @@ export class PrismaTransferLogRepository implements TransferLogRepository {
   constructor(private readonly prisma: Pick<PrismaClient, "transferPacket">) {}
 
   async recordTransfer(entry: TransferLogEntry): Promise<string> {
-    const row = await this.prisma.transferPacket.create({
-      data: {
-        intakeId: entry.intakeId,
-        recipientEntity: entry.recipientEntity,
-        manifestHash: entry.manifestHash,
-        payloadSizeBytes: entry.payloadSizeBytes,
-        legalBasis: entry.legalBasis,
-      },
-    });
-    return row.id;
+    try {
+      const row = await this.prisma.transferPacket.create({
+        data: {
+          intakeId: entry.intakeId,
+          recipientEntity: entry.recipientEntity,
+          manifestHash: entry.manifestHash,
+          payloadSizeBytes: entry.payloadSizeBytes,
+          legalBasis: entry.legalBasis,
+          idempotencyKey: entry.idempotencyKey ?? null,
+          contentHash: entry.contentHash ?? null,
+        },
+      });
+
+      return row.id;
+    } catch (error) {
+      const existing = await this.prisma.transferPacket.findFirst({
+        where: {
+          OR: [
+            ...(entry.idempotencyKey
+              ? [{ idempotencyKey: entry.idempotencyKey }]
+              : []),
+            {
+              intakeId: entry.intakeId,
+              recipientEntity: entry.recipientEntity,
+              manifestHash: entry.manifestHash,
+            },
+          ],
+        },
+        select: { id: true },
+      });
+
+      if (existing) return existing.id;
+
+      throw error;
+    }
   }
 
   async recordAcknowledgment(transferId: string): Promise<void> {
@@ -33,12 +58,15 @@ export class PrismaTransferLogRepository implements TransferLogRepository {
       where: { intakeId },
       orderBy: { transferredAt: "desc" },
     });
+
     return rows.map((row) => ({
       id: row.id,
       intakeId: row.intakeId,
       recipientEntity: row.recipientEntity,
       manifestHash: row.manifestHash,
       legalBasis: row.legalBasis,
+      idempotencyKey: row.idempotencyKey,
+      contentHash: row.contentHash,
       transferredAt: row.transferredAt,
       acknowledgedAt: row.acknowledgedAt,
     }));

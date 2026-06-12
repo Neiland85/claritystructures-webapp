@@ -7,6 +7,7 @@ import type {
 } from "@claritystructures/domain";
 import {
   assembleTransferPacket,
+  buildIdempotencyFingerprint,
   computeManifestHash,
   eventDispatcher,
   TransferPacketGeneratedEvent,
@@ -24,6 +25,8 @@ export type GenerateTransferInput = {
   intakeId: string;
   decision: TransferableDecision;
   chronology: ChronologyEntry[];
+  generatedAt?: string;
+  idempotencyKey?: string;
 };
 
 export type GenerateTransferOutput = {
@@ -65,7 +68,21 @@ export class GenerateTransferPacketUseCase {
       status: t.status,
     }));
 
-    // 4. Assemble minimized transfer packet
+    // 4. Build deterministic transfer identity
+    const fingerprint = buildIdempotencyFingerprint({
+      scope: "transfer.generate",
+      version: "transfer-packet/v1",
+      explicitKey: input.idempotencyKey,
+      payload: {
+        intakeId: input.intakeId,
+        recipientEntity: consent.recipientEntity,
+        decision: input.decision,
+        slaSnapshot,
+        chronology: input.chronology,
+      },
+    });
+
+    // 5. Assemble minimized transfer packet
     const packet = assembleTransferPacket(
       {
         intakeId: intake.id,
@@ -78,9 +95,14 @@ export class GenerateTransferPacketUseCase {
       input.decision,
       slaSnapshot,
       input.chronology,
+      {
+        generatedAt:
+          input.generatedAt ?? input.decision.decidedAt.toISOString(),
+        packetIdempotencyKey: fingerprint.key,
+      },
     );
 
-    // 5. Compute manifest hash
+    // 6. Compute manifest hash
     const manifestHash = computeManifestHash(packet);
 
     // 6. Persist transfer log
@@ -91,6 +113,8 @@ export class GenerateTransferPacketUseCase {
       manifestHash,
       payloadSizeBytes: Buffer.byteLength(payloadJson, "utf-8"),
       legalBasis: "explicit_consent",
+      idempotencyKey: fingerprint.key,
+      contentHash: fingerprint.requestHash,
     });
 
     // 7. Dispatch domain event
@@ -111,6 +135,8 @@ export class GenerateTransferPacketUseCase {
           manifestHash,
           recipientEntity: consent.recipientEntity,
           payloadSizeBytes: Buffer.byteLength(payloadJson, "utf-8"),
+          idempotencyKey: fingerprint.key,
+          contentHash: fingerprint.requestHash,
         },
       });
     } catch {

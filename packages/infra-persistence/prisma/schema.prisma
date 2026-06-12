@@ -41,12 +41,12 @@ model ContactIntake {
   spamScore Float?
   meta      Json?
 
-  consentAcceptances     ConsentAcceptance[]
-  slaTimers              SlaTimer[]
-  derivationConsents     DerivationConsent[]
-  transferPackets        TransferPacket[]
-  legalHolds             LegalHold[]
-  deletionLogs           DeletionLog[]
+  consentAcceptances ConsentAcceptance[]
+  slaTimers          SlaTimer[]
+  derivationConsents DerivationConsent[]
+  transferPackets    TransferPacket[]
+  legalHolds         LegalHold[]
+  deletionLogs       DeletionLog[]
 
   // Performance indexes
   @@index([status])
@@ -109,6 +109,7 @@ model ConsentAcceptance {
   consentVersion ConsentVersion @relation(fields: [consentVersionId], references: [id])
   intake         ContactIntake  @relation(fields: [intakeId], references: [id])
 
+  @@unique([consentVersionId, intakeId])
   @@index([consentVersionId])
   @@index([intakeId])
 }
@@ -123,6 +124,7 @@ model DerivationConsent {
   revokedAt       DateTime?
   ipHash          String?
   userAgent       String?
+  activeKey       String?   @unique
 
   intake ContactIntake @relation(fields: [intakeId], references: [id])
 
@@ -137,13 +139,17 @@ model TransferPacket {
   manifestHash     String
   payloadSizeBytes Int
   legalBasis       String
+  idempotencyKey   String?   @unique
+  contentHash      String?
   transferredAt    DateTime  @default(now())
   acknowledgedAt   DateTime?
 
   intake ContactIntake @relation(fields: [intakeId], references: [id])
 
+  @@unique([intakeId, recipientEntity, manifestHash])
   @@index([intakeId])
   @@index([manifestHash])
+  @@index([contentHash])
   @@index([transferredAt(sort: Desc)])
 }
 
@@ -175,4 +181,40 @@ model DeletionLog {
   @@index([intakeId])
   @@index([deletedAt(sort: Desc)])
   @@index([trigger])
+}
+
+// ── Defensive Idempotency & Outbox ────────────────────────────
+
+model IdempotencyRecord {
+  id           String    @id @default(uuid())
+  scope        String
+  key          String
+  requestHash  String
+  responseHash String?
+  status       String    @default("in_progress")
+  responseBody Json?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  expiresAt    DateTime?
+
+  @@unique([scope, key])
+  @@index([requestHash])
+  @@index([status])
+  @@index([expiresAt])
+}
+
+model OutboxEvent {
+  id           String    @id @default(uuid())
+  eventName    String
+  aggregateId  String
+  causationKey String    @unique
+  payload      Json
+  status       String    @default("pending")
+  attempts     Int       @default(0)
+  createdAt    DateTime  @default(now())
+  processedAt  DateTime?
+
+  @@index([status])
+  @@index([aggregateId])
+  @@index([createdAt])
 }

@@ -54,6 +54,8 @@ describe("PrismaTransferLogRepository", () => {
           manifestHash: "sha256-abc123",
           payloadSizeBytes: 4096,
           legalBasis: "GDPR Art. 6(1)(b)",
+          idempotencyKey: null,
+          contentHash: null,
         },
       });
     });
