@@ -31,6 +31,68 @@ export interface AuditTrail {
   record(event: AuditEvent): Promise<void> | void;
 }
 
+// ── Defensive Idempotency ─────────────────────────────────────
+
+export type IdempotencyRecordView = {
+  id: string;
+  scope: string;
+  key: string;
+  requestHash: string;
+  responseHash: string | null;
+  status: "in_progress" | "completed" | "failed";
+  responseBody?: unknown;
+  createdAt: Date;
+  updatedAt: Date;
+  expiresAt: Date | null;
+};
+
+export type BeginIdempotencyInput = {
+  scope: string;
+  key: string;
+  requestHash: string;
+  expiresAt?: Date;
+};
+
+export type BeginIdempotencyResult =
+  | { state: "started"; record: IdempotencyRecordView }
+  | { state: "replayed"; record: IdempotencyRecordView }
+  | { state: "in_progress"; record: IdempotencyRecordView }
+  | { state: "conflict"; record: IdempotencyRecordView };
+
+export interface IdempotencyRepository {
+  begin(input: BeginIdempotencyInput): Promise<BeginIdempotencyResult>;
+  complete(
+    id: string,
+    responseBody: unknown,
+    responseHash: string,
+  ): Promise<void>;
+  fail(id: string, reason?: string): Promise<void>;
+}
+
+// ── Transactional Outbox ──────────────────────────────────────
+
+export type OutboxEventRecord = {
+  eventName: string;
+  aggregateId: string;
+  causationKey: string;
+  payload: Record<string, unknown>;
+};
+
+export type OutboxEventSummary = OutboxEventRecord & {
+  id: string;
+  status: "pending" | "processing" | "processed" | "failed";
+  attempts: number;
+  createdAt: Date;
+  processedAt: Date | null;
+};
+
+export interface OutboxRepository {
+  enqueue(event: OutboxEventRecord): Promise<string>;
+  findPending(limit?: number): Promise<OutboxEventSummary[]>;
+  markProcessed(id: string): Promise<void>;
+  markFailed(id: string): Promise<void>;
+}
+
 export type ConsentRecord = {
   intakeId: string;
   consentVersion: string;
@@ -89,6 +151,8 @@ export type TransferLogEntry = {
   manifestHash: string;
   payloadSizeBytes: number;
   legalBasis: string;
+  idempotencyKey?: string;
+  contentHash?: string;
 };
 
 export type TransferLogSummary = {
@@ -97,6 +161,8 @@ export type TransferLogSummary = {
   recipientEntity: string;
   manifestHash: string;
   legalBasis: string;
+  idempotencyKey?: string | null;
+  contentHash?: string | null;
   transferredAt: Date;
   acknowledgedAt: Date | null;
 };

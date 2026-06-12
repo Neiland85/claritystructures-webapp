@@ -5,10 +5,11 @@ import {
   verifyManifestHash,
 } from "../transfer-packet";
 import type {
-  TransferableIntake,
-  TransferableDecision,
-  SlaSnapshotEntry,
   ChronologyEntry,
+  SlaSnapshotEntry,
+  TransferableDecision,
+  TransferableIntake,
+  TransferPacketAssemblyOptions,
 } from "../transfer-packet";
 
 const sampleIntake: TransferableIntake = {
@@ -44,7 +45,10 @@ const sampleSla: SlaSnapshotEntry[] = [
 ];
 
 const sampleChronology: ChronologyEntry[] = [
-  { action: "intake_received", occurredAt: "2026-02-18T10:00:00Z" },
+  {
+    action: "intake_received",
+    occurredAt: "2026-02-18T10:00:00Z",
+  },
   {
     action: "priority_assessed",
     occurredAt: "2026-02-18T10:00:05Z",
@@ -52,18 +56,31 @@ const sampleChronology: ChronologyEntry[] = [
   },
 ];
 
+const packetOptions: TransferPacketAssemblyOptions = {
+  generatedAt: "2026-02-18T10:00:06.000Z",
+  packetIdempotencyKey: "transfer_intake_001_v1",
+};
+
+function buildPacket() {
+  return assembleTransferPacket(
+    sampleIntake,
+    sampleDecision,
+    sampleSla,
+    sampleChronology,
+    packetOptions,
+  );
+}
+
 describe("Transfer Packet", () => {
   describe("assembleTransferPacket", () => {
     it("should produce a frozen packet with schemaVersion 1.0", () => {
-      const packet = assembleTransferPacket(
-        sampleIntake,
-        sampleDecision,
-        sampleSla,
-        sampleChronology,
-      );
+      const packet = buildPacket();
 
       expect(packet.schemaVersion).toBe("1.0");
-      expect(packet.generatedAt).toBeDefined();
+      expect(packet.generatedAt).toBe(packetOptions.generatedAt);
+      expect(packet.packetIdempotencyKey).toBe(
+        packetOptions.packetIdempotencyKey,
+      );
       expect(Object.isFrozen(packet)).toBe(true);
     });
 
@@ -73,12 +90,13 @@ describe("Transfer Packet", () => {
         sampleDecision,
         [],
         [],
+        packetOptions,
       );
 
       expect(packet.intake.intakeId).toBe("intake-001");
       expect(packet.intake.tone).toBe("critical");
       expect(packet.intake.priority).toBe("critical");
-      // Verify no PII leaks — no email, no phone, no name
+
       expect(packet.intake).not.toHaveProperty("email");
       expect(packet.intake).not.toHaveProperty("phone");
       expect(packet.intake).not.toHaveProperty("name");
@@ -90,6 +108,7 @@ describe("Transfer Packet", () => {
         sampleDecision,
         [],
         [],
+        packetOptions,
       );
 
       expect(packet.decision.modelVersion).toBe("v2");
@@ -101,12 +120,7 @@ describe("Transfer Packet", () => {
     });
 
     it("should include SLA snapshot and chronology", () => {
-      const packet = assembleTransferPacket(
-        sampleIntake,
-        sampleDecision,
-        sampleSla,
-        sampleChronology,
-      );
+      const packet = buildPacket();
 
       expect(packet.slaSnapshot).toHaveLength(2);
       expect(packet.chronology).toHaveLength(2);
@@ -117,53 +131,46 @@ describe("Transfer Packet", () => {
 
   describe("computeManifestHash", () => {
     it("should return a 64-char hex SHA-256 hash", () => {
-      const packet = assembleTransferPacket(
-        sampleIntake,
-        sampleDecision,
-        sampleSla,
-        sampleChronology,
-      );
-      const hash = computeManifestHash(packet);
+      const hash = computeManifestHash(buildPacket());
 
       expect(hash).toMatch(/^[a-f0-9]{64}$/);
     });
 
-    it("should be deterministic — same input produces same hash", () => {
-      const packet = assembleTransferPacket(
+    it("should be deterministic across repeated assembly", () => {
+      const first = buildPacket();
+      const second = buildPacket();
+
+      expect(computeManifestHash(first)).toBe(computeManifestHash(second));
+    });
+
+    it("should change hash when packet generation identity changes", () => {
+      const first = buildPacket();
+
+      const second = assembleTransferPacket(
         sampleIntake,
         sampleDecision,
         sampleSla,
         sampleChronology,
+        {
+          ...packetOptions,
+          generatedAt: "2026-02-18T10:00:07.000Z",
+        },
       );
-      const h1 = computeManifestHash(packet);
-      const h2 = computeManifestHash(packet);
 
-      expect(h1).toBe(h2);
+      expect(computeManifestHash(first)).not.toBe(computeManifestHash(second));
     });
   });
 
   describe("verifyManifestHash", () => {
     it("should return true for matching hash", () => {
-      const packet = assembleTransferPacket(
-        sampleIntake,
-        sampleDecision,
-        sampleSla,
-        sampleChronology,
-      );
+      const packet = buildPacket();
       const hash = computeManifestHash(packet);
 
       expect(verifyManifestHash(packet, hash)).toBe(true);
     });
 
     it("should return false for non-matching hash", () => {
-      const packet = assembleTransferPacket(
-        sampleIntake,
-        sampleDecision,
-        sampleSla,
-        sampleChronology,
-      );
-
-      expect(verifyManifestHash(packet, "badhash")).toBe(false);
+      expect(verifyManifestHash(buildPacket(), "badhash")).toBe(false);
     });
   });
 });

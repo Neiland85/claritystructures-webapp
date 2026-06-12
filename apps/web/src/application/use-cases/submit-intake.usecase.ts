@@ -6,32 +6,43 @@ import type {
   AuditTrail,
   ConsentRepository,
   WizardResult,
+  IdempotencyFingerprint,
+  IdempotencyRepository,
 } from "@claritystructures/domain";
-import { decideIntakeWithExplanation } from "@claritystructures/domain";
-import { buildGuardianDecision } from "@/lib/governance/guardian-decision-builder";
-import { createGuardianInputFromEnvelope } from "@/lib/governance/guardian-input-adapter";
-import { createIntakeGovernanceEnvelope } from "@/lib/governance/wizard-result-to-governance-envelope";
+import {
+  buildResponseHash,
+  decideIntakeWithExplanation,
+} from "@claritystructures/domain";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("SubmitIntakeUseCase");
-const POLICY_BUNDLE_VERSION = "wizard-guardian-policy/v0";
 
-/**
- * Submit Intake Use Case
- *
- * Canonical business orchestration for intake submission.
- * Coordinates domain logic with infrastructure adapters.
- *
- * Responsibilities:
- * - Execute decision logic
- * - Persist intake record
- * - Record consent acceptance (if consent repository provided)
- * - Trigger notifications
- * - Record audit events
- *
- * Dependencies injected via constructor (Dependency Inversion Principle)
- */
-// Input for this use case: priority and route are optional as they are computed by the decision engine
+type IntakeDecisionExplanation = ReturnType<typeof decideIntakeWithExplanation>;
+
+export type SubmitIntakeOutput = {
+  record: IntakeRecord;
+  decision: IntakeDecisionExplanation;
+  idempotencyStatus?: "created" | "replayed";
+};
+
+export class IdempotencyConflictError extends Error {
+  readonly statusCode = 409;
+
+  constructor(readonly key: string) {
+    super("Idempotency key was already used with a different request body");
+    this.name = "IdempotencyConflictError";
+  }
+}
+
+export class IdempotencyInProgressError extends Error {
+  readonly statusCode = 409;
+
+  constructor(readonly key: string) {
+    super("Idempotent operation is already in progress");
+    this.name = "IdempotencyInProgressError";
+  }
+}
+
 export type SubmitIntakeInput = Omit<
   ContactIntakeInput,
   "priority" | "route"
@@ -40,7 +51,6 @@ export type SubmitIntakeInput = Omit<
   route?: ContactIntakeInput["route"];
 };
 
-// Optional consent metadata attached at submission time
 export type ConsentMeta = {
   consentVersion: string;
   ipHash?: string;
@@ -48,11 +58,31 @@ export type ConsentMeta = {
   locale?: string;
 };
 
-/** Type guard to verify meta is a valid WizardResult structure */
 function isWizardResult(meta: unknown): meta is WizardResult {
   if (!meta || typeof meta !== "object") return false;
   const m = meta as Record<string, unknown>;
+
   return typeof m.objective === "string" && typeof m.incident === "string";
+}
+
+function isSubmitIntakeOutput(value: unknown): value is SubmitIntakeOutput {
+  if (!value || typeof value !== "object") return false;
+
+  const record = (value as { record?: unknown }).record;
+  const decision = (value as { decision?: unknown }).decision;
+
+  return Boolean(record && typeof record === "object" && decision);
+}
+
+function reviveOutput(value: SubmitIntakeOutput): SubmitIntakeOutput {
+  return {
+    ...value,
+    record: {
+      ...value.record,
+      createdAt: new Date(value.record.createdAt),
+    },
+    idempotencyStatus: "replayed",
+  };
 }
 
 export class SubmitIntakeUseCase {
@@ -61,121 +91,128 @@ export class SubmitIntakeUseCase {
     private readonly notifier: Notifier,
     private readonly audit: AuditTrail,
     private readonly consent?: ConsentRepository,
+    private readonly idempotency?: IdempotencyRepository,
   ) {}
 
   async execute(
     input: SubmitIntakeInput,
     consentMeta?: ConsentMeta,
-  ): Promise<{
-    record: IntakeRecord;
-    decision: ReturnType<typeof decideIntakeWithExplanation>;
-  }> {
-    // 1. Execute domain decision logic (pure function)
-    const meta = input.meta;
-    let wizardResult: WizardResult;
+    idempotencyFingerprint?: IdempotencyFingerprint,
+  ): Promise<SubmitIntakeOutput> {
+    const guard =
+      this.idempotency && idempotencyFingerprint
+        ? await this.idempotency.begin({
+            scope: idempotencyFingerprint.scope,
+            key: idempotencyFingerprint.key,
+            requestHash: idempotencyFingerprint.requestHash,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+          })
+        : null;
 
-    if (isWizardResult(meta)) {
-      wizardResult = meta;
-    } else {
-      // Fallback for when meta is null/undefined or not a full wizard result
-      // This ensures decideIntakeWithExplanation receives a valid structure
-      wizardResult = {
-        objective: "contact",
-        incident: input.message,
-        clientProfile: "other",
-        urgency: "informational",
-        devices: 0,
-        actionsTaken: [],
-        evidenceSources: [],
-      };
+    if (guard?.state === "replayed") {
+      if (isSubmitIntakeOutput(guard.record.responseBody)) {
+        return reviveOutput(guard.record.responseBody);
+      }
+
+      throw new Error("Stored idempotent response is malformed");
     }
 
-    const decision = decideIntakeWithExplanation(wizardResult, true);
+    if (guard?.state === "conflict") {
+      throw new IdempotencyConflictError(idempotencyFingerprint?.key ?? "");
+    }
 
-    // 2. Persist intake record (infrastructure)
-    // CRITICAL: We use the *computed* priority and route from the decision engine,
-    // overriding whatever default might have been passed in the input.
-    const record = await this.repository.create({
-      ...input,
-      priority: decision.decision.priority,
-      route: decision.decision.route,
-    });
+    if (guard?.state === "in_progress") {
+      throw new IdempotencyInProgressError(idempotencyFingerprint?.key ?? "");
+    }
 
-    const governanceEnvelope = createIntakeGovernanceEnvelope({
-      wizardResult,
-      requestId: record.id,
-      consentVersion: consentMeta?.consentVersion ?? "unknown",
-      policyBundleVersion: POLICY_BUNDLE_VERSION,
-      ipHash: consentMeta?.ipHash,
-      userAgent: consentMeta?.userAgent,
-    });
+    try {
+      const meta = input.meta;
+      let wizardResult: WizardResult;
 
-    const guardianInput = createGuardianInputFromEnvelope(governanceEnvelope);
-    const guardianDecision = buildGuardianDecision(guardianInput);
+      if (isWizardResult(meta)) {
+        wizardResult = meta;
+      } else {
+        wizardResult = {
+          objective: "contact",
+          incident: input.message,
+          clientProfile: "other",
+          urgency: "informational",
+          devices: 0,
+          actionsTaken: [],
+          evidenceSources: [],
+        };
+      }
 
-    // 3. Record consent acceptance (if consent repository is available)
-    if (this.consent && consentMeta) {
+      const decision = decideIntakeWithExplanation(wizardResult, true);
+
+      const record = await this.repository.create({
+        ...input,
+        priority: decision.decision.priority,
+        route: decision.decision.route,
+      });
+
+      if (this.consent && consentMeta) {
+        try {
+          await this.consent.recordAcceptance({
+            intakeId: record.id,
+            consentVersion: consentMeta.consentVersion,
+            ipHash: consentMeta.ipHash,
+            userAgent: consentMeta.userAgent,
+            locale: consentMeta.locale,
+          });
+        } catch (error) {
+          logger.error("Consent recording failed", error);
+        }
+      }
+
       try {
-        await this.consent.recordAcceptance({
+        await this.notifier.notifyIntakeReceived(record);
+      } catch (error) {
+        logger.error("Notification failed", error);
+      }
+
+      try {
+        await this.audit.record({
+          action: "intake_submitted",
           intakeId: record.id,
-          consentVersion: consentMeta.consentVersion,
-          ipHash: consentMeta.ipHash,
-          userAgent: consentMeta.userAgent,
-          locale: consentMeta.locale,
+          metadata: {
+            priority: decision.decision.priority,
+            route: decision.decision.route,
+            modelVersion: decision.decision.decisionModelVersion,
+            consentVersion: consentMeta?.consentVersion,
+            idempotencyKey: idempotencyFingerprint?.key,
+            requestHash: idempotencyFingerprint?.requestHash,
+          },
+          occurredAt: new Date(),
         });
       } catch (error) {
-        logger.error("Consent recording failed", error);
+        logger.error("Audit trail recording failed", error);
       }
-    }
 
-    // 4. Trigger notification (infrastructure)
-    // Wrapped in try/catch to ensure failure here doesn't block the main flow
-    try {
-      await this.notifier.notifyIntakeReceived(record);
+      const output: SubmitIntakeOutput = {
+        record,
+        decision,
+        idempotencyStatus: guard ? "created" : undefined,
+      };
+
+      if (this.idempotency && guard?.state === "started") {
+        await this.idempotency.complete(
+          guard.record.id,
+          output,
+          buildResponseHash(output),
+        );
+      }
+
+      return output;
     } catch (error) {
-      logger.error("Notification failed", error);
-      // We do not rethrow; the intake is saved, which is the primary goal.
-    }
+      if (this.idempotency && guard?.state === "started") {
+        await this.idempotency.fail(
+          guard.record.id,
+          error instanceof Error ? error.message : "unknown_error",
+        );
+      }
 
-    // 5. Record audit event (infrastructure)
-    try {
-      await this.audit.record({
-        action: "intake_submitted",
-        intakeId: record.id,
-        metadata: {
-          priority: decision.decision.priority,
-          route: decision.decision.route,
-          modelVersion: decision.decision.decisionModelVersion,
-          consentVersion: consentMeta?.consentVersion,
-          governanceEnvelope: {
-            schemaVersion: governanceEnvelope.schemaVersion,
-            riskLevel: governanceEnvelope.governanceContext.riskLevel,
-            requiresHumanReview:
-              governanceEnvelope.governanceContext.requiresHumanReview,
-            allowsEvidenceHandling:
-              governanceEnvelope.governanceContext.allowsEvidenceHandling,
-            wizardResultHash: governanceEnvelope.integrity.wizardResultHash,
-            hashAlgorithm: governanceEnvelope.integrity.hashAlgorithm,
-            policyBundleVersion:
-              governanceEnvelope.integrity.policyBundleVersion,
-          },
-          guardianDecision: {
-            schemaVersion: guardianDecision.schemaVersion,
-            decision: guardianDecision.decision,
-            allowedActions: guardianDecision.allowedActions,
-            blockedActions: guardianDecision.blockedActions,
-            requiresHumanReview: guardianDecision.requiresHumanReview,
-            riskLevel: guardianDecision.riskLevel,
-            reasonCodes: guardianDecision.reasonCodes,
-            policyBundleVersion: guardianDecision.policyBundleVersion,
-          },
-        },
-        occurredAt: new Date(),
-      });
-    } catch (error) {
-      logger.error("Audit trail recording failed", error);
+      throw error;
     }
-
-    return { record, decision };
   }
 }

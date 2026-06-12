@@ -4,6 +4,13 @@ import type {
   DerivationConsentRecord,
   DerivationConsentSummary,
 } from "@claritystructures/domain";
+import { sha256Hex } from "@claritystructures/domain";
+
+function buildActiveKey(record: DerivationConsentRecord): string {
+  return sha256Hex(
+    `legal.derivation.consent:${record.intakeId}:${record.recipientEntity}`,
+  );
+}
 
 export class PrismaLegalDerivationRepository implements LegalDerivationRepository {
   constructor(
@@ -11,21 +18,39 @@ export class PrismaLegalDerivationRepository implements LegalDerivationRepositor
   ) {}
 
   async recordConsent(record: DerivationConsentRecord): Promise<string> {
-    const row = await this.prisma.derivationConsent.create({
-      data: {
-        intakeId: record.intakeId,
-        recipientEntity: record.recipientEntity,
-        ipHash: record.ipHash ?? null,
-        userAgent: record.userAgent ?? null,
-      },
-    });
-    return row.id;
+    const activeKey = buildActiveKey(record);
+
+    try {
+      const row = await this.prisma.derivationConsent.create({
+        data: {
+          intakeId: record.intakeId,
+          recipientEntity: record.recipientEntity,
+          ipHash: record.ipHash ?? null,
+          userAgent: record.userAgent ?? null,
+          activeKey,
+        },
+      });
+
+      return row.id;
+    } catch (error) {
+      const existing = await this.prisma.derivationConsent.findFirst({
+        where: { activeKey, revokedAt: null },
+        select: { id: true },
+      });
+
+      if (!existing) throw error;
+
+      return existing.id;
+    }
   }
 
   async revokeConsent(consentId: string): Promise<void> {
     await this.prisma.derivationConsent.update({
       where: { id: consentId },
-      data: { revokedAt: new Date() },
+      data: {
+        revokedAt: new Date(),
+        activeKey: null,
+      },
     });
   }
 
@@ -36,7 +61,9 @@ export class PrismaLegalDerivationRepository implements LegalDerivationRepositor
       where: { intakeId, revokedAt: null },
       orderBy: { consentedAt: "desc" },
     });
+
     if (!row) return null;
+
     return {
       id: row.id,
       intakeId: row.intakeId,

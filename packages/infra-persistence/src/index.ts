@@ -8,3 +8,6 @@ export { PrismaLegalHoldRepository } from "./repositories/legal-hold.repository"
 export { PrismaDeletionLogRepository } from "./repositories/deletion-log.repository";
 export * from "./intake-prisma-consistency";
 export { default as prisma } from "../prisma/client";
+export { PrismaIdempotencyRepository } from "./repositories/idempotency.repository";
+
+export { PrismaOutboxRepository } from "./repositories/outbox.repository";

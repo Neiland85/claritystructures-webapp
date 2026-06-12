@@ -98,6 +98,7 @@ export {
 } from "./transfer-packet";
 export type {
   TransferPacketPayload,
+  TransferPacketAssemblyOptions,
   TransferableIntake,
   TransferableDecision,
   SlaSnapshotEntry,
@@ -113,3 +114,20 @@ export {
 export type { RetentionCategory } from "./retention";
 
 export * from "./wizard-contracts";
+
+// Defensive Idempotency
+export {
+  IDEMPOTENCY_SCOPES,
+  buildIdempotencyFingerprint,
+  buildResponseHash,
+  requestHashesMatch,
+  sha256Hex,
+  stableCanonicalJson,
+} from "./idempotency";
+
+export type {
+  BuildIdempotencyFingerprintInput,
+  IdempotencyFingerprint,
+  IdempotencyScope,
+  IdempotencyStatus,
+} from "./idempotency";

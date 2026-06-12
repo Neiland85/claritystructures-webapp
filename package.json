@@ -22,7 +22,12 @@
     "lint:fix": "eslint --fix .",
     "start": "pnpm --filter @claritystructures/web run start",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "validate:idempotency": "pnpm exec prisma validate --config prisma.config.ts && pnpm db:generate && pnpm exec vitest run packages/domain/src/__tests__/idempotency.test.ts packages/domain/src/__tests__/transfer-packet.test.ts apps/web/src/__tests__/application/use-cases/generate-transfer-packet.usecase.test.ts",
+    "validate:core": "pnpm validate:idempotency && pnpm typecheck",
+    "validate:full": "pnpm validate:core && pnpm lint && pnpm build",
+    "db:migrate:dev:safe": "node scripts/guard-prisma-datasource.mjs && prisma migrate dev --config prisma.config.ts",
+    "db:migrate:status": "prisma migrate status --config prisma.config.ts"
   },
   "devDependencies": {
     "@claritystructures/domain": "workspace:*",

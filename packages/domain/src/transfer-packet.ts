@@ -2,18 +2,14 @@
  * Transfer Packet – Legal Derivation
  *
  * Pure functions to assemble, minimize, and hash the data packet
- * transferred to external legal counsel (Ospina Abogados).
+ * transferred to external legal counsel.
  *
  * Data minimization: only fields strictly necessary for legal assessment
- * are included. Personal contact details are excluded unless the user
- * explicitly consented to their transfer.
+ * are included.
  */
 
 import { createHash } from "node:crypto";
-
-// ────────────────────────────────────────────────────────────────
-// Types
-// ────────────────────────────────────────────────────────────────
+import { stableCanonicalJson } from "./idempotency";
 
 export type TransferableIntake = {
   intakeId: string;
@@ -32,18 +28,18 @@ export type TransferableDecision = {
   decidedAt: Date;
 };
 
-export type TransferPacketPayload = {
-  /** Schema version for forward-compat parsing */
-  schemaVersion: "1.0";
-  /** ISO-8601 timestamp of packet generation */
+export type TransferPacketAssemblyOptions = {
   generatedAt: string;
-  /** Minimised intake summary */
+  packetIdempotencyKey?: string;
+};
+
+export type TransferPacketPayload = {
+  schemaVersion: "1.0";
+  generatedAt: string;
+  packetIdempotencyKey?: string;
   intake: TransferableIntake;
-  /** Decision artifact */
   decision: TransferableDecision;
-  /** SLA snapshot at packet-generation time */
   slaSnapshot: SlaSnapshotEntry[];
-  /** Chain-of-custody: chronological events */
   chronology: ChronologyEntry[];
 };
 
@@ -60,23 +56,23 @@ export type ChronologyEntry = {
   metadata?: Record<string, unknown>;
 };
 
-// ────────────────────────────────────────────────────────────────
-// Pure functions
-// ────────────────────────────────────────────────────────────────
-
-/**
- * Assemble a transfer packet from domain artefacts.
- * Applies data-minimization by selecting only legally relevant fields.
- */
 export function assembleTransferPacket(
   intake: TransferableIntake,
   decision: TransferableDecision,
   sla: SlaSnapshotEntry[],
   chronology: ChronologyEntry[],
+  options: TransferPacketAssemblyOptions,
 ): TransferPacketPayload {
+  if (!options?.generatedAt) {
+    throw new Error(
+      "Transfer packet generatedAt is required for deterministic assembly",
+    );
+  }
+
   return Object.freeze({
     schemaVersion: "1.0" as const,
-    generatedAt: new Date().toISOString(),
+    generatedAt: options.generatedAt,
+    packetIdempotencyKey: options.packetIdempotencyKey,
     intake: Object.freeze({ ...intake }),
     decision: Object.freeze({ ...decision }),
     slaSnapshot: Object.freeze(sla.map((s) => Object.freeze({ ...s }))),
@@ -84,18 +80,12 @@ export function assembleTransferPacket(
   }) as TransferPacketPayload;
 }
 
-/**
- * Compute a SHA-256 manifest hash of the complete packet.
- * The hash proves packet integrity and enables tamper detection.
- */
 export function computeManifestHash(packet: TransferPacketPayload): string {
-  const canonical = JSON.stringify(packet);
+  const canonical = stableCanonicalJson(packet);
+
   return createHash("sha256").update(canonical).digest("hex");
 }
 
-/**
- * Validate that a packet matches its claimed manifest hash.
- */
 export function verifyManifestHash(
   packet: TransferPacketPayload,
   expectedHash: string,
