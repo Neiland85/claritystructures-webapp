@@ -1,24 +1,96 @@
 {
-  "editor.formatOnSave": true,
+  // =========================
+  // CLARITY CORE WORKSPACE
+  // Sprint 1: contrato + gobernanza del intake
+  // =========================
+
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.rulers": [100],
+
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+  "editor.formatOnType": false,
+
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // TypeScript del repo, no el global de VS Code
+  "js/ts.tsdk.path": "./node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": true,
+
+  "eslint.useFlatConfig": true,
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  "prettier.requireConfig": true,
 
   "files.exclude": {
     "**/.git": true,
     "**/.next": true,
-    "**/node_modules": true
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/coverage": true,
+    "**/generated": true
   },
 
   "search.exclude": {
     "**/.next": true,
-    "**/node_modules": true
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/coverage": true,
+    "**/generated": true
   },
 
-  // Copilot / Codex: asistido, NO autónomo
+  "files.watcherExclude": {
+    "**/.git/**": true,
+    "**/.next/**": true,
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/coverage/**": true,
+    "**/generated/**": true
+  },
+
   "github.copilot.chat.enabled": true,
   "github.copilot.editor.enableAutoCompletions": true,
   "github.copilot.experimental.agent": false,
 
-  // Evitar ejecuciones implícitas
-  "npm.enableRunFromFolder": false
+  "npm.enableRunFromFolder": false,
+
+  "terminal.integrated.defaultProfile.osx": "zsh",
+
+  "workbench.editor.enablePreview": false,
+  "breadcrumbs.enabled": true,
+  "outline.showFiles": true
 }

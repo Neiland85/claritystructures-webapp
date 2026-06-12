@@ -1,0 +1,22 @@
+# Dependencies / generated
+node_modules
+.pnpm-store
+.next
+dist
+build
+coverage
+generated
+
+# Local Python env
+.venv
+
+# Audit artifacts / machine reports
+.audit
+
+# Local archives / uploaded bundles
+*.zip
+*.tar
+*.tar.gz
+
+# Package manager / generated lock artifacts if needed
+pnpm-lock.yaml

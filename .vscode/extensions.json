@@ -4,5 +4,11 @@
     "esbenp.prettier-vscode",
     "GitHub.copilot",
     "GitHub.copilot-chat"
+  ],
+  "unwantedRecommendations": [
+    "ms-azuretools.vscode-azureappservice",
+    "googlecloudtools.cloudcode",
+    "firefox-devtools.vscode-firefox-debug",
+    "ivory-lab.jenkinsfile-support"
   ]
 }
