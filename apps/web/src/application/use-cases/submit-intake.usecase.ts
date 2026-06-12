@@ -14,6 +14,8 @@ import {
   decideIntakeWithExplanation,
 } from "@claritystructures/domain";
 import { createLogger } from "@/lib/logger";
+import { createIntakeGovernanceEnvelope } from "@/lib/governance/wizard-result-to-governance-envelope";
+import { buildGuardianDecision } from "@/lib/governance/guardian-decision-builder";
 
 const logger = createLogger("SubmitIntakeUseCase");
 
@@ -145,6 +147,28 @@ export class SubmitIntakeUseCase {
 
       const decision = decideIntakeWithExplanation(wizardResult, true);
 
+      const governanceEnvelope = createIntakeGovernanceEnvelope({
+        wizardResult,
+        requestId: idempotencyFingerprint?.key ?? "non-idempotent-intake",
+        consentVersion: consentMeta?.consentVersion ?? "unknown",
+        policyBundleVersion: "wizard-guardian-policy/v0",
+        ipHash: consentMeta?.ipHash,
+        userAgent: consentMeta?.userAgent,
+      });
+
+      const guardianDecision = buildGuardianDecision({
+        requestId: governanceEnvelope.requestId,
+        schemaVersion: governanceEnvelope.schemaVersion,
+        riskLevel: governanceEnvelope.governanceContext.riskLevel,
+        requiresHumanReview:
+          governanceEnvelope.governanceContext.requiresHumanReview,
+        allowsAutomatedPreclassification:
+          governanceEnvelope.governanceContext.allowsAutomatedPreclassification,
+        allowsEvidenceHandling:
+          governanceEnvelope.governanceContext.allowsEvidenceHandling,
+        policyBundleVersion: governanceEnvelope.integrity.policyBundleVersion,
+      });
+
       const record = await this.repository.create({
         ...input,
         priority: decision.decision.priority,
@@ -182,6 +206,22 @@ export class SubmitIntakeUseCase {
             consentVersion: consentMeta?.consentVersion,
             idempotencyKey: idempotencyFingerprint?.key,
             requestHash: idempotencyFingerprint?.requestHash,
+            governanceEnvelope: {
+              riskLevel: governanceEnvelope.governanceContext.riskLevel,
+              requiresHumanReview:
+                governanceEnvelope.governanceContext.requiresHumanReview,
+              requiresLegalDerivation:
+                governanceEnvelope.governanceContext.requiresLegalDerivation,
+              allowsAutomatedPreclassification:
+                governanceEnvelope.governanceContext
+                  .allowsAutomatedPreclassification,
+              allowsEvidenceHandling:
+                governanceEnvelope.governanceContext.allowsEvidenceHandling,
+              wizardResultHash: governanceEnvelope.integrity.wizardResultHash,
+              policyBundleVersion:
+                governanceEnvelope.integrity.policyBundleVersion,
+            },
+            guardianDecision,
           },
           occurredAt: new Date(),
         });

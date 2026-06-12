@@ -21,6 +21,13 @@ vi.mock("@claritystructures/infra-persistence", () => ({
       findActiveVersion: vi.fn(),
     };
   }),
+  PrismaIdempotencyRepository: vi.fn().mockImplementation(function () {
+    return {
+      begin: vi.fn(),
+      complete: vi.fn(),
+      fail: vi.fn(),
+    };
+  }),
   PrismaLegalDerivationRepository: vi.fn().mockImplementation(function () {
     return {
       recordConsent: vi.fn(),
@@ -101,6 +108,9 @@ describe("DI Container", () => {
     it("should inject PrismaIntakeRepository with prisma client", () => {
       diContainer.createSubmitIntakeUseCase();
       expect(persistence.PrismaIntakeRepository).toHaveBeenCalledWith(
+        persistence.prisma,
+      );
+      expect(persistence.PrismaIdempotencyRepository).toHaveBeenCalledWith(
         persistence.prisma,
       );
     });

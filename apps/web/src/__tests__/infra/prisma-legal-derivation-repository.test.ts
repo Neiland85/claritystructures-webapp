@@ -51,6 +51,7 @@ describe("PrismaLegalDerivationRepository", () => {
           recipientEntity: "Legal Corp SLU",
           ipHash: "abc123",
           userAgent: "Mozilla/5.0",
+          activeKey: expect.any(String),
         },
       });
     });
@@ -67,6 +68,7 @@ describe("PrismaLegalDerivationRepository", () => {
           recipientEntity: "Another Corp",
           ipHash: null,
           userAgent: null,
+          activeKey: expect.any(String),
         },
       });
     });
@@ -78,7 +80,10 @@ describe("PrismaLegalDerivationRepository", () => {
 
       expect(mockPrisma.derivationConsent.update).toHaveBeenCalledWith({
         where: { id: "consent-001" },
-        data: { revokedAt: expect.any(Date) },
+        data: {
+          revokedAt: expect.any(Date),
+          activeKey: null,
+        },
       });
     });
   });
