@@ -8,6 +8,8 @@ import type {
   WizardResult,
 } from "@claritystructures/domain";
 import { decideIntakeWithExplanation } from "@claritystructures/domain";
+import { buildGuardianDecision } from "@/lib/governance/guardian-decision-builder";
+import { createGuardianInputFromEnvelope } from "@/lib/governance/guardian-input-adapter";
 import { createIntakeGovernanceEnvelope } from "@/lib/governance/wizard-result-to-governance-envelope";
 import { createLogger } from "@/lib/logger";
 
@@ -108,6 +110,9 @@ export class SubmitIntakeUseCase {
       userAgent: consentMeta?.userAgent,
     });
 
+    const guardianInput = createGuardianInputFromEnvelope(governanceEnvelope);
+    const guardianDecision = buildGuardianDecision(guardianInput);
+
     // 3. Record consent acceptance (if consent repository is available)
     if (this.consent && consentMeta) {
       try {
@@ -153,6 +158,16 @@ export class SubmitIntakeUseCase {
             hashAlgorithm: governanceEnvelope.integrity.hashAlgorithm,
             policyBundleVersion:
               governanceEnvelope.integrity.policyBundleVersion,
+          },
+          guardianDecision: {
+            schemaVersion: guardianDecision.schemaVersion,
+            decision: guardianDecision.decision,
+            allowedActions: guardianDecision.allowedActions,
+            blockedActions: guardianDecision.blockedActions,
+            requiresHumanReview: guardianDecision.requiresHumanReview,
+            riskLevel: guardianDecision.riskLevel,
+            reasonCodes: guardianDecision.reasonCodes,
+            policyBundleVersion: guardianDecision.policyBundleVersion,
           },
         },
         occurredAt: new Date(),
