@@ -58,3 +58,12 @@ prisma/generated/
 **/.env
 **/.env.*
 !**/.env.example
+
+# Local Python/tooling environments
+.venv/
+venv/
+
+# Temporary local config files
+*.temp.ts
+*.temp.js
+*.tmp
