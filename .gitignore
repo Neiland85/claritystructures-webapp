@@ -49,3 +49,12 @@ prisma/generated/
 # Local AI tooling
 .claude/
 
+
+# Local secrets — never commit
+.env
+.env.*
+!.env.example
+!.env.production.local.example
+**/.env
+**/.env.*
+!**/.env.example
