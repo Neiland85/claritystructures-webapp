@@ -1,11 +1,13 @@
-import { ActionsPanel } from "./_components/actions-panel";
-import { AssuranceTrail } from "./_components/assurance-trail";
-import { controlRoomDemoViewModel } from "./_components/control-room-demo-data";
-import { ControlRoomHeader } from "./_components/control-room-header";
-import { GovernanceDecisionCard } from "./_components/governance-decision-card";
-import { PrivacyBoundaryCard } from "./_components/privacy-boundary-card";
-import { ReadinessRadar } from "./_components/readiness-radar";
-import { ReviewNotesPanel } from "./_components/review-notes-panel";
+import {
+  ActionsPanel,
+  AssuranceTrail,
+  controlRoomDemoViewModel,
+  ControlRoomHeader,
+  GovernanceDecisionCard,
+  PrivacyBoundaryCard,
+  ReadinessRadar,
+  ReviewNotesPanel,
+} from "../../../../features/control-room";
 
 export default function ControlRoomDemoPage() {
   const viewModel = controlRoomDemoViewModel;
