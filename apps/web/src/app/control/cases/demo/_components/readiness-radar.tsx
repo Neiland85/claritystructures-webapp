@@ -1,12 +1,16 @@
-import { readinessItems } from "./control-room-demo-data";
+import type { ReadinessItemViewModel } from "./control-room-view-model";
 import { toneClass } from "./control-room-style";
 
-export function ReadinessRadar() {
+type ReadinessRadarProps = {
+  items: ReadinessItemViewModel[];
+};
+
+export function ReadinessRadar({ items }: ReadinessRadarProps) {
   return (
     <aside className="rounded-3xl border border-slate-700/70 bg-[#0D1B26] p-5">
       <h2 className="text-lg font-semibold text-white">Readiness radar</h2>
       <div className="mt-5 flex flex-col gap-3">
-        {readinessItems.map((item) => (
+        {items.map((item) => (
           <div
             key={item.label}
             className={`rounded-2xl border p-4 ${toneClass(item.tone)}`}

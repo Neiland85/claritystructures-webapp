@@ -1,6 +1,10 @@
-import { notes } from "./control-room-demo-data";
+import type { ReviewNoteViewModel } from "./control-room-view-model";
 
-export function ReviewNotesPanel() {
+type ReviewNotesPanelProps = {
+  notes: ReviewNoteViewModel[];
+};
+
+export function ReviewNotesPanel({ notes }: ReviewNotesPanelProps) {
   return (
     <div className="rounded-3xl border border-slate-700/70 bg-[#0D1B26] p-6">
       <h2 className="text-lg font-semibold text-white">Review notes</h2>
