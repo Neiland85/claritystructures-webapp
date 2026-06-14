@@ -71,3 +71,11 @@ Independent Technical Review — Findings & Remediation Plan
 
 The goal is not praise. The goal is controlled institutional strengthening.
 ```
+
+## Operational naming bridge
+
+For reviewers from regulated, operational or critical-system environments, see:
+
+- `docs/institutional/11_OPERATIONAL_NAMING_BRIDGE.md`
+
+This document provides a controlled terminology bridge for external technical review. It does not rename internal contracts and does not claim compliance with defense, aerospace, aviation, safety-critical or classified-system standards.
