@@ -1,6 +1,7 @@
-import type { ControlRoomViewModel } from "./control-room-view-model";
+import type { ControlRoomSource } from "./control-room-source";
+import { toControlRoomViewModel } from "./to-control-room-view-model";
 
-export const controlRoomDemoViewModel: ControlRoomViewModel = {
+export const controlRoomDemoSource: ControlRoomSource = {
   caseRef: "EV-2026-DEMO",
   title: "Governed Case File",
   subtitle:
@@ -145,3 +146,7 @@ export const controlRoomDemoViewModel: ControlRoomViewModel = {
     },
   ],
 };
+
+export const controlRoomDemoViewModel = toControlRoomViewModel(
+  controlRoomDemoSource,
+);

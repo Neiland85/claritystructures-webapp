@@ -1,11 +1,15 @@
 export { ActionsPanel } from "./actions-panel";
 export { AssuranceTrail } from "./assurance-trail";
-export { controlRoomDemoViewModel } from "./control-room-demo-data";
+export {
+  controlRoomDemoSource,
+  controlRoomDemoViewModel,
+} from "./control-room-demo-data";
 export { ControlRoomHeader } from "./control-room-header";
 export { GovernanceDecisionCard } from "./governance-decision-card";
 export { PrivacyBoundaryCard } from "./privacy-boundary-card";
 export { ReadinessRadar } from "./readiness-radar";
 export { ReviewNotesPanel } from "./review-notes-panel";
+export { toControlRoomViewModel } from "./to-control-room-view-model";
 
 export type {
   AssuranceEventViewModel,
@@ -17,3 +21,15 @@ export type {
   ReadinessItemViewModel,
   ReviewNoteViewModel,
 } from "./control-room-view-model";
+
+export type {
+  ControlRoomSource,
+  ControlRoomSourceAssuranceEvent,
+  ControlRoomSourceBlockedAction,
+  ControlRoomSourceGovernanceDecision,
+  ControlRoomSourcePrivacyBoundary,
+  ControlRoomSourceReadinessItem,
+  ControlRoomSourceReviewNote,
+  ControlRoomSourceStatus,
+  ControlRoomSourceTone,
+} from "./control-room-source";
