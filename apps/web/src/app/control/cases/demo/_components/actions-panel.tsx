@@ -1,6 +1,14 @@
-import { allowedActions, blockedActions } from "./control-room-demo-data";
+import type { BlockedActionViewModel } from "./control-room-view-model";
 
-export function ActionsPanel() {
+type ActionsPanelProps = {
+  allowedActions: string[];
+  blockedActions: BlockedActionViewModel[];
+};
+
+export function ActionsPanel({
+  allowedActions,
+  blockedActions,
+}: ActionsPanelProps) {
   return (
     <aside className="flex flex-col gap-6">
       <div className="rounded-3xl border border-slate-700/70 bg-[#0D1B26] p-5">
