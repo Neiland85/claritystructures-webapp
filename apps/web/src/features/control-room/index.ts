@@ -51,3 +51,13 @@ export {
   canonicalControlRoomDemoCaseId,
   canonicalControlRoomDemoCasePath,
 } from "./control-room-demo-route";
+export {
+  assertControlRoomSourceAdapterContract,
+  requiredControlRoomSourceAdapterCapabilities,
+  resolveControlRoomCaseThroughAdapter,
+} from "./control-room-source-adapter";
+export type {
+  ControlRoomSourceAdapterCapability,
+  ControlRoomSourceAdapterContract,
+  ControlRoomSourceAdapterKind,
+} from "./control-room-source-adapter";
