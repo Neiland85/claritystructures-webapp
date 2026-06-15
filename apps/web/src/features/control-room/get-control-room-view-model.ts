@@ -1,9 +1,13 @@
-import {
-  inMemoryControlRoomCaseRepository,
-  type ControlRoomCaseRepository,
-  type ControlRoomCaseSourceResult,
-} from "./control-room-case-repository";
 import { controlRoomDemoViewModel } from "./control-room-demo-data";
+import type { ControlRoomCaseSourceResult } from "./control-room-case-repository";
+import {
+  getControlRoomSourceAdapter,
+  type ControlRoomSourceAdapterOverride,
+} from "./control-room-source-adapter-registry";
+import {
+  resolveControlRoomCaseThroughAdapter,
+  type ControlRoomSourceAdapterKind,
+} from "./control-room-source-adapter";
 import type { ControlRoomViewModel } from "./control-room-view-model";
 import { toControlRoomSource } from "./to-control-room-source";
 import { toControlRoomViewModel } from "./to-control-room-view-model";
@@ -11,7 +15,7 @@ import { toControlRoomViewModel } from "./to-control-room-view-model";
 export type ControlRoomViewModelResolution = {
   caseId: string;
   viewModel: ControlRoomViewModel;
-  source: "in-memory";
+  source: ControlRoomSourceAdapterKind;
   status: ControlRoomCaseSourceResult["status"];
   reason?: string;
   resolvedCaseRef?: string;
@@ -29,9 +33,10 @@ function getControlledFallbackReason(
 
 export async function getControlRoomViewModel(
   caseId: string,
-  repository: ControlRoomCaseRepository = inMemoryControlRoomCaseRepository,
+  adapterOverride?: ControlRoomSourceAdapterOverride,
 ): Promise<ControlRoomViewModelResolution> {
-  const result = await repository.findByCaseId(caseId);
+  const adapter = getControlRoomSourceAdapter(adapterOverride);
+  const result = await resolveControlRoomCaseThroughAdapter(adapter, caseId);
 
   if (result.status === "found") {
     const source = toControlRoomSource(result.caseFile);
@@ -39,7 +44,7 @@ export async function getControlRoomViewModel(
     return {
       caseId,
       viewModel: toControlRoomViewModel(source),
-      source: "in-memory",
+      source: adapter.kind,
       status: "found",
       resolvedCaseRef: result.caseFile.caseRef,
     };
@@ -48,7 +53,7 @@ export async function getControlRoomViewModel(
   return {
     caseId,
     viewModel: controlRoomDemoViewModel,
-    source: "in-memory",
+    source: adapter.kind,
     status: result.status,
     reason: getControlledFallbackReason(result),
   };
