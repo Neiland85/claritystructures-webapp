@@ -35,7 +35,7 @@ export async function getControlRoomViewModel(
   caseId: string,
   adapterOverride?: ControlRoomSourceAdapterOverride,
 ): Promise<ControlRoomViewModelResolution> {
-  const adapter = getControlRoomSourceAdapter(adapterOverride);
+  const adapter = getControlRoomSourceAdapter({ adapterOverride });
   const result = await resolveControlRoomCaseThroughAdapter(adapter, caseId);
 
   if (result.status === "found") {
