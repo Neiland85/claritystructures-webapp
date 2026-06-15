@@ -8,6 +8,7 @@ import {
   ReadinessRadar,
   ReviewNotesPanel,
 } from "@/features/control-room";
+import { ResolutionStatusBanner } from "@/features/control-room/resolution-status-banner";
 
 type ControlCasePageProps = {
   params: Promise<{
@@ -19,7 +20,8 @@ export default async function ControlCasePage({
   params,
 }: ControlCasePageProps) {
   const { caseId } = await params;
-  const { viewModel, source } = await getControlRoomViewModel(caseId);
+  const { viewModel, source, status, reason, resolvedCaseRef } =
+    await getControlRoomViewModel(caseId);
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-8 text-slate-100">
@@ -51,6 +53,14 @@ export default async function ControlCasePage({
           <ActionsPanel
             allowedActions={viewModel.allowedActions}
             blockedActions={viewModel.blockedActions}
+          />
+
+          <ResolutionStatusBanner
+            caseId={caseId}
+            source={source}
+            status={status}
+            reason={reason}
+            resolvedCaseRef={resolvedCaseRef}
           />
           <AssuranceTrail events={viewModel.assuranceTrail} />
         </div>

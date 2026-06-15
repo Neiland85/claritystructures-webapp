@@ -19,6 +19,8 @@ required_files=(
   "apps/web/src/features/control-room/to-control-room-view-model.ts"
   "apps/web/src/features/control-room/control-room-demo-data.ts"
   "apps/web/src/features/control-room/control-room-case-repository.ts"
+  "apps/web/src/features/control-room/control-room-resolution-status.ts"
+  "apps/web/src/features/control-room/resolution-status-banner.tsx"
   "apps/web/src/features/control-room/get-control-room-view-model.ts"
   "apps/web/src/features/control-room/__tests__/control-room-demo-data.test.ts"
   "apps/web/src/features/control-room/__tests__/to-control-room-source.test.ts"
@@ -65,6 +67,14 @@ grep -R -n "inMemoryControlRoomCaseRepository\|ControlRoomCaseRepository\|findBy
 echo "OK resolver uses repository seam"
 echo
 
+echo "== Guard: dynamic route must render resolver status band =="
+grep -R -n "ResolutionStatusBanner\|status\|reason\|resolvedCaseRef" \
+  apps/web/src/app/control/cases/[caseId]/page.tsx \
+  apps/web/src/features/control-room/resolution-status-banner.tsx \
+  apps/web/src/features/control-room/control-room-resolution-status.ts
+echo "OK dynamic route renders resolver status band"
+echo
+
 echo "== Guard: dynamic route must use resolver boundary =="
 grep -R -n "getControlRoomViewModel" apps/web/src/app/control/cases/[caseId]/page.tsx apps/web/src/features/control-room/get-control-room-view-model.ts apps/web/src/features/control-room/index.ts
 if grep -R -n "controlRoomDemoViewModel" apps/web/src/app/control/cases/[caseId]/page.tsx; then
@@ -88,6 +98,7 @@ pnpm exec vitest run \
   apps/web/src/features/control-room/__tests__/control-room-demo-data.test.ts \
   apps/web/src/features/control-room/__tests__/control-room-dynamic-route.test.ts \
   apps/web/src/features/control-room/__tests__/control-room-case-repository.test.ts \
+  apps/web/src/features/control-room/__tests__/control-room-resolution-status.test.ts \
   apps/web/src/features/control-room/__tests__/get-control-room-view-model.test.ts \
   apps/web/src/features/control-room/__tests__/to-control-room-source.test.ts \
   apps/web/src/features/control-room/__tests__/to-control-room-view-model.test.ts \

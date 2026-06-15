@@ -40,3 +40,8 @@ export type {
   ControlRoomCaseRepository,
   ControlRoomCaseSourceResult,
 } from "./control-room-case-repository";
+export { getControlRoomResolutionStatusCopy } from "./control-room-resolution-status";
+export type {
+  ControlRoomResolutionStatus,
+  ControlRoomResolutionStatusCopy,
+} from "./control-room-resolution-status";
