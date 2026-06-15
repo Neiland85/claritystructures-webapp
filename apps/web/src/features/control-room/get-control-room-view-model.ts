@@ -3,6 +3,7 @@ import type { ControlRoomCaseSourceResult } from "./control-room-case-repository
 import { getControlRoomSourceAdapter } from "./control-room-source-adapter-registry";
 import {
   resolveControlRoomCaseThroughAdapter,
+  type ControlRoomSourceAdapterContract,
   type ControlRoomSourceAdapterKind,
 } from "./control-room-source-adapter";
 import type { ControlRoomViewModel } from "./control-room-view-model";
