@@ -1,9 +1,10 @@
 import { getControlRoomResolutionStatusCopy } from "./control-room-resolution-status";
 import type { ControlRoomResolutionStatus } from "./control-room-resolution-status";
+import type { ControlRoomSourceAdapterKind } from "./control-room-source-adapter";
 
 export type ResolutionStatusBannerProps = {
   caseId: string;
-  source: "in-memory";
+  source: ControlRoomSourceAdapterKind;
   status: ControlRoomResolutionStatus;
   reason?: string;
   resolvedCaseRef?: string;

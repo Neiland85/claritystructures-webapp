@@ -23,6 +23,8 @@ expected_files=(
   "apps/web/src/features/control-room/demo-state-navigation.tsx"
   "apps/web/src/features/control-room/control-room-demo-route.ts"
   "apps/web/src/features/control-room/control-room-source-adapter.ts"
+  "apps/web/src/features/control-room/control-room-source-adapter-registry.ts"
+  "apps/web/src/features/control-room/__tests__/control-room-source-adapter-registry.test.ts"
   "apps/web/src/features/control-room/__tests__/control-room-file-source-adapter.test.ts"
   "apps/web/src/features/control-room/__fixtures__/file-source-adapter/EV-2026-DEMO.json"
   "apps/web/src/features/control-room/file-source-adapter/control-room-file-source-adapter.ts"
@@ -79,6 +81,13 @@ grep -R -n "ControlRoomCaseRepository\|findByCaseId\|inMemoryControlRoomCaseRepo
 echo "OK resolver uses repository seam"
 echo
 
+echo "== Guard: resolver must use source adapter registry =="
+grep -R -n "getControlRoomSourceAdapter\|resolveControlRoomCaseThroughAdapter\|ControlRoomSourceAdapterKind" apps/web/src/features/control-room/get-control-room-view-model.ts apps/web/src/features/control-room/resolution-status-banner.tsx apps/web/src/features/control-room/__tests__/get-control-room-view-model.test.ts
+grep -R -n "repository.findByCaseId\|ControlRoomCaseRepository\|inMemoryControlRoomCaseRepository" apps/web/src/features/control-room/get-control-room-view-model.ts && exit 1 || echo "OK resolver does not call repository directly"
+grep -R -n "control-room-source-adapter-registry.test.ts" scripts/control-room-chain-readiness.sh
+echo "OK resolver uses source adapter registry"
+echo
+
 echo "== Guard: readiness must execute file source adapter test =="
 grep -R -n "control-room-file-source-adapter.test.ts" scripts/control-room-chain-readiness.sh
 echo "OK readiness executes file source adapter test"
@@ -101,6 +110,7 @@ echo "== Guard: source adapter contract must remain explicit and observable =="
 grep -R -n "ControlRoomSourceAdapterContract\|requiredControlRoomSourceAdapterCapabilities\|assertControlRoomSourceAdapterContract\|avoid_silent_fallback\|explain_failure\|resolveControlRoomCaseThroughAdapter" \
   apps/web/src/features/control-room/control-room-source-adapter.ts \
   apps/web/src/features/control-room/__tests__/control-room-source-adapter.test.ts \
+  apps/web/src/features/control-room/__tests__/control-room-source-adapter-registry.test.ts \
   apps/web/src/features/control-room/__tests__/control-room-public-api.test.ts \
   apps/web/src/features/control-room/index.ts
 echo "OK source adapter contract is explicit and observable"
@@ -168,6 +178,7 @@ pnpm exec vitest run \
   apps/web/src/features/control-room/__tests__/demo-state-navigation.test.tsx \
   apps/web/src/features/control-room/__tests__/control-room-demo-route.test.ts \
   apps/web/src/features/control-room/__tests__/control-room-source-adapter.test.ts \
+  apps/web/src/features/control-room/__tests__/control-room-source-adapter-registry.test.ts \
   apps/web/src/features/control-room/__tests__/control-room-public-api.test.ts
 
 echo

@@ -61,3 +61,8 @@ export type {
   ControlRoomSourceAdapterContract,
   ControlRoomSourceAdapterKind,
 } from "./control-room-source-adapter";
+export {
+  getControlRoomSourceAdapter,
+  inMemoryControlRoomSourceAdapter,
+} from "./control-room-source-adapter-registry";
+export type { ControlRoomSourceAdapterOverride } from "./control-room-source-adapter-registry";
