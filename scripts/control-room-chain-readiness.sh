@@ -79,6 +79,11 @@ grep -R -n "ControlRoomCaseRepository\|findByCaseId\|inMemoryControlRoomCaseRepo
 echo "OK resolver uses repository seam"
 echo
 
+echo "== Guard: readiness must execute file source adapter test =="
+grep -R -n "control-room-file-source-adapter.test.ts" scripts/control-room-chain-readiness.sh
+echo "OK readiness executes file source adapter test"
+echo
+
 echo "== Guard: file source adapter must preserve governed source states =="
 grep -R -n "createControlRoomFileSourceAdapter\|createControlRoomFileSourceRepository\|kind: \"file\"\|found\|not_found\|blocked\|unavailable\|File source adapter" \
   apps/web/src/features/control-room/file-source-adapter/control-room-file-source-adapter.ts \
