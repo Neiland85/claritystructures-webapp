@@ -18,6 +18,7 @@ required_files=(
   "apps/web/src/features/control-room/to-control-room-source.ts"
   "apps/web/src/features/control-room/to-control-room-view-model.ts"
   "apps/web/src/features/control-room/control-room-demo-data.ts"
+  "apps/web/src/features/control-room/control-room-case-repository.ts"
   "apps/web/src/features/control-room/get-control-room-view-model.ts"
   "apps/web/src/features/control-room/__tests__/control-room-demo-data.test.ts"
   "apps/web/src/features/control-room/__tests__/to-control-room-source.test.ts"
@@ -56,6 +57,14 @@ fi
 echo "OK no stale transfer_packet_generation literal in view-model mapper test"
 
 echo
+echo "== Guard: resolver must use repository seam =="
+grep -R -n "inMemoryControlRoomCaseRepository\|ControlRoomCaseRepository\|findByCaseId" \
+  apps/web/src/features/control-room/control-room-case-repository.ts \
+  apps/web/src/features/control-room/get-control-room-view-model.ts \
+  apps/web/src/features/control-room/__tests__/get-control-room-view-model.test.ts
+echo "OK resolver uses repository seam"
+echo
+
 echo "== Guard: dynamic route must use resolver boundary =="
 grep -R -n "getControlRoomViewModel" apps/web/src/app/control/cases/[caseId]/page.tsx apps/web/src/features/control-room/get-control-room-view-model.ts apps/web/src/features/control-room/index.ts
 if grep -R -n "controlRoomDemoViewModel" apps/web/src/app/control/cases/[caseId]/page.tsx; then
@@ -78,6 +87,7 @@ echo "== Tests: Control Room chain =="
 pnpm exec vitest run \
   apps/web/src/features/control-room/__tests__/control-room-demo-data.test.ts \
   apps/web/src/features/control-room/__tests__/control-room-dynamic-route.test.ts \
+  apps/web/src/features/control-room/__tests__/control-room-case-repository.test.ts \
   apps/web/src/features/control-room/__tests__/get-control-room-view-model.test.ts \
   apps/web/src/features/control-room/__tests__/to-control-room-source.test.ts \
   apps/web/src/features/control-room/__tests__/to-control-room-view-model.test.ts \

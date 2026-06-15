@@ -35,3 +35,8 @@ export type {
   ControlRoomSourceStatus,
   ControlRoomSourceTone,
 } from "./control-room-source";
+export { inMemoryControlRoomCaseRepository } from "./control-room-case-repository";
+export type {
+  ControlRoomCaseRepository,
+  ControlRoomCaseSourceResult,
+} from "./control-room-case-repository";
