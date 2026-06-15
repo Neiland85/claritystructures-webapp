@@ -85,4 +85,17 @@ describe("getControlRoomViewModel", () => {
 
     expect(result.viewModel.caseRef).toBe("EV-2026-DEMO");
   });
+  it("can resolve through an explicitly selected file source adapter", async () => {
+    const result = await getControlRoomViewModel("EV-2026-DEMO", {
+      selection: "file",
+    });
+
+    expect(result.status).toBe("found");
+
+    if (result.status !== "found") {
+      throw new Error("Expected file source adapter to resolve demo case");
+    }
+
+    expect(result.source).toBe("file");
+  });
 });

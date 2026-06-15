@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import type { ControlRoomViewModelSourceOptions } from "../index";
+
 import {
   assertControlRoomSourceAdapterContract,
   defaultControlRoomFileSourceAdapterOptions,
@@ -14,6 +16,10 @@ describe("Control Room public API", () => {
     expect(assertControlRoomSourceAdapterContract).toBeTypeOf("function");
     expect(resolveControlRoomCaseThroughAdapter).toBeTypeOf("function");
     expect(getControlRoomSourceAdapter).toBeTypeOf("function");
+    const sourceOptions = {
+      selection: "file",
+    } satisfies ControlRoomViewModelSourceOptions;
+    expect(sourceOptions.selection).toBe("file");
     expect(
       defaultControlRoomFileSourceAdapterOptions.fixtureDirectory,
     ).toContain(

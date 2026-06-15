@@ -115,6 +115,15 @@ print("OK observable adapter markdown fence is closed before blocked section")
 PY_CHECK
 echo
 
+echo "== Guard: resolver must accept governed source options =="
+grep -R -n "ControlRoomViewModelSourceOptions\|sourceOptions.*ControlRoomViewModelSourceOptions\|getControlRoomSourceAdapter(sourceOptions)" \
+  apps/web/src/features/control-room/get-control-room-view-model.ts \
+  apps/web/src/features/control-room/index.ts
+grep -R -n "can resolve through an explicitly selected file source adapter" \
+  apps/web/src/features/control-room/__tests__/get-control-room-view-model.test.ts
+echo "OK resolver accepts governed source options without route activation"
+echo
+
 echo "== Guard: adapter selection must be observable but not runtime-activated =="
 grep -R -n "Observable adapter selection\|Runtime default\|in-memory.*yes\|file.*no" docs/control-room/ADAPTER_INTEGRATION_GATE.md
 grep -R -n "does not activate the file source adapter unless explicitly selected" apps/web/src/features/control-room/__tests__/control-room-source-adapter-registry.test.ts
