@@ -32,6 +32,7 @@ expected_files=(
   "apps/web/src/app/control/cases/demo/page.tsx"
   "apps/web/src/app/control/cases/[caseId]/page.tsx"
   "docs/control-room/DEMO_CONTRACT.md"
+  "docs/control-room/ADAPTER_INTEGRATION_GATE.md"
 )
 
 echo "== Expected files =="
@@ -73,6 +74,11 @@ grep -R -n "ControlRoomCaseRepository\|findByCaseId\|inMemoryControlRoomCaseRepo
   apps/web/src/features/control-room/get-control-room-view-model.ts \
   apps/web/src/features/control-room/__tests__/get-control-room-view-model.test.ts
 echo "OK resolver uses repository seam"
+echo
+
+echo "== Guard: adapter integration gate must block uncontrolled source integration =="
+grep -R -n "Control Room Adapter Integration Gate\|file-backed source adapter\|database adapter remains blocked\|API adapter remains blocked\|resolve_case\|preserve_status\|explain_failure\|avoid_silent_fallback\|dynamic route.*database\|UI.*fetch" docs/control-room/ADAPTER_INTEGRATION_GATE.md
+echo "OK adapter integration gate blocks uncontrolled source integration"
 echo
 
 echo "== Guard: source adapter contract must remain explicit and observable =="
