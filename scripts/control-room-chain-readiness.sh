@@ -73,14 +73,6 @@ fi
 echo "OK no stale transfer_packet_generation literal in view-model mapper test"
 echo
 
-echo "== Guard: resolver must use repository seam =="
-grep -R -n "ControlRoomCaseRepository\|findByCaseId\|inMemoryControlRoomCaseRepository" \
-  apps/web/src/features/control-room/control-room-case-repository.ts \
-  apps/web/src/features/control-room/get-control-room-view-model.ts \
-  apps/web/src/features/control-room/__tests__/get-control-room-view-model.test.ts
-echo "OK resolver uses repository seam"
-echo
-
 echo "== Guard: resolver must use source adapter registry =="
 grep -R -n "getControlRoomSourceAdapter\|resolveControlRoomCaseThroughAdapter\|ControlRoomSourceAdapterKind" apps/web/src/features/control-room/get-control-room-view-model.ts apps/web/src/features/control-room/resolution-status-banner.tsx apps/web/src/features/control-room/__tests__/get-control-room-view-model.test.ts
 grep -R -n "repository.findByCaseId\|ControlRoomCaseRepository\|inMemoryControlRoomCaseRepository" apps/web/src/features/control-room/get-control-room-view-model.ts && exit 1 || echo "OK resolver does not call repository directly"
