@@ -1,9 +1,6 @@
 import { controlRoomDemoViewModel } from "./control-room-demo-data";
 import type { ControlRoomCaseSourceResult } from "./control-room-case-repository";
-import {
-  getControlRoomSourceAdapter,
-  type ControlRoomSourceAdapterOverride,
-} from "./control-room-source-adapter-registry";
+import { getControlRoomSourceAdapter } from "./control-room-source-adapter-registry";
 import {
   resolveControlRoomCaseThroughAdapter,
   type ControlRoomSourceAdapterKind,
@@ -31,11 +28,29 @@ function getControlledFallbackReason(
   return result.reason;
 }
 
+export type ControlRoomViewModelSourceOptions =
+  | ControlRoomSourceAdapterRegistryOptions
+  | ControlRoomSourceAdapterContract;
+
+function normalizeControlRoomViewModelSourceOptions(
+  sourceOptions: ControlRoomViewModelSourceOptions = {},
+): ControlRoomSourceAdapterRegistryOptions {
+  if ("repository" in sourceOptions) {
+    return {
+      adapterOverride: sourceOptions,
+    };
+  }
+
+  return sourceOptions;
+}
+
 export async function getControlRoomViewModel(
   caseId: string,
-  adapterOverride?: ControlRoomSourceAdapterOverride,
+  sourceOptions: ControlRoomViewModelSourceOptions = {},
 ): Promise<ControlRoomViewModelResolution> {
-  const adapter = getControlRoomSourceAdapter({ adapterOverride });
+  const adapter = getControlRoomSourceAdapter(
+    normalizeControlRoomViewModelSourceOptions(sourceOptions),
+  );
   const result = await resolveControlRoomCaseThroughAdapter(adapter, caseId);
 
   if (result.status === "found") {
