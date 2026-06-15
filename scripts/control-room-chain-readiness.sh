@@ -23,6 +23,9 @@ expected_files=(
   "apps/web/src/features/control-room/demo-state-navigation.tsx"
   "apps/web/src/features/control-room/control-room-demo-route.ts"
   "apps/web/src/features/control-room/control-room-source-adapter.ts"
+  "apps/web/src/features/control-room/__tests__/control-room-file-source-adapter.test.ts"
+  "apps/web/src/features/control-room/__fixtures__/file-source-adapter/EV-2026-DEMO.json"
+  "apps/web/src/features/control-room/file-source-adapter/control-room-file-source-adapter.ts"
   "apps/web/src/features/control-room/get-control-room-view-model.ts"
   "apps/web/src/features/control-room/__tests__/control-room-demo-data.test.ts"
   "apps/web/src/features/control-room/__tests__/to-control-room-source.test.ts"
@@ -74,6 +77,14 @@ grep -R -n "ControlRoomCaseRepository\|findByCaseId\|inMemoryControlRoomCaseRepo
   apps/web/src/features/control-room/get-control-room-view-model.ts \
   apps/web/src/features/control-room/__tests__/get-control-room-view-model.test.ts
 echo "OK resolver uses repository seam"
+echo
+
+echo "== Guard: file source adapter must preserve governed source states =="
+grep -R -n "createControlRoomFileSourceAdapter\|createControlRoomFileSourceRepository\|kind: \"file\"\|found\|not_found\|blocked\|unavailable\|File source adapter" \
+  apps/web/src/features/control-room/file-source-adapter/control-room-file-source-adapter.ts \
+  apps/web/src/features/control-room/__tests__/control-room-file-source-adapter.test.ts \
+  apps/web/src/features/control-room/__fixtures__/file-source-adapter/EV-2026-DEMO.json
+echo "OK file source adapter preserves governed source states"
 echo
 
 echo "== Guard: adapter integration gate must block uncontrolled source integration =="
