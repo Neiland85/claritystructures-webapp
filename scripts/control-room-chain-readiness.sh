@@ -22,6 +22,7 @@ required_files=(
   "apps/web/src/features/control-room/control-room-resolution-status.ts"
   "apps/web/src/features/control-room/resolution-status-banner.tsx"
   "apps/web/src/features/control-room/demo-state-navigation.tsx"
+  "apps/web/src/features/control-room/control-room-demo-route.ts"
   "apps/web/src/features/control-room/get-control-room-view-model.ts"
   "apps/web/src/features/control-room/__tests__/control-room-demo-data.test.ts"
   "apps/web/src/features/control-room/__tests__/to-control-room-source.test.ts"
@@ -68,6 +69,18 @@ grep -R -n "inMemoryControlRoomCaseRepository\|ControlRoomCaseRepository\|findBy
 echo "OK resolver uses repository seam"
 echo
 
+echo "== Guard: legacy demo route must redirect to canonical dynamic route =="
+grep -R -n "redirect\|canonicalControlRoomDemoCasePath\|EV-2026-DEMO" \
+  apps/web/src/app/control/cases/demo/page.tsx \
+  apps/web/src/features/control-room/control-room-demo-route.ts \
+  apps/web/src/features/control-room/__tests__/control-room-demo-route.test.ts
+if ! grep -q "redirect(canonicalControlRoomDemoCasePath)" apps/web/src/app/control/cases/demo/page.tsx; then
+  echo "FAIL legacy demo route must redirect to canonical dynamic route"
+  exit 1
+fi
+echo "OK legacy demo route redirects to canonical dynamic route"
+echo
+
 echo "== Guard: dynamic route must render demo state navigation =="
 grep -R -n "DemoStateNavigation\|EV-2026-DEMO\|future-real-case\|blocked-case\|unavailable-case" \
   apps/web/src/app/control/cases/[caseId]/page.tsx \
@@ -109,6 +122,7 @@ pnpm exec vitest run \
   apps/web/src/features/control-room/__tests__/control-room-case-repository.test.ts \
   apps/web/src/features/control-room/__tests__/control-room-resolution-status.test.ts \
   apps/web/src/features/control-room/__tests__/demo-state-navigation.test.tsx \
+  apps/web/src/features/control-room/__tests__/control-room-demo-route.test.ts \
   apps/web/src/features/control-room/__tests__/get-control-room-view-model.test.ts \
   apps/web/src/features/control-room/__tests__/to-control-room-source.test.ts \
   apps/web/src/features/control-room/__tests__/to-control-room-view-model.test.ts \

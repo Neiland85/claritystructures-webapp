@@ -47,3 +47,7 @@ export type {
 } from "./control-room-resolution-status";
 export { DemoStateNavigation } from "./demo-state-navigation";
 export type { ControlRoomDemoStateLink } from "./demo-state-navigation";
+export {
+  canonicalControlRoomDemoCaseId,
+  canonicalControlRoomDemoCasePath,
+} from "./control-room-demo-route";
