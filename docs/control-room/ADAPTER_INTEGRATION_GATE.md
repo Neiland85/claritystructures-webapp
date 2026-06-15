@@ -185,3 +185,42 @@ demo fallback
 
 The Control Room remains a governed operational surface, not a data-access shortcut.
 ```
+
+## Observable adapter selection
+
+The Control Room source adapter registry may expose multiple governed adapter selections.
+
+Current governed selections:
+
+| Selection   | Adapter kind | Runtime default | Purpose                                                                  |
+| ----------- | ------------ | --------------: | ------------------------------------------------------------------------ |
+| `in-memory` | `in-memory`  |             yes | Stable demo and fallback source.                                         |
+| `file`      | `file`       |              no | Local governed fixture-backed source for adapter integration validation. |
+
+Rules:
+
+- `in-memory` remains the default runtime source.
+- `file` must only be selected explicitly through the governed source adapter registry.
+- The dynamic route must not know whether the selected source is in-memory, file-backed, API-backed, database-backed, queue-backed, or external.
+- Source selection must remain observable through tests and readiness checks.
+- Adding a new source selection does not authorize runtime activation.
+- Runtime activation requires a separate PR, explicit acceptance criteria, and readiness coverage.
+
+The observable selection chain is:
+
+```text
+route
+  -> resolver
+    -> source adapter registry
+      -> selected governed adapter
+        -> adapter contract
+          -> repository internals
+```
+
+Blocked until separately approved:
+
+- Environment-driven runtime source switching.
+- API source activation.
+- Database source activation.
+- Prisma-backed resolver access.
+- Route-level knowledge of storage implementation.

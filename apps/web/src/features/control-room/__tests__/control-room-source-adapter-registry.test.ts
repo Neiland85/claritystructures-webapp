@@ -59,4 +59,12 @@ describe("Control Room source adapter registry", () => {
       "apps/web/src/features/control-room/__fixtures__/file-source-adapter",
     );
   });
+  it("does not activate the file source adapter unless explicitly selected", () => {
+    const defaultAdapter = getControlRoomSourceAdapter();
+    const fileAdapter = getControlRoomSourceAdapter({ selection: "file" });
+
+    expect(defaultAdapter.kind).toBe("in-memory");
+    expect(fileAdapter.kind).toBe("file");
+    expect(defaultAdapter).not.toBe(fileAdapter);
+  });
 });
