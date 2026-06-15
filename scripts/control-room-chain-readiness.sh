@@ -80,6 +80,14 @@ grep -R -n "control-room-source-adapter-registry.test.ts" scripts/control-room-c
 echo "OK resolver uses source adapter registry"
 echo
 
+echo "== Guard: registry must expose governed source adapter selection =="
+grep -R -n "ControlRoomSourceAdapterSelection\|selection.*file\|defaultControlRoomFileSourceAdapterOptions" \
+  apps/web/src/features/control-room/control-room-source-adapter-registry.ts \
+  apps/web/src/features/control-room/__tests__/control-room-source-adapter-registry.test.ts \
+  apps/web/src/features/control-room/index.ts
+echo "OK registry exposes governed source adapter selection"
+echo
+
 echo "== Guard: readiness must execute file source adapter test =="
 grep -R -n "control-room-file-source-adapter.test.ts" scripts/control-room-chain-readiness.sh
 echo "OK readiness executes file source adapter test"

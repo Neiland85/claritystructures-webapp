@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  defaultControlRoomFileSourceAdapterOptions,
   getControlRoomSourceAdapter,
   inMemoryControlRoomSourceAdapter,
 } from "../control-room-source-adapter-registry";
@@ -36,6 +37,26 @@ describe("Control Room source adapter registry", () => {
       },
     };
 
-    expect(getControlRoomSourceAdapter(adapterOverride)).toBe(adapterOverride);
+    expect(getControlRoomSourceAdapter({ adapterOverride })).toBe(
+      adapterOverride,
+    );
+  });
+
+  it("selects the file source adapter through the governed registry", () => {
+    const adapter = getControlRoomSourceAdapter({ selection: "file" });
+
+    expect(adapter.kind).toBe("file");
+    expect(adapter.capabilities).toEqual(
+      requiredControlRoomSourceAdapterCapabilities,
+    );
+    expect(assertControlRoomSourceAdapterContract(adapter)).toBe(adapter);
+  });
+
+  it("keeps default file source options explicit and local", () => {
+    expect(
+      defaultControlRoomFileSourceAdapterOptions.fixtureDirectory,
+    ).toContain(
+      "apps/web/src/features/control-room/__fixtures__/file-source-adapter",
+    );
   });
 });

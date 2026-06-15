@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   assertControlRoomSourceAdapterContract,
+  defaultControlRoomFileSourceAdapterOptions,
   getControlRoomSourceAdapter,
   inMemoryControlRoomSourceAdapter,
   requiredControlRoomSourceAdapterCapabilities,
@@ -13,6 +14,11 @@ describe("Control Room public API", () => {
     expect(assertControlRoomSourceAdapterContract).toBeTypeOf("function");
     expect(resolveControlRoomCaseThroughAdapter).toBeTypeOf("function");
     expect(getControlRoomSourceAdapter).toBeTypeOf("function");
+    expect(
+      defaultControlRoomFileSourceAdapterOptions.fixtureDirectory,
+    ).toContain(
+      "apps/web/src/features/control-room/__fixtures__/file-source-adapter",
+    );
 
     expect(inMemoryControlRoomSourceAdapter).toMatchObject({
       kind: "in-memory",
