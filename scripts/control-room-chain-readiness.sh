@@ -69,6 +69,11 @@ grep -R -n "inMemoryControlRoomCaseRepository\|ControlRoomCaseRepository\|findBy
 echo "OK resolver uses repository seam"
 echo
 
+echo "== Guard: demo contract must define canonical routes =="
+grep -R -n "Control Room Demo Contract\|/control/cases/demo\|/control/cases/EV-2026-DEMO\|found\|not_found\|blocked\|unavailable\|Do not add" docs/control-room/DEMO_CONTRACT.md
+echo "OK demo contract defines canonical routes and forbidden surfaces"
+echo
+
 echo "== Guard: legacy demo route must redirect to canonical dynamic route =="
 grep -R -n "redirect\|canonicalControlRoomDemoCasePath\|EV-2026-DEMO" \
   apps/web/src/app/control/cases/demo/page.tsx \
