@@ -80,6 +80,47 @@ grep -R -n "control-room-source-adapter-registry.test.ts" scripts/control-room-c
 echo "OK resolver uses source adapter registry"
 echo
 
+echo "== Guard: observable adapter markdown fence must be closed =="
+python3 - <<'PY_CHECK'
+from pathlib import Path
+
+text = Path("docs/control-room/ADAPTER_INTEGRATION_GATE.md").read_text()
+section = text.split("## Observable adapter selection", 1)[1]
+
+expected_chain = """```text
+route
+  -> resolver
+    -> source adapter registry
+      -> selected governed adapter
+        -> adapter contract
+          -> repository internals
+```"""
+
+if section.count("```text") != 1:
+    raise SystemExit("Expected exactly one text code fence opener in observable section")
+
+if section.count("```") != 2:
+    raise SystemExit("Expected exactly two markdown fence markers in observable section")
+
+if expected_chain not in section:
+    raise SystemExit("Observable chain code fence missing")
+
+if "Blocked until separately approved:" not in section.split(expected_chain, 1)[1]:
+    raise SystemExit("Blocked section missing after observable chain")
+
+if "∙" in section:
+    raise SystemExit("Unexpected bullet glyph remains in observable section")
+
+print("OK observable adapter markdown fence is closed before blocked section")
+PY_CHECK
+echo
+
+echo "== Guard: adapter selection must be observable but not runtime-activated =="
+grep -R -n "Observable adapter selection\|Runtime default\|in-memory.*yes\|file.*no" docs/control-room/ADAPTER_INTEGRATION_GATE.md
+grep -R -n "does not activate the file source adapter unless explicitly selected" apps/web/src/features/control-room/__tests__/control-room-source-adapter-registry.test.ts
+echo "OK adapter selection is observable without runtime activation"
+echo
+
 echo "== Guard: registry must expose governed source adapter selection =="
 grep -R -n "ControlRoomSourceAdapterSelection\|selection.*file\|defaultControlRoomFileSourceAdapterOptions" \
   apps/web/src/features/control-room/control-room-source-adapter-registry.ts \
