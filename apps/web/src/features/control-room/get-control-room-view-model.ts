@@ -1,6 +1,9 @@
 import { controlRoomDemoViewModel } from "./control-room-demo-data";
 import type { ControlRoomCaseSourceResult } from "./control-room-case-repository";
-import { getControlRoomSourceAdapter } from "./control-room-source-adapter-registry";
+import {
+  getControlRoomSourceAdapter,
+  type ControlRoomSourceAdapterRegistryOptions,
+} from "./control-room-source-adapter-registry";
 import {
   resolveControlRoomCaseThroughAdapter,
   type ControlRoomSourceAdapterContract,
