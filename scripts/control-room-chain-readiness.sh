@@ -21,6 +21,7 @@ required_files=(
   "apps/web/src/features/control-room/control-room-case-repository.ts"
   "apps/web/src/features/control-room/control-room-resolution-status.ts"
   "apps/web/src/features/control-room/resolution-status-banner.tsx"
+  "apps/web/src/features/control-room/demo-state-navigation.tsx"
   "apps/web/src/features/control-room/get-control-room-view-model.ts"
   "apps/web/src/features/control-room/__tests__/control-room-demo-data.test.ts"
   "apps/web/src/features/control-room/__tests__/to-control-room-source.test.ts"
@@ -67,6 +68,14 @@ grep -R -n "inMemoryControlRoomCaseRepository\|ControlRoomCaseRepository\|findBy
 echo "OK resolver uses repository seam"
 echo
 
+echo "== Guard: dynamic route must render demo state navigation =="
+grep -R -n "DemoStateNavigation\|EV-2026-DEMO\|future-real-case\|blocked-case\|unavailable-case" \
+  apps/web/src/app/control/cases/[caseId]/page.tsx \
+  apps/web/src/features/control-room/demo-state-navigation.tsx \
+  apps/web/src/features/control-room/__tests__/demo-state-navigation.test.tsx
+echo "OK dynamic route renders demo state navigation"
+echo
+
 echo "== Guard: dynamic route must render resolver status band =="
 grep -R -n "ResolutionStatusBanner\|status\|reason\|resolvedCaseRef" \
   apps/web/src/app/control/cases/[caseId]/page.tsx \
@@ -99,6 +108,7 @@ pnpm exec vitest run \
   apps/web/src/features/control-room/__tests__/control-room-dynamic-route.test.ts \
   apps/web/src/features/control-room/__tests__/control-room-case-repository.test.ts \
   apps/web/src/features/control-room/__tests__/control-room-resolution-status.test.ts \
+  apps/web/src/features/control-room/__tests__/demo-state-navigation.test.tsx \
   apps/web/src/features/control-room/__tests__/get-control-room-view-model.test.ts \
   apps/web/src/features/control-room/__tests__/to-control-room-source.test.ts \
   apps/web/src/features/control-room/__tests__/to-control-room-view-model.test.ts \

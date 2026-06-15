@@ -8,6 +8,7 @@ import {
   ReadinessRadar,
   ReviewNotesPanel,
 } from "@/features/control-room";
+import { DemoStateNavigation } from "@/features/control-room/demo-state-navigation";
 import { ResolutionStatusBanner } from "@/features/control-room/resolution-status-banner";
 
 type ControlCasePageProps = {
@@ -41,6 +42,8 @@ export default async function ControlCasePage({
             migration. Current source: {source}.
           </p>
         </section>
+
+        <DemoStateNavigation activeCaseId={caseId} />
 
         <ControlRoomHeader viewModel={viewModel} />
 
