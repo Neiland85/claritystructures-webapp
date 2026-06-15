@@ -23,4 +23,26 @@ describe("inMemoryControlRoomCaseRepository", () => {
       caseId: "future-real-case",
     });
   });
+
+  it("returns a controlled blocked result for the demo blocked route", async () => {
+    const result =
+      await inMemoryControlRoomCaseRepository.findByCaseId("blocked-case");
+
+    expect(result).toEqual({
+      status: "blocked",
+      caseId: "blocked-case",
+      reason: "Demo policy gate blocks exposure of this governed case file.",
+    });
+  });
+
+  it("returns a controlled unavailable result for the demo unavailable route", async () => {
+    const result =
+      await inMemoryControlRoomCaseRepository.findByCaseId("unavailable-case");
+
+    expect(result).toEqual({
+      status: "unavailable",
+      caseId: "unavailable-case",
+      reason: "Demo source adapter cannot answer this case safely.",
+    });
+  });
 });
