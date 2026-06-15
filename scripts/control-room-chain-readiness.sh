@@ -22,6 +22,7 @@ required_files=(
   "apps/web/src/features/control-room/__tests__/to-control-room-source.test.ts"
   "apps/web/src/features/control-room/__tests__/to-control-room-view-model.test.ts"
   "apps/web/src/app/control/cases/demo/page.tsx"
+  "apps/web/src/app/control/cases/[caseId]/page.tsx"
 )
 
 for file in "${required_files[@]}"; do
@@ -35,7 +36,7 @@ grep -R -n "export type GovernedCaseFile" packages/domain/src/governed-casefile
 grep -R -n "governedCaseFileFixture" packages/domain/src/governed-casefile apps/web/src/features/control-room
 grep -R -n "toControlRoomSource" apps/web/src/features/control-room
 grep -R -n "toControlRoomViewModel" apps/web/src/features/control-room
-grep -R -n "controlRoomDemoViewModel" apps/web/src/features/control-room apps/web/src/app/control/cases/demo/page.tsx
+grep -R -n "controlRoomDemoViewModel" apps/web/src/features/control-room apps/web/src/app/control/cases/demo/page.tsx apps/web/src/app/control/cases/[caseId]/page.tsx
 grep -R -n "ControlRoomSource" apps/web/src/features/control-room
 grep -R -n "ControlRoomViewModel" apps/web/src/features/control-room
 
@@ -66,6 +67,7 @@ echo
 echo "== Tests: Control Room chain =="
 pnpm exec vitest run \
   apps/web/src/features/control-room/__tests__/control-room-demo-data.test.ts \
+  apps/web/src/features/control-room/__tests__/control-room-dynamic-route.test.ts \
   apps/web/src/features/control-room/__tests__/to-control-room-source.test.ts \
   apps/web/src/features/control-room/__tests__/to-control-room-view-model.test.ts \
   packages/domain/src/__tests__/governed-casefile.test.ts
