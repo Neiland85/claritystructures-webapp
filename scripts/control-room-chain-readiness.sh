@@ -87,17 +87,26 @@ from pathlib import Path
 text = Path("docs/control-room/ADAPTER_INTEGRATION_GATE.md").read_text()
 section = text.split("## Observable adapter selection", 1)[1]
 
+expected_chain = """```text
+route
+  -> resolver
+    -> source adapter registry
+      -> selected governed adapter
+        -> adapter contract
+          -> repository internals
+```"""
+
 if section.count("```text") != 1:
     raise SystemExit("Expected exactly one text code fence opener in observable section")
 
 if section.count("```") != 2:
     raise SystemExit("Expected exactly two markdown fence markers in observable section")
 
-if "```text\\nroute" not in section:
+if expected_chain not in section:
     raise SystemExit("Observable chain code fence missing")
 
-if "```\\n\\nBlocked until separately approved:" not in section:
-    raise SystemExit("Blocked section is still inside the code fence")
+if "Blocked until separately approved:" not in section.split(expected_chain, 1)[1]:
+    raise SystemExit("Blocked section missing after observable chain")
 
 if "∙" in section:
     raise SystemExit("Unexpected bullet glyph remains in observable section")
