@@ -45,3 +45,5 @@ export type {
   ControlRoomResolutionStatus,
   ControlRoomResolutionStatusCopy,
 } from "./control-room-resolution-status";
+export { DemoStateNavigation } from "./demo-state-navigation";
+export type { ControlRoomDemoStateLink } from "./demo-state-navigation";
