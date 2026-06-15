@@ -1,3 +1,5 @@
+export type { ControlRoomViewModelResolution } from "./get-control-room-view-model";
+export { getControlRoomViewModel } from "./get-control-room-view-model";
 export { ActionsPanel } from "./actions-panel";
 export { AssuranceTrail } from "./assurance-trail";
 export {

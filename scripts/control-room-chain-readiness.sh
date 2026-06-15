@@ -18,6 +18,7 @@ required_files=(
   "apps/web/src/features/control-room/to-control-room-source.ts"
   "apps/web/src/features/control-room/to-control-room-view-model.ts"
   "apps/web/src/features/control-room/control-room-demo-data.ts"
+  "apps/web/src/features/control-room/get-control-room-view-model.ts"
   "apps/web/src/features/control-room/__tests__/control-room-demo-data.test.ts"
   "apps/web/src/features/control-room/__tests__/to-control-room-source.test.ts"
   "apps/web/src/features/control-room/__tests__/to-control-room-view-model.test.ts"
@@ -36,7 +37,7 @@ grep -R -n "export type GovernedCaseFile" packages/domain/src/governed-casefile
 grep -R -n "governedCaseFileFixture" packages/domain/src/governed-casefile apps/web/src/features/control-room
 grep -R -n "toControlRoomSource" apps/web/src/features/control-room
 grep -R -n "toControlRoomViewModel" apps/web/src/features/control-room
-grep -R -n "controlRoomDemoViewModel" apps/web/src/features/control-room apps/web/src/app/control/cases/demo/page.tsx apps/web/src/app/control/cases/[caseId]/page.tsx
+grep -R -n "controlRoomDemoViewModel" apps/web/src/features/control-room apps/web/src/app/control/cases/demo/page.tsx
 grep -R -n "ControlRoomSource" apps/web/src/features/control-room
 grep -R -n "ControlRoomViewModel" apps/web/src/features/control-room
 
@@ -55,6 +56,15 @@ fi
 echo "OK no stale transfer_packet_generation literal in view-model mapper test"
 
 echo
+echo "== Guard: dynamic route must use resolver boundary =="
+grep -R -n "getControlRoomViewModel" apps/web/src/app/control/cases/[caseId]/page.tsx apps/web/src/features/control-room/get-control-room-view-model.ts apps/web/src/features/control-room/index.ts
+if grep -R -n "controlRoomDemoViewModel" apps/web/src/app/control/cases/[caseId]/page.tsx; then
+  echo "ERROR: dynamic route imports fixture view model directly"
+  exit 1
+fi
+echo "OK dynamic route uses resolver boundary"
+
+echo
 echo "== Guard: no Prisma/schema/migration working tree changes =="
 if git status --short | grep -E "prisma|migration|schema.prisma" >/dev/null; then
   echo "ERROR: Prisma/DB change detected in working tree"
@@ -68,6 +78,7 @@ echo "== Tests: Control Room chain =="
 pnpm exec vitest run \
   apps/web/src/features/control-room/__tests__/control-room-demo-data.test.ts \
   apps/web/src/features/control-room/__tests__/control-room-dynamic-route.test.ts \
+  apps/web/src/features/control-room/__tests__/get-control-room-view-model.test.ts \
   apps/web/src/features/control-room/__tests__/to-control-room-source.test.ts \
   apps/web/src/features/control-room/__tests__/to-control-room-view-model.test.ts \
   packages/domain/src/__tests__/governed-casefile.test.ts
