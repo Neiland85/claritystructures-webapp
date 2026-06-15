@@ -1,8 +1,8 @@
 import {
   ActionsPanel,
   AssuranceTrail,
-  controlRoomDemoViewModel,
   ControlRoomHeader,
+  getControlRoomViewModel,
   GovernanceDecisionCard,
   PrivacyBoundaryCard,
   ReadinessRadar,
@@ -19,7 +19,7 @@ export default async function ControlCasePage({
   params,
 }: ControlCasePageProps) {
   const { caseId } = await params;
-  const viewModel = controlRoomDemoViewModel;
+  const { viewModel, source } = await getControlRoomViewModel(caseId);
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-8 text-slate-100">
@@ -32,10 +32,11 @@ export default async function ControlCasePage({
             /control/cases/{caseId}
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300">
-            This route is wired to the existing Control Room feature boundary
-            and currently renders the governed case-file fixture chain. It
-            prepares the product path for real governed case loading without
-            adding a database, API route, persistence, or Prisma migration.
+            This route is wired through getControlRoomViewModel(caseId), an
+            internal resolver that currently returns the governed case-file
+            fixture chain. It prepares the product path for real governed case
+            loading without adding a database, API route, persistence, or Prisma
+            migration. Current source: {source}.
           </p>
         </section>
 
