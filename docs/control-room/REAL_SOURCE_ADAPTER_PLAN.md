@@ -60,7 +60,7 @@ A governed case exists, but the resolver must not expose it to the Control Room 
 
 unavailable
 
-The source adapter cannot answer safely. This is different from not found.
+The source adapter cannot answer safely. This is different from not_found.
 
 Non-goals for this phase
 
@@ -90,7 +90,7 @@ Step 3 — resolver outcome tests
 Test the resolver against:
 
 found.
-not found.
+not_found.
 blocked.
 unavailable.
 Step 4 — readiness guard
