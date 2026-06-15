@@ -9,16 +9,18 @@ describe("toControlRoomViewModel", () => {
 
     expect(viewModel.caseRef).toBe(controlRoomDemoSource.caseRef);
     expect(viewModel.title).toBe(controlRoomDemoSource.title);
-    expect(viewModel.readiness).toHaveLength(
+    expect(viewModel.readiness.length).toBe(
       controlRoomDemoSource.readiness.length,
     );
-    expect(viewModel.governanceDecision.blocked).toContain(
-      "transfer_packet_generation",
+    expect(viewModel.governanceDecision.blocked).toEqual(
+      controlRoomDemoSource.governanceDecision.blocked,
     );
     expect(viewModel.blockedActions[0]?.action).toBe(
-      "Generate transfer package",
+      controlRoomDemoSource.blockedActions[0]?.action,
     );
-    expect(viewModel.privacyBoundary.title).toBe("Privacy boundary");
+    expect(viewModel.privacyBoundary.title).toBe(
+      controlRoomDemoSource.privacyBoundary.title,
+    );
   });
 
   it("does not expose source arrays by reference", () => {
