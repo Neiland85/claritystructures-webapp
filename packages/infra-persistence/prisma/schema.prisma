@@ -41,6 +41,10 @@ model ContactIntake {
   spamScore Float?
   meta      Json?
 
+  suppressedAt       DateTime?
+  suppressionReason  String?
+  suppressionTrigger String?
+
   consentAcceptances ConsentAcceptance[]
   slaTimers          SlaTimer[]
   derivationConsents DerivationConsent[]
@@ -54,6 +58,7 @@ model ContactIntake {
   @@index([createdAt(sort: Desc)])
   @@index([status, priority])
   @@index([email])
+  @@index([suppressedAt])
 }
 
 model AuditLog {

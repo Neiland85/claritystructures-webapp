@@ -4,13 +4,13 @@ import type {
   ConsentRepository,
 } from "@claritystructures/domain";
 
-/**
- * PrismaConsentRepository — records consent acceptances linked to intake records.
- *
- * Implements the ConsentRepository port for:
- * - Linking intakes to their consent version at submission time
- * - Finding the currently active consent policy version
- */
+export class UnknownConsentVersionError extends Error {
+  constructor(readonly consentVersion: string) {
+    super(`Unknown consent version: ${consentVersion}`);
+    this.name = "UnknownConsentVersionError";
+  }
+}
+
 export class PrismaConsentRepository implements ConsentRepository {
   constructor(
     private readonly prisma: Pick<
@@ -26,10 +26,7 @@ export class PrismaConsentRepository implements ConsentRepository {
     });
 
     if (!version) {
-      console.warn(
-        `[ConsentRepository] Unknown consent version: ${record.consentVersion}`,
-      );
-      return;
+      throw new UnknownConsentVersionError(record.consentVersion);
     }
 
     await this.prisma.consentAcceptance.create({

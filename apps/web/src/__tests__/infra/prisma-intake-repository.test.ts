@@ -16,6 +16,9 @@ const SAMPLE_ROW = {
   status: "pending" as const,
   spamScore: null,
   meta: null,
+  suppressedAt: null,
+  suppressionReason: null,
+  suppressionTrigger: null,
 };
 
 function createMockPrisma() {
@@ -27,9 +30,6 @@ function createMockPrisma() {
       update: vi.fn(async () => ({ ...SAMPLE_ROW, status: "accepted" })),
       deleteMany: vi.fn(async () => ({ count: 1 })),
       delete: vi.fn(async () => SAMPLE_ROW),
-    },
-    consentAcceptance: {
-      deleteMany: vi.fn(async () => ({ count: 0 })),
     },
   };
 }
@@ -94,10 +94,11 @@ describe("PrismaIntakeRepository", () => {
   });
 
   describe("findAll", () => {
-    it("should return all records ordered by createdAt desc", async () => {
+    it("should return active records ordered by createdAt desc", async () => {
       const result = await repo.findAll();
 
       expect(mockPrisma.contactIntake.findMany).toHaveBeenCalledWith({
+        where: { suppressedAt: null },
         orderBy: { createdAt: "desc" },
       });
       expect(result).toHaveLength(1);
@@ -126,11 +127,11 @@ describe("PrismaIntakeRepository", () => {
   });
 
   describe("findByEmail", () => {
-    it("should return records matching the email", async () => {
+    it("should return active records matching the email", async () => {
       const result = await repo.findByEmail("alice@example.com");
 
       expect(mockPrisma.contactIntake.findMany).toHaveBeenCalledWith({
-        where: { email: "alice@example.com" },
+        where: { email: "alice@example.com", suppressedAt: null },
         orderBy: { createdAt: "desc" },
       });
       expect(result).toHaveLength(1);
@@ -138,36 +139,52 @@ describe("PrismaIntakeRepository", () => {
   });
 
   describe("deleteByEmail", () => {
-    it("should cascade delete consent acceptances then intakes", async () => {
+    it("should suppress active intakes for an email", async () => {
       const count = await repo.deleteByEmail("alice@example.com");
 
-      expect(mockPrisma.consentAcceptance.deleteMany).toHaveBeenCalledWith({
-        where: { intakeId: { in: ["intake-001"] } },
+      expect(mockPrisma.contactIntake.findMany).toHaveBeenCalledWith({
+        where: { email: "alice@example.com", suppressedAt: null },
+        select: { id: true },
       });
-      expect(mockPrisma.contactIntake.deleteMany).toHaveBeenCalledWith({
-        where: { email: "alice@example.com" },
-      });
+
+      expect(mockPrisma.contactIntake.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: "intake-001" },
+          data: expect.objectContaining({
+            name: null,
+            email: "suppressed+intake-001@suppressed.local",
+            phone: null,
+            message: "[suppressed]",
+            suppressedAt: expect.any(Date),
+            suppressionReason: "privacy_suppression",
+            suppressionTrigger: "deleteById",
+          }),
+        }),
+      );
+
+      expect(mockPrisma.contactIntake.deleteMany).not.toHaveBeenCalled();
+      expect(mockPrisma.contactIntake.delete).not.toHaveBeenCalled();
       expect(count).toBe(1);
     });
 
-    it("should return 0 when no intakes found for email", async () => {
+    it("should return 0 when no active intakes found for email", async () => {
       mockPrisma.contactIntake.findMany.mockResolvedValueOnce([]);
 
       const count = await repo.deleteByEmail("nobody@example.com");
 
       expect(count).toBe(0);
-      expect(mockPrisma.consentAcceptance.deleteMany).not.toHaveBeenCalled();
+      expect(mockPrisma.contactIntake.update).not.toHaveBeenCalled();
     });
   });
 
   describe("findExpiredBefore", () => {
-    it("should query intakes created before cutoff date", async () => {
+    it("should query active intakes created before cutoff date", async () => {
       const cutoff = new Date("2025-01-01");
 
       await repo.findExpiredBefore(cutoff);
 
       expect(mockPrisma.contactIntake.findMany).toHaveBeenCalledWith({
-        where: { createdAt: { lt: cutoff } },
+        where: { createdAt: { lt: cutoff }, suppressedAt: null },
         orderBy: { createdAt: "asc" },
       });
     });
@@ -183,15 +200,26 @@ describe("PrismaIntakeRepository", () => {
   });
 
   describe("deleteById", () => {
-    it("should cascade delete consent acceptances then the intake", async () => {
+    it("should suppress/anonymize the intake instead of physically deleting it", async () => {
       await repo.deleteById("intake-001");
 
-      expect(mockPrisma.consentAcceptance.deleteMany).toHaveBeenCalledWith({
-        where: { intakeId: "intake-001" },
-      });
-      expect(mockPrisma.contactIntake.delete).toHaveBeenCalledWith({
-        where: { id: "intake-001" },
-      });
+      expect(mockPrisma.contactIntake.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: "intake-001" },
+          data: expect.objectContaining({
+            name: null,
+            email: "suppressed+intake-001@suppressed.local",
+            phone: null,
+            message: "[suppressed]",
+            suppressedAt: expect.any(Date),
+            suppressionReason: "privacy_suppression",
+            suppressionTrigger: "deleteById",
+          }),
+        }),
+      );
+
+      expect(mockPrisma.contactIntake.delete).not.toHaveBeenCalled();
+      expect(mockPrisma.contactIntake.deleteMany).not.toHaveBeenCalled();
     });
   });
 });

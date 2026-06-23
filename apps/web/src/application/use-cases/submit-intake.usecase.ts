@@ -45,6 +45,27 @@ export class IdempotencyInProgressError extends Error {
   }
 }
 
+export class MissingConsentError extends Error {
+  constructor() {
+    super("Consent recording is required");
+    this.name = "MissingConsentError";
+  }
+}
+
+export class NoActiveConsentVersionError extends Error {
+  constructor() {
+    super("No active consent version configured");
+    this.name = "NoActiveConsentVersionError";
+  }
+}
+
+export class InactiveConsentVersionError extends Error {
+  constructor(readonly consentVersion: string) {
+    super(`Consent version is not active: ${consentVersion}`);
+    this.name = "InactiveConsentVersionError";
+  }
+}
+
 export type SubmitIntakeInput = Omit<
   ContactIntakeInput,
   "priority" | "route"
@@ -128,6 +149,20 @@ export class SubmitIntakeUseCase {
     }
 
     try {
+      if (!this.consent || !consentMeta) {
+        throw new MissingConsentError();
+      }
+
+      const activeConsent = await this.consent.findActiveVersion();
+
+      if (!activeConsent) {
+        throw new NoActiveConsentVersionError();
+      }
+
+      if (activeConsent.version !== consentMeta.consentVersion) {
+        throw new InactiveConsentVersionError(consentMeta.consentVersion);
+      }
+
       const meta = input.meta;
       let wizardResult: WizardResult;
 
@@ -150,10 +185,10 @@ export class SubmitIntakeUseCase {
       const governanceEnvelope = createIntakeGovernanceEnvelope({
         wizardResult,
         requestId: idempotencyFingerprint?.key ?? "non-idempotent-intake",
-        consentVersion: consentMeta?.consentVersion ?? "unknown",
+        consentVersion: consentMeta.consentVersion,
         policyBundleVersion: "wizard-guardian-policy/v0",
-        ipHash: consentMeta?.ipHash,
-        userAgent: consentMeta?.userAgent,
+        ipHash: consentMeta.ipHash,
+        userAgent: consentMeta.userAgent,
       });
 
       const guardianDecision = buildGuardianDecision({
@@ -175,18 +210,27 @@ export class SubmitIntakeUseCase {
         route: decision.decision.route,
       });
 
-      if (this.consent && consentMeta) {
+      try {
+        await this.consent.recordAcceptance({
+          intakeId: record.id,
+          consentVersion: consentMeta.consentVersion,
+          ipHash: consentMeta.ipHash,
+          userAgent: consentMeta.userAgent,
+          locale: consentMeta.locale,
+        });
+      } catch (error) {
+        logger.error("Consent recording failed; suppressing intake", error);
+
         try {
-          await this.consent.recordAcceptance({
-            intakeId: record.id,
-            consentVersion: consentMeta.consentVersion,
-            ipHash: consentMeta.ipHash,
-            userAgent: consentMeta.userAgent,
-            locale: consentMeta.locale,
-          });
-        } catch (error) {
-          logger.error("Consent recording failed", error);
+          await this.repository.deleteById(record.id);
+        } catch (suppressionError) {
+          logger.error(
+            "Failed to suppress intake after consent recording failure",
+            suppressionError,
+          );
         }
+
+        throw error;
       }
 
       try {
@@ -203,7 +247,7 @@ export class SubmitIntakeUseCase {
             priority: decision.decision.priority,
             route: decision.decision.route,
             modelVersion: decision.decision.decisionModelVersion,
-            consentVersion: consentMeta?.consentVersion,
+            consentVersion: consentMeta.consentVersion,
             idempotencyKey: idempotencyFingerprint?.key,
             requestHash: idempotencyFingerprint?.requestHash,
             governanceEnvelope: {
