@@ -28,13 +28,12 @@ function toIntakeRecord(row: ContactIntakeModel): IntakeRecord {
   };
 }
 
+function buildSuppressedEmail(id: string): string {
+  return `suppressed+${id}@suppressed.local`;
+}
+
 export class PrismaIntakeRepository implements IntakeRepository {
-  constructor(
-    private readonly prisma: Pick<
-      PrismaClient,
-      "contactIntake" | "consentAcceptance"
-    >,
-  ) {}
+  constructor(private readonly prisma: Pick<PrismaClient, "contactIntake">) {}
 
   async create(input: ContactIntakeInput): Promise<IntakeRecord> {
     const created = await this.prisma.contactIntake.create({
@@ -67,6 +66,7 @@ export class PrismaIntakeRepository implements IntakeRepository {
 
   async findAll(): Promise<IntakeRecord[]> {
     const records = await this.prisma.contactIntake.findMany({
+      where: { suppressedAt: null },
       orderBy: { createdAt: "desc" },
     });
 
@@ -96,7 +96,7 @@ export class PrismaIntakeRepository implements IntakeRepository {
 
   async findByEmail(email: string): Promise<IntakeRecord[]> {
     const records = await this.prisma.contactIntake.findMany({
-      where: { email },
+      where: { email, suppressedAt: null },
       orderBy: { createdAt: "desc" },
     });
 
@@ -104,38 +104,48 @@ export class PrismaIntakeRepository implements IntakeRepository {
   }
 
   async deleteByEmail(email: string): Promise<number> {
-    // Cascade: delete consent acceptances first, then intakes
     const intakes = await this.prisma.contactIntake.findMany({
-      where: { email },
+      where: { email, suppressedAt: null },
       select: { id: true },
     });
 
-    if (intakes.length === 0) return 0;
+    for (const intake of intakes) {
+      await this.deleteById(intake.id);
+    }
 
-    const intakeIds = intakes.map((i) => i.id);
-
-    await this.prisma.consentAcceptance.deleteMany({
-      where: { intakeId: { in: intakeIds } },
-    });
-
-    const deleted = await this.prisma.contactIntake.deleteMany({
-      where: { email },
-    });
-
-    return deleted.count;
+    return intakes.length;
   }
 
   async findExpiredBefore(cutoff: Date): Promise<IntakeRecord[]> {
     const records = await this.prisma.contactIntake.findMany({
-      where: { createdAt: { lt: cutoff } },
+      where: {
+        createdAt: { lt: cutoff },
+        suppressedAt: null,
+      },
       orderBy: { createdAt: "asc" },
     });
+
     return records.map(toIntakeRecord);
   }
 
   async deleteById(id: string): Promise<void> {
-    // Cascade: delete all related records before the intake itself
-    await this.prisma.consentAcceptance.deleteMany({ where: { intakeId: id } });
-    await this.prisma.contactIntake.delete({ where: { id } });
+    const now = new Date();
+
+    await this.prisma.contactIntake.update({
+      where: { id },
+      data: {
+        name: null,
+        email: buildSuppressedEmail(id),
+        phone: null,
+        message: "[suppressed]",
+        meta: {
+          suppressed: true,
+          suppressedAt: now.toISOString(),
+        } as Prisma.InputJsonValue,
+        suppressedAt: now,
+        suppressionReason: "privacy_suppression",
+        suppressionTrigger: "deleteById",
+      },
+    });
   }
 }

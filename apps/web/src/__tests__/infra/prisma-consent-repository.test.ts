@@ -79,20 +79,17 @@ describe("PrismaConsentRepository", () => {
       });
     });
 
-    it("should skip recording when consent version is unknown", async () => {
+    it("should throw when consent version is unknown", async () => {
       mockPrisma.consentVersion.findUnique.mockResolvedValueOnce(null as never);
-      const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
-      await repo.recordAcceptance({
-        intakeId: "intake-003",
-        consentVersion: "v999",
-      });
+      await expect(
+        repo.recordAcceptance({
+          intakeId: "intake-003",
+          consentVersion: "v999",
+        }),
+      ).rejects.toThrow("Unknown consent version: v999");
 
       expect(mockPrisma.consentAcceptance.create).not.toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "[ConsentRepository] Unknown consent version: v999",
-      );
-      consoleSpy.mockRestore();
     });
   });
 

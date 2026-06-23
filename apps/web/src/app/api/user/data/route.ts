@@ -17,11 +17,6 @@ const EmailSchema = z.object({
   email: z.string().email("Invalid email format").toLowerCase(),
 });
 
-/**
- * POST /api/user/data
- * ARCO-POL: Acceso — retrieve all data associated with an email.
- * Requires bearer auth (admin-only).
- */
 export async function POST(req: NextRequest) {
   return apiGuard(
     req,
@@ -45,9 +40,15 @@ export async function POST(req: NextRequest) {
             id: intake.id,
             createdAt: intake.createdAt,
             tone: intake.tone,
+            route: intake.route,
             priority: intake.priority,
             status: intake.status,
+            name: intake.name,
+            email: intake.email,
+            phone: intake.phone,
             message: intake.message,
+            spamScore: intake.spamScore,
+            meta: intake.meta,
           })),
         });
       } catch (error) {
@@ -62,11 +63,6 @@ export async function POST(req: NextRequest) {
   );
 }
 
-/**
- * DELETE /api/user/data
- * ARCO-POL: Supresión — delete all data associated with an email.
- * Requires bearer auth + CSRF (admin-only, destructive).
- */
 export async function DELETE(req: NextRequest) {
   return apiGuard(
     req,
@@ -85,16 +81,17 @@ export async function DELETE(req: NextRequest) {
 
         return NextResponse.json({
           email: parsed.data.email,
-          deleted: result.deleted,
+          suppressed: result.suppressed,
+          skippedLegalHold: result.skippedLegalHold,
           message:
-            result.deleted > 0
-              ? `Deleted ${result.deleted} record(s) for ${parsed.data.email}`
-              : `No records found for ${parsed.data.email}`,
+            result.suppressed > 0
+              ? `Suppressed ${result.suppressed} record(s) for ${parsed.data.email}`
+              : `No suppressible records found for ${parsed.data.email}`,
         });
       } catch (error) {
-        logger.error("Failed to delete user data", error);
+        logger.error("Failed to suppress user data", error);
         return NextResponse.json(
-          { error: "Failed to delete user data" },
+          { error: "Failed to suppress user data" },
           { status: 500 },
         );
       }

@@ -106,7 +106,15 @@ export function createGetUserDataUseCase(): GetUserDataUseCase {
  */
 export function createDeleteUserDataUseCase(): DeleteUserDataUseCase {
   const repository = new PrismaIntakeRepository(prisma);
-  return new DeleteUserDataUseCase(repository, compositeAudit);
+  const legalHolds = new PrismaLegalHoldRepository(prisma);
+  const deletionLog = new PrismaDeletionLogRepository(prisma);
+
+  return new DeleteUserDataUseCase(
+    repository,
+    legalHolds,
+    deletionLog,
+    compositeAudit,
+  );
 }
 
 /**
