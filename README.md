@@ -70,6 +70,17 @@ See:
 - docs/operational-evidence-ledger.md
 
 
+Evidence bundle export
+
+The repository now includes a domain-level evidence bundle export model.
+
+It converts operational evidence chains into verifiable bundles with bundleId, manifestHash, bundleHash, event chain verification, artifacts, limitations and redacted summary metadata.
+
+See:
+
+- docs/evidence-bundle-export.md
+
+
 Deterministic decision engine
 Same structured WizardResult input yields the same decision output.
 Decision logic is snapshot-tested.
