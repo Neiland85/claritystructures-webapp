@@ -43,6 +43,21 @@ Not an autonomous investigation system.
 Not a replacement for expert human review.
 Not a generic ML classifier.
 Not open-source software.
+
+Legal and forensic operating boundary
+
+This repository is positioned as an operational evidence and decision-traceability system.
+
+By default, it does not provide generic legal advice or automatic forensic certification.
+
+Legal advice may only be provided when the output is reviewed, validated and signed by a qualified legal professional under a specific engagement.
+
+Forensic or expert certification may only be issued when an evidence bundle is produced under a defined protocol and signed by an identified expert, with scope, methodology, limitations, hash references and chain-of-custody information.
+
+See:
+
+- docs/legal-forensic-operating-boundary.md
+
 Core capabilities
 Deterministic decision engine
 Same structured WizardResult input yields the same decision output.
