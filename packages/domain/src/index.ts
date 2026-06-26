@@ -115,6 +115,22 @@ export type { RetentionCategory } from "./retention";
 
 export * from "./wizard-contracts";
 
+// Evidence Bundle Export
+export {
+  EVIDENCE_BUNDLE_VERSION,
+  buildEvidenceBundle,
+  verifyEvidenceBundle,
+} from "./evidence-bundle";
+
+export type {
+  EvidenceBundle,
+  EvidenceBundleActor,
+  EvidenceBundleArtifact,
+  EvidenceBundleInput,
+  EvidenceBundleManifest,
+  EvidenceBundleVerification,
+} from "./evidence-bundle";
+
 // Operational Evidence Ledger
 export {
   OPERATIONAL_EVIDENCE_LEDGER_VERSION,
