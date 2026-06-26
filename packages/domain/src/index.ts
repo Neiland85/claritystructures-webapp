@@ -115,6 +115,27 @@ export type { RetentionCategory } from "./retention";
 
 export * from "./wizard-contracts";
 
+// Operational Evidence Ledger
+export {
+  OPERATIONAL_EVIDENCE_LEDGER_VERSION,
+  OPERATIONAL_EVIDENCE_EVENT_TYPES,
+  buildOperationalEvidencePayload,
+  buildOperationalEvidenceEvent,
+  buildOperationalEvidenceChain,
+  verifyOperationalEvidenceChain,
+  redactOperationalEvidenceMetadata,
+} from "./operational-evidence-ledger";
+
+export type {
+  OperationalEvidenceActor,
+  OperationalEvidenceActorType,
+  OperationalEvidenceEvent,
+  OperationalEvidenceEventInput,
+  OperationalEvidenceEventType,
+  OperationalEvidencePayload,
+  OperationalEvidenceChainVerification,
+} from "./operational-evidence-ledger";
+
 // Defensive Idempotency
 export {
   IDEMPOTENCY_SCOPES,

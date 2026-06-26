@@ -59,6 +59,17 @@ See:
 - docs/legal-forensic-operating-boundary.md
 
 Core capabilities
+Operational evidence ledger
+
+The repository now includes a domain-level operational evidence ledger for reconstructable event chains.
+
+The first version supports canonical event payloads, sensitive metadata redaction, deterministic payload hashes, event hashes, previousHash linking and chain verification.
+
+See:
+
+- docs/operational-evidence-ledger.md
+
+
 Deterministic decision engine
 Same structured WizardResult input yields the same decision output.
 Decision logic is snapshot-tested.
