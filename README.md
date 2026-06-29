@@ -6,20 +6,25 @@ The project combines a deterministic domain decision engine, a canonical wizard 
 
 ## Status
 
-Current main baseline:
+Validated preproduction baseline:
 
 ```text
 ff593ed fix(api): connect contact route to submit intake use case (#138)
-Current validation baseline:
+```
 
-pnpm -r run typecheck  # OK
-pnpm -r run build      # OK
-pnpm test:run          # OK
+CI validation baseline:
 
-Test files: 78 passed
-Tests: 722 passed
+- `pnpm -r run typecheck` ✅
+- `pnpm -r run build` ✅
+- `pnpm test:run` ✅
+- 78 test files passed / 722 tests passed
 
 The test suite intentionally exercises failure scenarios such as database errors, notification failures, audit failures and error boundaries. Related stderr output is expected when the suite finishes green.
+
+Deployment status:
+
+- This repository validates quality and buildability in CI.
+- Deployment is handled externally (Vercel integration) and is not automated as a release gate in this repository.
 
 License and ownership
 
@@ -69,7 +74,6 @@ See:
 
 - docs/operational-evidence-ledger.md
 
-
 Evidence bundle export
 
 The repository now includes a domain-level evidence bundle export model.
@@ -79,7 +83,6 @@ It converts operational evidence chains into verifiable bundles with bundleId, m
 See:
 
 - docs/evidence-bundle-export.md
-
 
 Deterministic decision engine
 Same structured WizardResult input yields the same decision output.
@@ -223,11 +226,11 @@ pnpm test:run
 
 Focused tests:
 
-pnpm exec vitest run apps/web/src/__tests__/api/contact-route.test.ts
-pnpm exec vitest run apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts
-pnpm exec vitest run apps/web/src/__tests__/components/Wizard.test.tsx
-pnpm exec vitest run apps/web/src/__tests__/components/TriageGate.test.tsx
-pnpm exec vitest run apps/web/src/__tests__/components/TriageTable.test.tsx
+pnpm exec vitest run apps/web/src/**tests**/api/contact-route.test.ts
+pnpm exec vitest run apps/web/src/**tests**/application/use-cases/submit-intake.usecase.test.ts
+pnpm exec vitest run apps/web/src/**tests**/components/Wizard.test.tsx
+pnpm exec vitest run apps/web/src/**tests**/components/TriageGate.test.tsx
+pnpm exec vitest run apps/web/src/**tests**/components/TriageTable.test.tsx
 Environment variables
 
 See:
@@ -283,4 +286,3 @@ add timing-safe cron bearer verification
 update cron routes
 reinforce cron route tests
 keep fail-closed behavior when CRON_SECRET is missing
-```

@@ -38,7 +38,7 @@ Decision protocol:
 
 ## Links to related code modules
 
-- Tier 1 (domain): `src/domain/intake.ts`, `src/domain/intake-records.ts`, `src/domain/priority.ts`, `src/domain/flow.ts`.
-- Tier 2 (application): `src/app/api/contact/route.ts`, `src/components/ContactForm.tsx`, `src/components/Wizard.tsx`.
-- Tier 3 (adapters): `src/components/forms/ContactFormBasic.tsx`, `src/components/forms/ContactFormLegal.tsx`, `src/components/forms/ContactFormSensitive.tsx`, `src/infra/alerts.ts`, `prisma/schema.prisma`.
-- Tier 4 (operations and migrations): `prisma/migrations/20260209080045_add_consent_versions_and_acceptances/migration.sql`, `CHANGELOG.md`.
+- Tier 1 (domain): `packages/domain/src/intake.ts`, `packages/domain/src/intake-records.ts`, `packages/domain/src/priority.ts`, `packages/domain/src/flow.ts`.
+- Tier 2 (application): `apps/web/src/app/api/contact/route.ts`, `apps/web/src/components/ContactForm.tsx`, `apps/web/src/components/Wizard.tsx`.
+- Tier 3 (adapters): `apps/web/src/components/forms/ContactFormBasic.tsx`, `apps/web/src/components/forms/ContactFormLegal.tsx`, `apps/web/src/components/forms/ContactFormSensitive.tsx`, `packages/infra-notifications/src/alerts.ts`, `packages/infra-persistence/prisma/schema.prisma`.
+- Tier 4 (operations and migrations): `packages/infra-persistence/prisma/migrations/20260215082833_init/migration.sql`, `CHANGELOG.md`.

@@ -13,6 +13,26 @@ const logger = createLogger("api/derivation");
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+function getClientIp(req: NextRequest): string | undefined {
+  const forwardedFor = req.headers.get("x-forwarded-for");
+
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0]?.trim();
+  }
+
+  return req.headers.get("x-real-ip") ?? undefined;
+}
+
+async function sha256Hex(value: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(value);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 /**
  * POST /api/derivation
  *
@@ -70,10 +90,11 @@ export async function POST(req: NextRequest) {
 
         if (data.action === "consent") {
           const useCase = createRequestLegalDerivationUseCase();
+          const clientIp = getClientIp(req);
           const result = await useCase.execute({
             intakeId: data.intakeId,
             recipientEntity: data.recipientEntity,
-            ipHash: req.headers.get("x-forwarded-for") ?? undefined,
+            ipHash: clientIp ? await sha256Hex(clientIp) : undefined,
             userAgent: req.headers.get("user-agent") ?? undefined,
           });
           return NextResponse.json({ consentId: result.consentId });

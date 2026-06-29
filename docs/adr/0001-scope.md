@@ -29,13 +29,13 @@ Out-of-scope for this bounded context:
 
 ## Consequences
 
-- Domain terminology must be stabilized in `src/domain/*` and consumed by application/UI layers rather than redefined in components.
+- Domain terminology must be stabilized in `packages/domain/src/*` and consumed by application/UI layers rather than redefined in components.
 - New features should declare whether they belong to core/supporting/infrastructure subdomains before implementation.
 - Cross-cutting concerns (i18n, alerts, persistence) remain adapters around domain policy, reducing accidental coupling.
 - Architectural governance reviews can use this ADR as baseline for scoping decisions and backlog triage.
 
 ## Links to related code modules
 
-- Domain policies and vocabulary: `src/domain/intake.ts`, `src/domain/intake-records.ts`, `src/domain/priority.ts`, `src/domain/flow.ts`, `src/domain/intake-prisma-consistency.ts`.
-- Application entry points and flows: `src/app/(i18n)/[lang]/contact/page.tsx`, `src/components/Wizard.tsx`, `src/components/ContactForm.tsx`.
-- Infrastructure adapters: `src/app/api/contact/route.ts`, `src/infra/alerts.ts`, `prisma/schema.prisma`.
+- Domain policies and vocabulary: `packages/domain/src/intake.ts`, `packages/domain/src/intake-records.ts`, `packages/domain/src/priority.ts`, `packages/domain/src/flow.ts`.
+- Application entry points and flows: `apps/web/src/app/(i18n)/[lang]/contact/page.tsx`, `apps/web/src/components/Wizard.tsx`, `apps/web/src/components/ContactForm.tsx`.
+- Infrastructure adapters: `apps/web/src/app/api/contact/route.ts`, `packages/infra-notifications/src/alerts.ts`, `packages/infra-persistence/prisma/schema.prisma`.

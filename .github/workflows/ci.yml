@@ -55,7 +55,7 @@ jobs:
       - name: Coverage check
         run: pnpm test:coverage
 
-      - name: Dependency audit
+      - name: Dependency audit (informational, non-blocking)
         run: pnpm audit --audit-level=high
         continue-on-error: true
 

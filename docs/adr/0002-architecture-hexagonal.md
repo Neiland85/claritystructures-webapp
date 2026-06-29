@@ -11,13 +11,13 @@ Hexagonal architecture (ports and adapters) is appropriate for this problem beca
 Adopt a hexagonal architecture interpretation for this codebase:
 
 - **Domain core (inside the hexagon)**
-  - Pure domain modules in `src/domain/*` express invariants, transformations, and decision policy.
+  - Pure domain modules in `packages/domain/src/*` express invariants, transformations, and decision policy.
 - **Application orchestration (use-case layer)**
   - Route handlers and orchestrating components map external requests to domain operations.
 - **Inbound adapters (driving adapters)**
   - Next.js pages/routes and form components act as user and HTTP input adapters.
 - **Outbound adapters (driven adapters)**
-  - Persistence (`prisma/*`) and alerting (`src/infra/alerts.ts`) implement external side effects.
+  - Persistence (`packages/infra-persistence/prisma/*`) and alerting (`packages/infra-notifications/src/alerts.ts`) implement external side effects.
 
 Governance rules:
 
@@ -34,7 +34,7 @@ Governance rules:
 
 ## Links to related code modules
 
-- Domain core: `src/domain/intake.ts`, `src/domain/priority.ts`, `src/domain/flow.ts`, `src/domain/json.ts`.
-- Inbound adapters: `src/app/api/contact/route.ts`, `src/components/forms/ContactFormBasic.tsx`, `src/components/forms/ContactFormLegal.tsx`, `src/components/forms/ContactFormSensitive.tsx`.
-- Application orchestration: `src/components/ContactForm.tsx`, `src/components/Wizard.tsx`, `src/app/(i18n)/[lang]/contact/page.tsx`.
-- Outbound adapters: `src/infra/alerts.ts`, `prisma/schema.prisma`, `prisma/migrations/20260209080045_add_consent_versions_and_acceptances/migration.sql`.
+- Domain core: `packages/domain/src/intake.ts`, `packages/domain/src/priority.ts`, `packages/domain/src/flow.ts`, `packages/domain/src/json.ts`.
+- Inbound adapters: `apps/web/src/app/api/contact/route.ts`, `apps/web/src/components/forms/ContactFormBasic.tsx`, `apps/web/src/components/forms/ContactFormLegal.tsx`, `apps/web/src/components/forms/ContactFormSensitive.tsx`.
+- Application orchestration: `apps/web/src/components/ContactForm.tsx`, `apps/web/src/components/Wizard.tsx`, `apps/web/src/app/(i18n)/[lang]/contact/page.tsx`.
+- Outbound adapters: `packages/infra-notifications/src/alerts.ts`, `packages/infra-persistence/prisma/schema.prisma`, `packages/infra-persistence/prisma/migrations/20260215082833_init/migration.sql`.
