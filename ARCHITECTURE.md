@@ -2,11 +2,11 @@
 
 ## Overview
 
-Clarity Structures Webapp is organized around a lightweight **hexagonal (ports-and-adapters) style**:
+Clarity Structures Webapp is organized around a lightweight **hexagonal (ports-and-adapters) style** in a monorepo layout:
 
-- **Domain core (`src/domain`)**: business rules and deterministic decision logic.
-- **Application/use-case orchestration (`src/components`, `src/app`)**: user flow and route orchestration.
-- **Infrastructure adapters (`src/infra`, `src/app/api`)**: integrations such as SMTP email delivery and runtime I/O.
+- **Domain core (`packages/domain/src`)**: business rules and deterministic decision logic.
+- **Application/use-case orchestration (`apps/web/src/application`, `apps/web/src/app`, `apps/web/src/components`)**: user flow and route orchestration.
+- **Infrastructure adapters (`packages/infra-*`, `apps/web/src/app/api`)**: integrations such as SMTP email delivery and runtime I/O.
 
 This keeps core classification/routing logic independent from framework details.
 
@@ -34,8 +34,8 @@ The application layer coordinates user interactions and invokes domain rules:
 
 External effects are isolated in adapters:
 
-- API route `src/app/api/contact/route.ts` parses payload, calls `assessIntake`, and sends an internal email via SMTP.
-- `src/infra/alerts.ts` provides critical-alert email dispatch.
+- API route `apps/web/src/app/api/contact/route.ts` parses payload and invokes the application use case.
+- `packages/infra-notifications/src/alerts.ts` provides critical-alert email dispatch.
 - Prisma schema/migrations define persistence boundaries for intake and consent records.
 
 ## Domain decisions (current)
@@ -101,20 +101,13 @@ Output contract:
 
 ## ADR links
 
-There is no dedicated ADR directory in the current repository.
+Formal ADRs live in:
 
-Current decision references:
-
-- [AI_RULES.md](./AI_RULES.md) — implementation governance constraints.
-- [CHANGELOG.md](./CHANGELOG.md) — release-level evolution trace.
-
-Recommended future location for formal ADRs:
-
-- `docs/adr/` (for example: `docs/adr/0001-hexagonal-layout.md`).
+- `docs/adr/`
 
 ## Conventions (architecture-level)
 
-- Keep business logic in `src/domain` and free of framework/runtime dependencies.
-- Keep side effects in adapters (`src/app/api`, `src/infra`).
-- Keep use-case orchestration thin (`src/components`, route handlers).
+- Keep business logic in `packages/domain/src` and free of framework/runtime dependencies.
+- Keep side effects in adapters (`apps/web/src/app/api`, `packages/infra-*`).
+- Keep use-case orchestration thin (`apps/web/src/application`, route handlers).
 - Preserve deterministic decision logic and explicit explainability outputs (flags + recommendations).

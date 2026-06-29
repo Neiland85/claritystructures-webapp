@@ -23,10 +23,13 @@ const { POST } = await import("@/app/api/derivation/route");
 
 // ── Helpers ─────────────────────────────────────────────────────
 
-function createPostRequest(body: unknown): NextRequest {
+function createPostRequest(
+  body: unknown,
+  headers?: Record<string, string>,
+): NextRequest {
   return new NextRequest("http://localhost:3000/api/derivation", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...(headers ?? {}) },
     body: JSON.stringify(body),
   });
 }
@@ -52,6 +55,24 @@ describe("POST /api/derivation (consent)", () => {
     expect(res.status).toBe(200);
     expect(json.consentId).toBe("consent-001");
     expect(mockConsentExecute).toHaveBeenCalledOnce();
+  });
+
+  it("should hash x-forwarded-for before passing ipHash", async () => {
+    const res = await POST(
+      createPostRequest(
+        {
+          action: "consent",
+          intakeId: "intake-001",
+          recipientEntity: "Legal Corp SLU",
+        },
+        { "x-forwarded-for": "127.0.0.1, 10.0.0.5" },
+      ),
+    );
+
+    expect(res.status).toBe(200);
+    const callArg = mockConsentExecute.mock.calls[0]?.[0];
+    expect(callArg?.ipHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(callArg?.ipHash).not.toContain("127.0.0.1");
   });
 
   it("should return 400 when intakeId is missing", async () => {

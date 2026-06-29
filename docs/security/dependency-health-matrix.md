@@ -28,6 +28,19 @@ This matrix documents the critical dependency surface of ClarityStructures WebAp
 - CI validates typecheck, lint, tests, coverage and build.
 - Security audit and secret scanning are active.
 
+## Gate semantics in CI
+
+| Control                                    | CI behavior                                   |
+| ------------------------------------------ | --------------------------------------------- |
+| `pnpm install --frozen-lockfile`           | **Blocking** (job fails on error)             |
+| `pnpm typecheck`                           | **Blocking**                                  |
+| `pnpm lint` + `pnpm format:check`          | **Blocking**                                  |
+| `pnpm test:run` + domain/integration tests | **Blocking**                                  |
+| `pnpm test:coverage`                       | **Blocking**                                  |
+| `pnpm build`                               | **Blocking**                                  |
+| `./scripts/check-secrets.sh`               | **Blocking**                                  |
+| `pnpm audit --audit-level=high`            | **Informational** (`continue-on-error: true`) |
+
 ## Review cadence
 
 This matrix should be reviewed after:

@@ -33,7 +33,7 @@ Governance constraints:
 
 ## Links to related code modules
 
-- Consent and domain consistency logic: `src/domain/intake-prisma-consistency.ts`, `src/types/consent.ts`, `src/domain/intake.ts`.
-- Intake capture surfaces: `src/components/ConsentBlock.tsx`, `src/components/forms/ContactFormLegal.tsx`, `src/components/forms/ContactFormSensitive.tsx`.
-- Persistence/versioning artifacts: `prisma/schema.prisma`, `prisma/migrations/20260209080045_add_consent_versions_and_acceptances/migration.sql`.
-- Intake API integration: `src/app/api/contact/route.ts`.
+- Consent and domain consistency logic: `packages/domain/src/intake.ts`.
+- Intake capture surfaces: `apps/web/src/components/ConsentBlock.tsx`, `apps/web/src/components/forms/ContactFormLegal.tsx`, `apps/web/src/components/forms/ContactFormSensitive.tsx`.
+- Persistence/versioning artifacts: `packages/infra-persistence/prisma/schema.prisma`, `packages/infra-persistence/prisma/migrations/20260215082833_init/migration.sql`.
+- Intake API integration: `apps/web/src/app/api/contact/route.ts`.
