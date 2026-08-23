@@ -205,4 +205,45 @@ describe("POST /api/contact", () => {
     expect(res.status).toBe(500);
     expect(json).toEqual({ error: "Server error" });
   });
+
+  it("should sanitize HTML before persist/notify payload", async () => {
+    const dirty = {
+      ...VALID_BODY,
+      name: "<script>alert(1)</script>Jane",
+      message:
+        "<img src=x onerror=alert(1)>I need help with a digital forensics case involving data breach",
+      wizardResult: {
+        ...VALID_BODY.wizardResult,
+        incident: "<b>Data</b> breach suspected",
+      },
+    };
+
+    const res = await POST(createRequest(dirty));
+    expect(res.status).toBe(200);
+
+    const [input] = executeMock.mock.calls[0];
+    expect(input.name).toBe("Jane");
+    expect(input.message).not.toContain("<img");
+    expect(input.message).toContain("I need help");
+    expect(input.meta.incident).toBe("Data breach suspected");
+  });
+
+  it("should not report success when notification delivery fails", async () => {
+    const { NotificationDeliveryError } =
+      await import("@/application/use-cases/submit-intake.usecase");
+    executeMock.mockRejectedValueOnce(
+      new NotificationDeliveryError("intake-001"),
+    );
+
+    const res = await POST(createRequest(VALID_BODY));
+    const json = await res.json();
+
+    expect(res.status).toBe(503);
+    expect(json.success).toBeUndefined();
+    expect(json).toMatchObject({
+      error: "Notification pending",
+      intakeId: "intake-001",
+      notificationStatus: "pending",
+    });
+  });
 });

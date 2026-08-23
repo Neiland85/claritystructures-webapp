@@ -82,16 +82,27 @@ describe("upstash rate limiter", () => {
   });
 
   describe("getIdentifier", () => {
-    it("should extract IP from x-forwarded-for header", () => {
+    it("should combine session cookie with forwarded IP", () => {
       const request = new Request("http://localhost", {
-        headers: { "x-forwarded-for": "1.2.3.4, 5.6.7.8" },
+        headers: {
+          "x-forwarded-for": "1.2.3.4, 5.6.7.8",
+          cookie: "__csrf=session-abc",
+        },
       });
-      expect(getIdentifier(request)).toBe("1.2.3.4");
+      expect(getIdentifier(request)).toBe("session-abc:1.2.3.4");
     });
 
-    it("should return 'unknown' when no forwarded header", () => {
+    it("should not use x-forwarded-for as the unique identity", () => {
+      const request = new Request("http://localhost", {
+        headers: { "x-forwarded-for": "1.2.3.4" },
+      });
+      expect(getIdentifier(request)).toBe("anon:1.2.3.4");
+      expect(getIdentifier(request)).not.toBe("1.2.3.4");
+    });
+
+    it("should return anon:unknown when no forwarded header or cookie", () => {
       const request = new Request("http://localhost");
-      expect(getIdentifier(request)).toBe("unknown");
+      expect(getIdentifier(request)).toBe("anon:unknown");
     });
   });
 });

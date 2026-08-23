@@ -66,6 +66,15 @@ export class InactiveConsentVersionError extends Error {
   }
 }
 
+export class NotificationDeliveryError extends Error {
+  readonly statusCode = 503;
+
+  constructor(readonly intakeId: string) {
+    super("Notification delivery failed");
+    this.name = "NotificationDeliveryError";
+  }
+}
+
 export type SubmitIntakeInput = Omit<
   ContactIntakeInput,
   "priority" | "route"
@@ -237,6 +246,7 @@ export class SubmitIntakeUseCase {
         await this.notifier.notifyIntakeReceived(record);
       } catch (error) {
         logger.error("Notification failed", error);
+        throw new NotificationDeliveryError(record.id);
       }
 
       try {

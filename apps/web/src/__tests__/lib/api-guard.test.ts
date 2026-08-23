@@ -48,6 +48,15 @@ describe("api-guard", () => {
       const req = buildRequest("GET", { origin: "https://evil.com" });
       expect(validateCors(req)).toBe(false);
     });
+
+    it("rejects wildcard origin and wildcard allowlist", () => {
+      const wildcardOrigin = buildRequest("GET", { origin: "*" });
+      expect(validateCors(wildcardOrigin)).toBe(false);
+
+      vi.stubEnv("NEXT_PUBLIC_APP_URL", "*");
+      const req = buildRequest("GET", { origin: "https://app.example" });
+      expect(validateCors(req)).toBe(false);
+    });
   });
 
   // ── Security headers ────────────────────────────────────────

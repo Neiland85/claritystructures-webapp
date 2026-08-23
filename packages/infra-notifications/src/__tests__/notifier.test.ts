@@ -132,7 +132,7 @@ describe("MailNotifier", () => {
       consoleSpy.mockRestore();
     });
 
-    it("should handle send errors gracefully", async () => {
+    it("should throw when send fails", async () => {
       process.env.SMTP_HOST = "smtp.example.com";
       process.env.SMTP_USER = "user@example.com";
       process.env.SMTP_PASS = "secret";
@@ -142,13 +142,28 @@ describe("MailNotifier", () => {
         .spyOn(console, "error")
         .mockImplementation(() => {});
       const notifier = new MailNotifier();
-      await notifier.notifyIntakeReceived(SAMPLE_INTAKE);
 
+      await expect(
+        notifier.notifyIntakeReceived(SAMPLE_INTAKE),
+      ).rejects.toThrow("SMTP timeout");
       expect(consoleSpy).toHaveBeenCalledWith(
         expect.stringContaining("[MailNotifier] Error"),
         expect.any(Error),
       );
       consoleSpy.mockRestore();
+    });
+
+    it("should throw in production when SMTP is not configured", async () => {
+      delete process.env.SMTP_HOST;
+      delete process.env.SMTP_USER;
+      delete process.env.SMTP_PASS;
+      process.env.NODE_ENV = "production";
+      mockCreateTransport.mockClear();
+
+      const notifier = new MailNotifier();
+      await expect(
+        notifier.notifyIntakeReceived(SAMPLE_INTAKE),
+      ).rejects.toThrow("Mail notifier is not configured");
     });
 
     it("should highlight critical priority in red in HTML", async () => {

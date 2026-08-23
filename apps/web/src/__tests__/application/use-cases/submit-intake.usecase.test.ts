@@ -4,6 +4,7 @@ import {
   MissingConsentError,
   NoActiveConsentVersionError,
   InactiveConsentVersionError,
+  NotificationDeliveryError,
 } from "../../../application/use-cases/submit-intake.usecase";
 import type {
   IntakeRepository,
@@ -215,14 +216,16 @@ describe("SubmitIntakeUseCase", () => {
     expect(event.metadata).toHaveProperty("consentVersion", "v1");
   });
 
-  it("should NOT fail when notification throws", async () => {
+  it("should fail the use case when notification throws", async () => {
     (
       notifier.notifyIntakeReceived as ReturnType<typeof vi.fn>
     ).mockRejectedValueOnce(new Error("SMTP down"));
 
-    const { record } = await useCase.execute(BASE_INPUT, CONSENT_META);
-    expect(record.id).toBe("intake-001");
+    await expect(
+      useCase.execute(BASE_INPUT, CONSENT_META),
+    ).rejects.toBeInstanceOf(NotificationDeliveryError);
     expect(repo.create).toHaveBeenCalledOnce();
+    expect(notifier.notifyIntakeReceived).toHaveBeenCalledOnce();
   });
 
   it("should NOT fail when audit throws", async () => {

@@ -52,26 +52,29 @@ describe("Rate Limiting", () => {
   });
 
   describe("getIdentifier", () => {
-    it("should get IP from x-forwarded-for", () => {
+    it("should combine cookie and x-forwarded-for", () => {
       const request = new Request("http://localhost", {
-        headers: { "x-forwarded-for": "1.2.3.4, 5.6.7.8" },
+        headers: {
+          "x-forwarded-for": "1.2.3.4, 5.6.7.8",
+          cookie: "csrf-token=sess-1",
+        },
       });
 
-      expect(getIdentifier(request)).toBe("1.2.3.4");
+      expect(getIdentifier(request)).toBe("sess-1:1.2.3.4");
     });
 
-    it("should get IP from x-real-ip", () => {
+    it("should get IP from x-real-ip when no cookie", () => {
       const request = new Request("http://localhost", {
         headers: { "x-real-ip": "1.2.3.4" },
       });
 
-      expect(getIdentifier(request)).toBe("1.2.3.4");
+      expect(getIdentifier(request)).toBe("anon:1.2.3.4");
     });
 
-    it("should fallback to localhost", () => {
+    it("should fallback to localhost with anon session", () => {
       const request = new Request("http://localhost");
 
-      expect(getIdentifier(request)).toBe("127.0.0.1");
+      expect(getIdentifier(request)).toBe("anon:127.0.0.1");
     });
   });
 });

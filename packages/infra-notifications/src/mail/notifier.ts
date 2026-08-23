@@ -23,6 +23,9 @@ export class MailNotifier implements Notifier {
     const summary = `Intake ${intake.id} from ${intake.email}`;
 
     if (!this.transporter) {
+      if (process.env.NODE_ENV === "production") {
+        throw new Error("Mail notifier is not configured");
+      }
       console.info(
         `[MailNotifier] STUB: New intake received: ${summary}. (SMTP not configured)`,
       );
@@ -73,6 +76,7 @@ ${process.env.NEXT_PUBLIC_SITE_URL}/triage
         `[MailNotifier] Error sending email for ${intake.id}:`,
         error,
       );
+      throw error;
     }
   }
 }

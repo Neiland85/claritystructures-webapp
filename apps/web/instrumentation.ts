@@ -1,6 +1,9 @@
 import * as Sentry from "@sentry/nextjs";
+import { assertProductionAuthSecrets } from "@/lib/auth/verify-bearer";
 
 export async function register() {
+  assertProductionAuthSecrets();
+
   if (process.env.NEXT_RUNTIME === "nodejs") {
     Sentry.init({
       dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,

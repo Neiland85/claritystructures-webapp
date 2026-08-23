@@ -5,7 +5,9 @@ import { createSubmitIntakeUseCase } from "@/application/di-container";
 import {
   IdempotencyConflictError,
   IdempotencyInProgressError,
+  NotificationDeliveryError,
 } from "@/application/use-cases/submit-intake.usecase";
+import { sanitizeHtml } from "@/lib/api/validate-request";
 import { createLogger } from "@/lib/logger";
 import { checkRateLimit, getIdentifier } from "@/lib/rate-limit/upstash";
 
@@ -67,6 +69,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
 
+    const sanitizedName = sanitizeHtml(parse.data.name);
+    const sanitizedMessage = sanitizeHtml(parse.data.message);
+    const sanitizedWizardResult = parse.data.wizardResult
+      ? {
+          ...parse.data.wizardResult,
+          incident: sanitizeHtml(parse.data.wizardResult.incident),
+        }
+      : parse.data.wizardResult;
+
     const useCase = createSubmitIntakeUseCase();
     const ip = getClientIp(req);
 
@@ -80,22 +91,22 @@ export async function POST(req: NextRequest) {
       payload: {
         emailHash: await sha256Hex(parse.data.email),
         phoneHash: parse.data.phone ? await sha256Hex(parse.data.phone) : null,
-        messageHash: await sha256Hex(parse.data.message),
+        messageHash: await sha256Hex(sanitizedMessage),
         tone: parse.data.tone,
         consentVersion: parse.data.consentVersion,
-        wizardResult: parse.data.wizardResult ?? null,
+        wizardResult: sanitizedWizardResult ?? null,
       },
     });
 
     const result = await useCase.execute(
       {
-        name: parse.data.name,
+        name: sanitizedName,
         email: parse.data.email,
         phone: parse.data.phone,
-        message: parse.data.message,
+        message: sanitizedMessage,
         tone: parse.data.tone,
         status: "pending",
-        meta: parse.data.wizardResult,
+        meta: sanitizedWizardResult,
       },
       {
         consentVersion: parse.data.consentVersion,
@@ -136,6 +147,17 @@ export async function POST(req: NextRequest) {
           status: error.statusCode,
           headers: { "Retry-After": "5" },
         },
+      );
+    }
+
+    if (error instanceof NotificationDeliveryError) {
+      return NextResponse.json(
+        {
+          error: "Notification pending",
+          intakeId: error.intakeId,
+          notificationStatus: "pending",
+        },
+        { status: error.statusCode },
       );
     }
 

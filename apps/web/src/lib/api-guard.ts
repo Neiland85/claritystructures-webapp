@@ -29,11 +29,14 @@ export function withSecurityHeaders(response: NextResponse) {
 
 export function validateCors(req: NextRequest) {
   const origin = req.headers.get("origin");
-  const allowedOrigins = [
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-  ];
+  const configured = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  // Never allow wildcard origins.
+  if (configured === "*") {
+    return false;
+  }
+  const allowedOrigins = [configured];
 
-  if (origin && !allowedOrigins.includes(origin)) {
+  if (origin && (origin === "*" || !allowedOrigins.includes(origin))) {
     return false;
   }
   return true;

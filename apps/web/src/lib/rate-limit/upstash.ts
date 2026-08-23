@@ -67,7 +67,14 @@ export async function checkRateLimit(
 }
 
 export function getIdentifier(request: Request): string {
+  // Identity = CSRF/session cookie + client IP. Combined on purpose.
+  // x-forwarded-for is never the sole key (clients can spoof it).
+  const cookieHeader = request.headers.get("cookie") ?? "";
+  const session =
+    cookieHeader.match(/(?:^|;\s*)(?:__csrf|csrf-token)=([^;]+)/)?.[1] ??
+    "anon";
   const forwarded = request.headers.get("x-forwarded-for");
-  const ip = forwarded ? forwarded.split(",")[0] : "unknown";
-  return ip;
+  const realIp = request.headers.get("x-real-ip");
+  const ip = forwarded?.split(",")[0]?.trim() || realIp || "unknown";
+  return `${session}:${ip}`;
 }
