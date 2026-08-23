@@ -242,11 +242,12 @@ export class SubmitIntakeUseCase {
         throw error;
       }
 
+      let notificationFailed = false;
       try {
         await this.notifier.notifyIntakeReceived(record);
       } catch (error) {
         logger.error("Notification failed", error);
-        throw new NotificationDeliveryError(record.id);
+        notificationFailed = true;
       }
 
       try {
@@ -297,8 +298,19 @@ export class SubmitIntakeUseCase {
         );
       }
 
+      if (notificationFailed) {
+        throw new NotificationDeliveryError(record.id);
+      }
+
       return output;
     } catch (error) {
+      if (
+        error instanceof NotificationDeliveryError &&
+        this.idempotency &&
+        guard?.state === "started"
+      ) {
+        throw error;
+      }
       if (this.idempotency && guard?.state === "started") {
         await this.idempotency.fail(
           guard.record.id,

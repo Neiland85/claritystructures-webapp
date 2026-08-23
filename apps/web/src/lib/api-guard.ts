@@ -10,10 +10,6 @@ export interface ApiGuardOptions {
   requireCsrf?: boolean;
 }
 
-/**
- * Procedimiento de Blindaje de API (Shield)
- * Implementa validaciones de seguridad nivel ICANN/ALAC
- */
 export function withSecurityHeaders(response: NextResponse) {
   response.headers.set("X-DNS-Prefetch-Control", "on");
   response.headers.set(

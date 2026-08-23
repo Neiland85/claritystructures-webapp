@@ -60,7 +60,7 @@ describe("Rate Limiting", () => {
         },
       });
 
-      expect(getIdentifier(request)).toBe("sess-1:1.2.3.4");
+      expect(getIdentifier(request)).toBe("sess-1:1.2.3.4:unknown");
     });
 
     it("should get IP from x-real-ip when no cookie", () => {
@@ -68,13 +68,24 @@ describe("Rate Limiting", () => {
         headers: { "x-real-ip": "1.2.3.4" },
       });
 
-      expect(getIdentifier(request)).toBe("anon:1.2.3.4");
+      expect(getIdentifier(request)).toBe("anon:1.2.3.4:unknown");
     });
 
     it("should fallback to localhost with anon session", () => {
       const request = new Request("http://localhost");
 
-      expect(getIdentifier(request)).toBe("anon:127.0.0.1");
+      expect(getIdentifier(request)).toBe("anon:unknown:unknown");
+    });
+
+    it("includes user-agent so anonymous identity is not IP-only", () => {
+      const request = new Request("http://localhost", {
+        headers: {
+          "x-forwarded-for": "1.2.3.4",
+          "user-agent": "Mozilla/5.0 Test",
+        },
+      });
+
+      expect(getIdentifier(request)).toBe("anon:1.2.3.4:Mozilla/5.0 Test");
     });
   });
 });
