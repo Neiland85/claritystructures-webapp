@@ -1,0 +1,644 @@
+From 0748f05ce73637bd3c996fd306d2e3b97216b534 Mon Sep 17 00:00:00 2001
+From: Neil Munoz <theia3impact@gmail.com>
+Date: Sun, 23 Aug 2026 01:14:04 +0000
+Subject: [PATCH] fix(security): close auth, XSS and notify review holes
+
+Fail closed on missing production admin/API secrets, sanitize contact
+bodies before persist/notify, surface notify failures as pending, and
+rate-limit on cookie+IP instead of x-forwarded-for alone.
+---
+ apps/web/instrumentation.ts                   |  3 +
+ .../src/__tests__/api/contact-route.test.ts   | 41 ++++++++++
+ .../use-cases/submit-intake.usecase.test.ts   |  9 ++-
+ apps/web/src/__tests__/lib/api-guard.test.ts  |  9 +++
+ .../lib/auth/no-static-admin-token.test.ts    | 75 +++++++++++++++++++
+ .../__tests__/lib/auth/verify-bearer.test.ts  | 35 ++++++++-
+ apps/web/src/__tests__/lib/rate-limit.test.ts | 17 +++--
+ .../__tests__/lib/rate-limit/upstash.test.ts  | 21 ++++--
+ apps/web/src/app/api/contact/route.ts         | 32 ++++++--
+ .../use-cases/submit-intake.usecase.ts        | 10 +++
+ apps/web/src/lib/api-guard.ts                 | 11 ++-
+ apps/web/src/lib/auth/verify-bearer.ts        | 29 ++++++-
+ apps/web/src/lib/rate-limit/memory.ts         |  9 ++-
+ apps/web/src/lib/rate-limit/upstash.ts        | 11 ++-
+ .../src/__tests__/notifier.test.ts            | 19 ++++-
+ .../infra-notifications/src/mail/notifier.ts  |  4 +
+ 16 files changed, 300 insertions(+), 35 deletions(-)
+ create mode 100644 apps/web/src/__tests__/lib/auth/no-static-admin-token.test.ts
+
+diff --git a/apps/web/instrumentation.ts b/apps/web/instrumentation.ts
+index 40c0b16..9b74495 100644
+--- a/apps/web/instrumentation.ts
++++ b/apps/web/instrumentation.ts
+@@ -1,6 +1,9 @@
+ import * as Sentry from "@sentry/nextjs";
++import { assertProductionAuthSecrets } from "@/lib/auth/verify-bearer";
+ 
+ export async function register() {
++  assertProductionAuthSecrets();
++
+   if (process.env.NEXT_RUNTIME === "nodejs") {
+     Sentry.init({
+       dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+diff --git a/apps/web/src/__tests__/api/contact-route.test.ts b/apps/web/src/__tests__/api/contact-route.test.ts
+index ae876be..0891adb 100644
+--- a/apps/web/src/__tests__/api/contact-route.test.ts
++++ b/apps/web/src/__tests__/api/contact-route.test.ts
+@@ -205,4 +205,45 @@ describe("POST /api/contact", () => {
+     expect(res.status).toBe(500);
+     expect(json).toEqual({ error: "Server error" });
+   });
++
++  it("should sanitize HTML before persist/notify payload", async () => {
++    const dirty = {
++      ...VALID_BODY,
++      name: "<script>alert(1)</script>Jane",
++      message:
++        "<img src=x onerror=alert(1)>I need help with a digital forensics case involving data breach",
++      wizardResult: {
++        ...VALID_BODY.wizardResult,
++        incident: "<b>Data</b> breach suspected",
++      },
++    };
++
++    const res = await POST(createRequest(dirty));
++    expect(res.status).toBe(200);
++
++    const [input] = executeMock.mock.calls[0];
++    expect(input.name).toBe("Jane");
++    expect(input.message).not.toContain("<img");
++    expect(input.message).toContain("I need help");
++    expect(input.meta.incident).toBe("Data breach suspected");
++  });
++
++  it("should not report success when notification delivery fails", async () => {
++    const { NotificationDeliveryError } =
++      await import("@/application/use-cases/submit-intake.usecase");
++    executeMock.mockRejectedValueOnce(
++      new NotificationDeliveryError("intake-001"),
++    );
++
++    const res = await POST(createRequest(VALID_BODY));
++    const json = await res.json();
++
++    expect(res.status).toBe(503);
++    expect(json.success).toBeUndefined();
++    expect(json).toMatchObject({
++      error: "Notification pending",
++      intakeId: "intake-001",
++      notificationStatus: "pending",
++    });
++  });
+ });
+diff --git a/apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts b/apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts
+index 32c979e..9b95c62 100644
+--- a/apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts
++++ b/apps/web/src/__tests__/application/use-cases/submit-intake.usecase.test.ts
+@@ -4,6 +4,7 @@ import {
+   MissingConsentError,
+   NoActiveConsentVersionError,
+   InactiveConsentVersionError,
++  NotificationDeliveryError,
+ } from "../../../application/use-cases/submit-intake.usecase";
+ import type {
+   IntakeRepository,
+@@ -215,14 +216,16 @@ describe("SubmitIntakeUseCase", () => {
+     expect(event.metadata).toHaveProperty("consentVersion", "v1");
+   });
+ 
+-  it("should NOT fail when notification throws", async () => {
++  it("should fail the use case when notification throws", async () => {
+     (
+       notifier.notifyIntakeReceived as ReturnType<typeof vi.fn>
+     ).mockRejectedValueOnce(new Error("SMTP down"));
+ 
+-    const { record } = await useCase.execute(BASE_INPUT, CONSENT_META);
+-    expect(record.id).toBe("intake-001");
++    await expect(
++      useCase.execute(BASE_INPUT, CONSENT_META),
++    ).rejects.toBeInstanceOf(NotificationDeliveryError);
+     expect(repo.create).toHaveBeenCalledOnce();
++    expect(notifier.notifyIntakeReceived).toHaveBeenCalledOnce();
+   });
+ 
+   it("should NOT fail when audit throws", async () => {
+diff --git a/apps/web/src/__tests__/lib/api-guard.test.ts b/apps/web/src/__tests__/lib/api-guard.test.ts
+index acbe322..5571bf0 100644
+--- a/apps/web/src/__tests__/lib/api-guard.test.ts
++++ b/apps/web/src/__tests__/lib/api-guard.test.ts
+@@ -48,6 +48,15 @@ describe("api-guard", () => {
+       const req = buildRequest("GET", { origin: "https://evil.com" });
+       expect(validateCors(req)).toBe(false);
+     });
++
++    it("rejects wildcard origin and wildcard allowlist", () => {
++      const wildcardOrigin = buildRequest("GET", { origin: "*" });
++      expect(validateCors(wildcardOrigin)).toBe(false);
++
++      vi.stubEnv("NEXT_PUBLIC_APP_URL", "*");
++      const req = buildRequest("GET", { origin: "https://app.example" });
++      expect(validateCors(req)).toBe(false);
++    });
+   });
+ 
+   // ── Security headers ────────────────────────────────────────
+diff --git a/apps/web/src/__tests__/lib/auth/no-static-admin-token.test.ts b/apps/web/src/__tests__/lib/auth/no-static-admin-token.test.ts
+new file mode 100644
+index 0000000..b6ac162
+--- /dev/null
++++ b/apps/web/src/__tests__/lib/auth/no-static-admin-token.test.ts
+@@ -0,0 +1,75 @@
++import { describe, expect, it } from "vitest";
++import fs from "node:fs";
++import path from "node:path";
++
++const ROOT = process.cwd();
++const SCAN_ROOTS = ["apps", "packages"];
++const SKIP_DIR = new Set([
++  "node_modules",
++  "dist",
++  ".next",
++  "coverage",
++  "generated",
++  "__tests__",
++]);
++
++const staticToken = ["admin", "-", "token"].join("");
++const defaultStub = ["change", "me"].join("");
++
++const FORBIDDEN = [
++  new RegExp(defaultStub, "i"),
++  new RegExp(staticToken, "i"),
++  new RegExp(`Bearer\\s+(admin|secret|token|${defaultStub})\\b`, "i"),
++  /(?:ADMIN_API_TOKEN|JWT_SECRET)\s*\|\|\s*["'][^"']+["']/,
++  /(?:ADMIN_API_TOKEN|JWT_SECRET)\s*=\s*["'][^"']+["']/,
++];
++
++function shouldScan(filePath: string): boolean {
++  if (!/\.(ts|tsx|js|mjs|cjs)$/.test(filePath)) return false;
++  if (/\.(test|spec)\.(ts|tsx|js)$/.test(filePath)) return false;
++  return true;
++}
++
++function walk(dir: string, acc: string[] = []): string[] {
++  if (!fs.existsSync(dir)) return acc;
++  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
++    if (SKIP_DIR.has(entry.name)) continue;
++    const full = path.join(dir, entry.name);
++    if (entry.isDirectory()) {
++      walk(full, acc);
++    } else if (shouldScan(full)) {
++      acc.push(full);
++    }
++  }
++  return acc;
++}
++
++describe("no static admin/API bearer token", () => {
++  it("fails if a default hardcoded token reappears in source", () => {
++    const files = SCAN_ROOTS.flatMap((rel) => walk(path.join(ROOT, rel)));
++    const hits: string[] = [];
++
++    for (const file of files) {
++      const lines = fs.readFileSync(file, "utf8").split("\n");
++      lines.forEach((line, index) => {
++        const trimmed = line.trimStart();
++        if (
++          trimmed.startsWith("//") ||
++          trimmed.startsWith("*") ||
++          trimmed.startsWith("/*")
++        ) {
++          return;
++        }
++        for (const pattern of FORBIDDEN) {
++          if (pattern.test(line)) {
++            hits.push(
++              `${path.relative(ROOT, file)}:${index + 1}: ${line.trim()}`,
++            );
++          }
++        }
++      });
++    }
++
++    expect(hits).toEqual([]);
++  });
++});
+diff --git a/apps/web/src/__tests__/lib/auth/verify-bearer.test.ts b/apps/web/src/__tests__/lib/auth/verify-bearer.test.ts
+index fca291d..beaff7a 100644
+--- a/apps/web/src/__tests__/lib/auth/verify-bearer.test.ts
++++ b/apps/web/src/__tests__/lib/auth/verify-bearer.test.ts
+@@ -1,5 +1,8 @@
+ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+-import { verifyBearerToken } from "@/lib/auth/verify-bearer";
++import {
++  verifyBearerToken,
++  assertProductionAuthSecrets,
++} from "@/lib/auth/verify-bearer";
+ 
+ describe("verifyBearerToken", () => {
+   const REAL_SECRET = "test-secret-that-is-long-enough-32ch";
+@@ -54,11 +57,35 @@ describe("verifyBearerToken", () => {
+     expect(result.error).toBe("Server misconfiguration");
+   });
+ 
++  it("rejects secrets shorter than 32 characters", () => {
++    vi.stubEnv("JWT_SECRET", "short");
++    vi.stubEnv("ADMIN_API_TOKEN", "");
++    const result = verifyBearerToken("Bearer short");
++    expect(result.authenticated).toBe(false);
++    expect(result.error).toBe("Server misconfiguration");
++  });
++
++  it("exits process in production when no auth secret is configured", () => {
++    vi.stubEnv("NODE_ENV", "production");
++    vi.stubEnv("JWT_SECRET", "");
++    vi.stubEnv("ADMIN_API_TOKEN", "");
++    const exitSpy = vi
++      .spyOn(process, "exit")
++      .mockImplementation((() => undefined) as typeof process.exit);
++    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
++
++    assertProductionAuthSecrets();
++
++    expect(exitSpy).toHaveBeenCalledWith(1);
++    exitSpy.mockRestore();
++    errorSpy.mockRestore();
++  });
++
+   it("prefers ADMIN_API_TOKEN over JWT_SECRET", () => {
+-    const adminToken = "admin-token-that-is-different-32c";
+-    vi.stubEnv("ADMIN_API_TOKEN", adminToken);
++    const dedicatedToken = "dedicated-console-secret-value-32";
++    vi.stubEnv("ADMIN_API_TOKEN", dedicatedToken);
+     // Should authenticate with ADMIN_API_TOKEN, not JWT_SECRET
+-    const result = verifyBearerToken(`Bearer ${adminToken}`);
++    const result = verifyBearerToken(`Bearer ${dedicatedToken}`);
+     expect(result).toEqual({ authenticated: true });
+     // JWT_SECRET should NOT work when ADMIN_API_TOKEN is set
+     const result2 = verifyBearerToken(`Bearer ${REAL_SECRET}`);
+diff --git a/apps/web/src/__tests__/lib/rate-limit.test.ts b/apps/web/src/__tests__/lib/rate-limit.test.ts
+index 95f7398..ebfaa0b 100644
+--- a/apps/web/src/__tests__/lib/rate-limit.test.ts
++++ b/apps/web/src/__tests__/lib/rate-limit.test.ts
+@@ -52,26 +52,29 @@ describe("Rate Limiting", () => {
+   });
+ 
+   describe("getIdentifier", () => {
+-    it("should get IP from x-forwarded-for", () => {
++    it("should combine cookie and x-forwarded-for", () => {
+       const request = new Request("http://localhost", {
+-        headers: { "x-forwarded-for": "1.2.3.4, 5.6.7.8" },
++        headers: {
++          "x-forwarded-for": "1.2.3.4, 5.6.7.8",
++          cookie: "csrf-token=sess-1",
++        },
+       });
+ 
+-      expect(getIdentifier(request)).toBe("1.2.3.4");
++      expect(getIdentifier(request)).toBe("sess-1:1.2.3.4");
+     });
+ 
+-    it("should get IP from x-real-ip", () => {
++    it("should get IP from x-real-ip when no cookie", () => {
+       const request = new Request("http://localhost", {
+         headers: { "x-real-ip": "1.2.3.4" },
+       });
+ 
+-      expect(getIdentifier(request)).toBe("1.2.3.4");
++      expect(getIdentifier(request)).toBe("anon:1.2.3.4");
+     });
+ 
+-    it("should fallback to localhost", () => {
++    it("should fallback to localhost with anon session", () => {
+       const request = new Request("http://localhost");
+ 
+-      expect(getIdentifier(request)).toBe("127.0.0.1");
++      expect(getIdentifier(request)).toBe("anon:127.0.0.1");
+     });
+   });
+ });
+diff --git a/apps/web/src/__tests__/lib/rate-limit/upstash.test.ts b/apps/web/src/__tests__/lib/rate-limit/upstash.test.ts
+index 198f915..2e3595a 100644
+--- a/apps/web/src/__tests__/lib/rate-limit/upstash.test.ts
++++ b/apps/web/src/__tests__/lib/rate-limit/upstash.test.ts
+@@ -82,16 +82,27 @@ describe("upstash rate limiter", () => {
+   });
+ 
+   describe("getIdentifier", () => {
+-    it("should extract IP from x-forwarded-for header", () => {
++    it("should combine session cookie with forwarded IP", () => {
+       const request = new Request("http://localhost", {
+-        headers: { "x-forwarded-for": "1.2.3.4, 5.6.7.8" },
++        headers: {
++          "x-forwarded-for": "1.2.3.4, 5.6.7.8",
++          cookie: "__csrf=session-abc",
++        },
+       });
+-      expect(getIdentifier(request)).toBe("1.2.3.4");
++      expect(getIdentifier(request)).toBe("session-abc:1.2.3.4");
+     });
+ 
+-    it("should return 'unknown' when no forwarded header", () => {
++    it("should not use x-forwarded-for as the unique identity", () => {
++      const request = new Request("http://localhost", {
++        headers: { "x-forwarded-for": "1.2.3.4" },
++      });
++      expect(getIdentifier(request)).toBe("anon:1.2.3.4");
++      expect(getIdentifier(request)).not.toBe("1.2.3.4");
++    });
++
++    it("should return anon:unknown when no forwarded header or cookie", () => {
+       const request = new Request("http://localhost");
+-      expect(getIdentifier(request)).toBe("unknown");
++      expect(getIdentifier(request)).toBe("anon:unknown");
+     });
+   });
+ });
+diff --git a/apps/web/src/app/api/contact/route.ts b/apps/web/src/app/api/contact/route.ts
+index 350bcc3..619eead 100644
+--- a/apps/web/src/app/api/contact/route.ts
++++ b/apps/web/src/app/api/contact/route.ts
+@@ -5,7 +5,9 @@ import { createSubmitIntakeUseCase } from "@/application/di-container";
+ import {
+   IdempotencyConflictError,
+   IdempotencyInProgressError,
++  NotificationDeliveryError,
+ } from "@/application/use-cases/submit-intake.usecase";
++import { sanitizeHtml } from "@/lib/api/validate-request";
+ import { createLogger } from "@/lib/logger";
+ import { checkRateLimit, getIdentifier } from "@/lib/rate-limit/upstash";
+ 
+@@ -67,6 +69,15 @@ export async function POST(req: NextRequest) {
+       return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+     }
+ 
++    const sanitizedName = sanitizeHtml(parse.data.name);
++    const sanitizedMessage = sanitizeHtml(parse.data.message);
++    const sanitizedWizardResult = parse.data.wizardResult
++      ? {
++          ...parse.data.wizardResult,
++          incident: sanitizeHtml(parse.data.wizardResult.incident),
++        }
++      : parse.data.wizardResult;
++
+     const useCase = createSubmitIntakeUseCase();
+     const ip = getClientIp(req);
+ 
+@@ -80,22 +91,22 @@ export async function POST(req: NextRequest) {
+       payload: {
+         emailHash: await sha256Hex(parse.data.email),
+         phoneHash: parse.data.phone ? await sha256Hex(parse.data.phone) : null,
+-        messageHash: await sha256Hex(parse.data.message),
++        messageHash: await sha256Hex(sanitizedMessage),
+         tone: parse.data.tone,
+         consentVersion: parse.data.consentVersion,
+-        wizardResult: parse.data.wizardResult ?? null,
++        wizardResult: sanitizedWizardResult ?? null,
+       },
+     });
+ 
+     const result = await useCase.execute(
+       {
+-        name: parse.data.name,
++        name: sanitizedName,
+         email: parse.data.email,
+         phone: parse.data.phone,
+-        message: parse.data.message,
++        message: sanitizedMessage,
+         tone: parse.data.tone,
+         status: "pending",
+-        meta: parse.data.wizardResult,
++        meta: sanitizedWizardResult,
+       },
+       {
+         consentVersion: parse.data.consentVersion,
+@@ -139,6 +150,17 @@ export async function POST(req: NextRequest) {
+       );
+     }
+ 
++    if (error instanceof NotificationDeliveryError) {
++      return NextResponse.json(
++        {
++          error: "Notification pending",
++          intakeId: error.intakeId,
++          notificationStatus: "pending",
++        },
++        { status: error.statusCode },
++      );
++    }
++
+     logger.error("Failed to submit contact intake", error);
+ 
+     return NextResponse.json({ error: "Server error" }, { status: 500 });
+diff --git a/apps/web/src/application/use-cases/submit-intake.usecase.ts b/apps/web/src/application/use-cases/submit-intake.usecase.ts
+index f1c143c..c549b73 100644
+--- a/apps/web/src/application/use-cases/submit-intake.usecase.ts
++++ b/apps/web/src/application/use-cases/submit-intake.usecase.ts
+@@ -66,6 +66,15 @@ export class InactiveConsentVersionError extends Error {
+   }
+ }
+ 
++export class NotificationDeliveryError extends Error {
++  readonly statusCode = 503;
++
++  constructor(readonly intakeId: string) {
++    super("Notification delivery failed");
++    this.name = "NotificationDeliveryError";
++  }
++}
++
+ export type SubmitIntakeInput = Omit<
+   ContactIntakeInput,
+   "priority" | "route"
+@@ -237,6 +246,7 @@ export class SubmitIntakeUseCase {
+         await this.notifier.notifyIntakeReceived(record);
+       } catch (error) {
+         logger.error("Notification failed", error);
++        throw new NotificationDeliveryError(record.id);
+       }
+ 
+       try {
+diff --git a/apps/web/src/lib/api-guard.ts b/apps/web/src/lib/api-guard.ts
+index f3daef3..a94f801 100644
+--- a/apps/web/src/lib/api-guard.ts
++++ b/apps/web/src/lib/api-guard.ts
+@@ -29,11 +29,14 @@ export function withSecurityHeaders(response: NextResponse) {
+ 
+ export function validateCors(req: NextRequest) {
+   const origin = req.headers.get("origin");
+-  const allowedOrigins = [
+-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+-  ];
++  const configured = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
++  // Never allow wildcard origins.
++  if (configured === "*") {
++    return false;
++  }
++  const allowedOrigins = [configured];
+ 
+-  if (origin && !allowedOrigins.includes(origin)) {
++  if (origin && (origin === "*" || !allowedOrigins.includes(origin))) {
+     return false;
+   }
+   return true;
+diff --git a/apps/web/src/lib/auth/verify-bearer.ts b/apps/web/src/lib/auth/verify-bearer.ts
+index 53359ae..eb1096c 100644
+--- a/apps/web/src/lib/auth/verify-bearer.ts
++++ b/apps/web/src/lib/auth/verify-bearer.ts
+@@ -5,10 +5,35 @@ export interface AuthResult {
+   error?: string;
+ }
+ 
++function resolveAdminSecret(): string | undefined {
++  const secret = process.env.ADMIN_API_TOKEN || process.env.JWT_SECRET;
++  if (!secret || secret.length < 32) {
++    return undefined;
++  }
++  return secret;
++}
++
++/**
++ * Production boot guard: refuse to start without a configured admin/API secret.
++ * Never falls back to a static token.
++ */
++export function assertProductionAuthSecrets(): void {
++  if (process.env.NODE_ENV !== "production") {
++    return;
++  }
++
++  if (!resolveAdminSecret()) {
++    console.error(
++      "[auth] Missing ADMIN_API_TOKEN or JWT_SECRET (>=32 chars) in production",
++    );
++    process.exit(1);
++  }
++}
++
+ /**
+  * Verify bearer token using constant-time comparison.
+  * Checks ADMIN_API_TOKEN first (dedicated), falls back to JWT_SECRET.
+- * Fails closed: no secret configured → no access.
++ * Fails closed: no secret configured → no access. No static default token.
+  */
+ export function verifyBearerToken(authHeader: string | null): AuthResult {
+   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+@@ -19,7 +44,7 @@ export function verifyBearerToken(authHeader: string | null): AuthResult {
+   }
+ 
+   const token = authHeader.slice(7);
+-  const secret = process.env.ADMIN_API_TOKEN || process.env.JWT_SECRET;
++  const secret = resolveAdminSecret();
+ 
+   if (!secret) {
+     return { authenticated: false, error: "Server misconfiguration" };
+diff --git a/apps/web/src/lib/rate-limit/memory.ts b/apps/web/src/lib/rate-limit/memory.ts
+index 0ca6453..766930b 100644
+--- a/apps/web/src/lib/rate-limit/memory.ts
++++ b/apps/web/src/lib/rate-limit/memory.ts
+@@ -61,7 +61,14 @@ export async function checkRateLimit(
+ }
+ 
+ export function getIdentifier(request: Request): string {
++  // Identity = CSRF/session cookie + client IP. Combined on purpose.
++  // x-forwarded-for is never the sole key (clients can spoof it).
++  const cookieHeader = request.headers.get("cookie") ?? "";
++  const session =
++    cookieHeader.match(/(?:^|;\s*)(?:__csrf|csrf-token)=([^;]+)/)?.[1] ??
++    "anon";
+   const forwarded = request.headers.get("x-forwarded-for");
+   const realIp = request.headers.get("x-real-ip");
+-  return forwarded?.split(",")[0] ?? realIp ?? "127.0.0.1";
++  const ip = forwarded?.split(",")[0]?.trim() || realIp || "127.0.0.1";
++  return `${session}:${ip}`;
+ }
+diff --git a/apps/web/src/lib/rate-limit/upstash.ts b/apps/web/src/lib/rate-limit/upstash.ts
+index beda4f8..dafc1d3 100644
+--- a/apps/web/src/lib/rate-limit/upstash.ts
++++ b/apps/web/src/lib/rate-limit/upstash.ts
+@@ -67,7 +67,14 @@ export async function checkRateLimit(
+ }
+ 
+ export function getIdentifier(request: Request): string {
++  // Identity = CSRF/session cookie + client IP. Combined on purpose.
++  // x-forwarded-for is never the sole key (clients can spoof it).
++  const cookieHeader = request.headers.get("cookie") ?? "";
++  const session =
++    cookieHeader.match(/(?:^|;\s*)(?:__csrf|csrf-token)=([^;]+)/)?.[1] ??
++    "anon";
+   const forwarded = request.headers.get("x-forwarded-for");
+-  const ip = forwarded ? forwarded.split(",")[0] : "unknown";
+-  return ip;
++  const realIp = request.headers.get("x-real-ip");
++  const ip = forwarded?.split(",")[0]?.trim() || realIp || "unknown";
++  return `${session}:${ip}`;
+ }
+diff --git a/packages/infra-notifications/src/__tests__/notifier.test.ts b/packages/infra-notifications/src/__tests__/notifier.test.ts
+index 49b22f8..da8e985 100644
+--- a/packages/infra-notifications/src/__tests__/notifier.test.ts
++++ b/packages/infra-notifications/src/__tests__/notifier.test.ts
+@@ -132,7 +132,7 @@ describe("MailNotifier", () => {
+       consoleSpy.mockRestore();
+     });
+ 
+-    it("should handle send errors gracefully", async () => {
++    it("should throw when send fails", async () => {
+       process.env.SMTP_HOST = "smtp.example.com";
+       process.env.SMTP_USER = "user@example.com";
+       process.env.SMTP_PASS = "secret";
+@@ -142,8 +142,10 @@ describe("MailNotifier", () => {
+         .spyOn(console, "error")
+         .mockImplementation(() => {});
+       const notifier = new MailNotifier();
+-      await notifier.notifyIntakeReceived(SAMPLE_INTAKE);
+ 
++      await expect(
++        notifier.notifyIntakeReceived(SAMPLE_INTAKE),
++      ).rejects.toThrow("SMTP timeout");
+       expect(consoleSpy).toHaveBeenCalledWith(
+         expect.stringContaining("[MailNotifier] Error"),
+         expect.any(Error),
+@@ -151,6 +153,19 @@ describe("MailNotifier", () => {
+       consoleSpy.mockRestore();
+     });
+ 
++    it("should throw in production when SMTP is not configured", async () => {
++      delete process.env.SMTP_HOST;
++      delete process.env.SMTP_USER;
++      delete process.env.SMTP_PASS;
++      process.env.NODE_ENV = "production";
++      mockCreateTransport.mockClear();
++
++      const notifier = new MailNotifier();
++      await expect(
++        notifier.notifyIntakeReceived(SAMPLE_INTAKE),
++      ).rejects.toThrow("Mail notifier is not configured");
++    });
++
+     it("should highlight critical priority in red in HTML", async () => {
+       process.env.SMTP_HOST = "smtp.example.com";
+       process.env.SMTP_USER = "user@example.com";
+diff --git a/packages/infra-notifications/src/mail/notifier.ts b/packages/infra-notifications/src/mail/notifier.ts
+index 0444e91..a2648bf 100644
+--- a/packages/infra-notifications/src/mail/notifier.ts
++++ b/packages/infra-notifications/src/mail/notifier.ts
+@@ -23,6 +23,9 @@ export class MailNotifier implements Notifier {
+     const summary = `Intake ${intake.id} from ${intake.email}`;
+ 
+     if (!this.transporter) {
++      if (process.env.NODE_ENV === "production") {
++        throw new Error("Mail notifier is not configured");
++      }
+       console.info(
+         `[MailNotifier] STUB: New intake received: ${summary}. (SMTP not configured)`,
+       );
+@@ -73,6 +76,7 @@ ${process.env.NEXT_PUBLIC_SITE_URL}/triage
+         `[MailNotifier] Error sending email for ${intake.id}:`,
+         error,
+       );
++      throw error;
+     }
+   }
+ }
+-- 
+2.43.0
+
